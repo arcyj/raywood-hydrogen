@@ -4,3 +4,5 @@ export { Menu } from './Menu';
 export { Profile } from './Profile';
 export { Add } from './Add';
 export { Remove } from './Remove';
+export { Back } from './Back';
+export { Filter } from './Filter';

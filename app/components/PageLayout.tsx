@@ -16,6 +16,7 @@ import {
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
+import { TopBar } from './TopBar';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -44,7 +45,13 @@ export function PageLayout({
           <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
         </>
       )}
-
+      {!isDesktop && (
+        <>
+          <TopBar />
+          <SearchAside />
+          <FilterAside />
+        </>
+      )}
       {header && isDesktop && (
         <Header
           header={header}
@@ -196,5 +203,16 @@ function MobileMenuAside({
         />
       </Aside>
     )
+  );
+}
+
+function FilterAside() {
+  return (
+    <Aside type="filter" heading="FILTERS">
+      <div className="filter-content">
+        <p>Filter options will be implemented here.</p>
+        {/* TODO: Add filter UI components */}
+      </div>
+    </Aside>
   );
 }

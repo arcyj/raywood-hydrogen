@@ -54,6 +54,10 @@
     font: 700 16px/18px 'Gilroy', sans-serif;
   }
 
+  .text-extra-small {
+    font: 500 13px/13px 'Gilroy', sans-serif;
+  }
+
   .text-small {
     font: 700 12px/20px 'Gilroy', sans-serif;
   }

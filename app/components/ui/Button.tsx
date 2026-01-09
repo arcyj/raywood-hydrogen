@@ -28,10 +28,6 @@ export const Button: FC<IButtonProps> = ({
   const isTertiaryOnDark = variant === 'tertiaryOnDark';
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (variant === 'redAction' && !isActivated) {
-      event.preventDefault();
-      return;
-    }
     //additional condition is needed (!editorEnabled) because in edit mode it's impossible to add space
     if ((event.key === 'Enter' || event.key === ' ') && onClick) {
       setIsKeyPressed(true);
@@ -72,7 +68,7 @@ export const Button: FC<IButtonProps> = ({
       onKeyUp={handleKeyUp}
       tabIndex={disabled || loading ? -1 : 0}
     >
-      <div className="tw-flex tw-items-center tw-justify-center" style={{ visibility: loading ? 'hidden' : 'visible' }}>
+      <div className="flex items-center justify-center" style={{ visibility: loading ? 'hidden' : 'visible' }}>
         {IconBefore && <IconBefore size={24} className="tw-mr-2" />}
         {children}
         {IconAfter && <IconAfter size={24} className="tw-ml-2" />}
