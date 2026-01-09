@@ -1,4 +1,5 @@
-import {redirect, useLoaderData} from 'react-router';
+import {redirect, useLoaderData, Await} from 'react-router';
+import {Suspense, useState} from 'react';
 import type {Route} from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -9,9 +10,13 @@ import {
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
 import {ProductPrice} from '~/components/ProductPrice';
-import {ProductImage} from '~/components/ProductImage';
+import {ProductGallery} from '~/components/ProductGallery';
 import {ProductForm} from '~/components/ProductForm';
+import { ProductDetailItem } from '~/components/ui/ProductDetailItem';
+import { ShippingOptions } from '~/components/ShippingOptions';
+import {ProductItem} from '~/components/ProductItem';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import { Counter } from '~/components/ui/Counter';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
@@ -30,7 +35,10 @@ export async function loader(args: Route.LoaderArgs) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return {...deferredData, ...criticalData};
+  // Now that we have the product, we can pass it to deferred data
+  const deferredDataWithProduct = loadDeferredDataWithProduct(args, criticalData.product);
+
+  return {...criticalData, relatedProducts: deferredDataWithProduct};
 }
 
 /**
@@ -70,14 +78,55 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
 function loadDeferredData({context, params}: Route.LoaderArgs) {
-  // Put any API calls that is not critical to be available on first page render
-  // For example: product reviews, product recommendations, social feeds.
-
+  // This function is kept for future use
   return {};
 }
 
+/**
+ * Load related products based on the current product's collections
+ */
+function loadDeferredDataWithProduct(
+  {context}: Route.LoaderArgs,
+  product: {id: string; collections?: {nodes?: Array<{handle: string}> | null} | null}
+) {
+  const {storefront} = context;
+  const firstCollection = product.collections?.nodes?.[0];
+
+  if (!firstCollection?.handle) {
+    return Promise.resolve(null);
+  }
+
+  // Fetch related products from the same collection, excluding current product
+  // This is deferred so it doesn't block the initial page render
+  return storefront
+    .query(RELATED_PRODUCTS_QUERY, {
+      variables: {
+        collectionHandle: firstCollection.handle,
+      },
+    })
+    .then((result: {collection?: {products?: {nodes?: Array<{id: string}>}}}) => {
+      // Filter out the current product from results
+      const collectionProducts = result.collection?.products?.nodes || [];
+      const filtered = collectionProducts.filter(
+        (p: {id: string}) => p.id !== product.id
+      );
+      return {
+        products: {
+          nodes: filtered.slice(0, 4), // Limit to 4 products
+        },
+      };
+    })
+    .catch((error: Error) => {
+      // Log query errors, but don't throw them so the page can still render
+      console.error('Error fetching related products:', error);
+      return null;
+    });
+}
+
 export default function Product() {
-  const {product} = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const {product, relatedProducts} = data;
+  const [productCount, setProductCount] = useState(1);
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -95,31 +144,96 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, descriptionHtml} = product;
+  const {media, title, descriptionHtml, vendor, metafields} = product;
+
+  // Find the expansion metaobject metafield
+  // Handles cases where metafield might be null, or namespace might be null, undefined, or empty
+  const expansionMetafield = metafields?.find(
+    (m: {namespace?: string | null; key: string} | null) => {
+      if (!m) return false;
+      const hasMatchingNamespace = m.namespace === 'custom' || !m.namespace;
+      return hasMatchingNamespace && m.key === 'expansion';
+    }
+  );
+
+  // Access the metaobject reference
+  const expansionMetaobject = expansionMetafield?.reference as
+    | {
+        id: string;
+        type: string;
+        fields: Array<{
+          key: string;
+          value: string;
+          reference?: unknown;
+        }>;
+      }
+    | undefined;
+
+  // Convert metaobject fields array to an object for easier access
+  const expansionData = expansionMetaobject?.fields.reduce(
+    (acc, field) => {
+      acc[field.key] = field.value;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+
+    const handleCountChange = (val: number) => {
+      setProductCount(val);
+    };
 
   return (
-    <div className="product">
-      <ProductImage image={selectedVariant?.image} />
-      <div className="product-main">
-        <h1>{title}</h1>
-        <ProductPrice
-          price={selectedVariant?.price}
-          compareAtPrice={selectedVariant?.compareAtPrice}
-        />
-        <br />
-        <ProductForm
-          productOptions={productOptions}
-          selectedVariant={selectedVariant}
-        />
-        <br />
-        <br />
-        <p>
-          <strong>Description</strong>
-        </p>
-        <br />
-        <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-        <br />
+    <div className="container mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-32 min-w-0">
+        <div className="min-w-0">
+          <ProductGallery media={media.nodes} />
+        </div>
+        <div className="product-main">
+          <span className="text-small text-gray">{vendor}</span>
+          <h1 className="text-h1 mt-4 mb-12">{title}</h1>
+          <div className="flex items-end justify-between mb-24">
+            <div>
+              <Counter
+                label={<span className="text-small mb-4">Amount</span>}
+                count={productCount}
+                countChange={(val) => handleCountChange(val)}
+                maxCount={10}
+                minCount={1}
+                className="flex flex-col items-start justify-center"
+              />
+            </div>
+            <ProductPrice
+              price={selectedVariant?.price}
+              compareAtPrice={selectedVariant?.compareAtPrice}
+            />
+          </div>
+          <ProductForm
+            productOptions={productOptions}
+            selectedVariant={selectedVariant}
+            quantity={productCount}
+          />
+          <p className='text-large mt-32'>Description</p>
+          <div className="mt-12">
+            <ProductDetailItem label="EAN" value={selectedVariant?.barcode} />
+            <ProductDetailItem
+              label="Expansion"
+              value={expansionData?.title || ''}
+            />
+            <ProductDetailItem
+              label="Recommended Age"
+              value={expansionData?.age || ''}
+            />
+            <ProductDetailItem
+              label="Language"
+              value={expansionData?.language || ''}
+            />
+          </div>
+          <div className="mt-24 text-regular" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+          <ShippingOptions />
+        </div>
       </div>
+
+      {relatedProducts && <RelatedProducts products={relatedProducts} />}
       <Analytics.ProductView
         data={{
           products: [
@@ -138,6 +252,50 @@ export default function Product() {
     </div>
   );
 }
+
+function RelatedProducts({
+  products,
+}: {
+  products: Promise<{products: {nodes: Array<any>}} | null> | undefined;
+}) {
+  if (!products) return null;
+  return (
+    <div className="related-products my-48">
+      <h2 className="text-large mb-24">Related Products</h2>
+      <Suspense fallback={<div>Loading related products...</div>}>
+        <Await resolve={products}>
+          {(response) => {
+            if (!response?.products?.nodes?.length) {
+              return null;
+            }
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-16">
+                {response.products.nodes.map((product) => (
+                  <ProductItem key={product.id} product={product} />
+                ))}
+              </div>
+            );
+          }}
+        </Await>
+      </Suspense>
+    </div>
+  );
+}
+
+const MEDIA_FRAGMENT = `#graphql
+  fragment Media on Media {
+    __typename
+    ... on MediaImage {
+      __typename
+      id
+      image {
+        id
+        url
+        altText
+      }
+    }
+  }
+` as const;
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
@@ -168,6 +326,7 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
       value
     }
     sku
+    barcode
     title
     unitPrice {
       amount
@@ -213,8 +372,50 @@ const PRODUCT_FRAGMENT = `#graphql
       description
       title
     }
+    collections(first: 5) {
+      nodes {
+        id
+        handle
+      }
+    }
+    media(first: 7) {
+      nodes {
+        ...Media
+      }
+    }
+    metafields(identifiers: [
+      {namespace: "custom", key: "expansion"}
+      {namespace: "custom", key: "language"}
+      {namespace: "details", key: "age"}
+    ]) {
+      id
+      namespace
+      key
+      value
+      reference {
+        ... on Metaobject {
+          id
+          type
+          fields {
+            key
+            value
+            reference {
+              ... on Metaobject {
+                id
+                type
+                fields {
+                  key
+                  value
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
   ${PRODUCT_VARIANT_FRAGMENT}
+  ${MEDIA_FRAGMENT}
 ` as const;
 
 const PRODUCT_QUERY = `#graphql
@@ -229,4 +430,44 @@ const PRODUCT_QUERY = `#graphql
     }
   }
   ${PRODUCT_FRAGMENT}
+` as const;
+
+const RELATED_PRODUCTS_QUERY = `#graphql
+  fragment RelatedProduct on Product {
+    id
+    title
+    handle
+    vendor
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+      maxVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    featuredImage {
+      id
+      url
+      altText
+      width
+      height
+    }
+  }
+  query RelatedProducts(
+    $country: CountryCode
+    $language: LanguageCode
+    $collectionHandle: String!
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $collectionHandle) {
+      id
+      products(first: 6) {
+        nodes {
+          ...RelatedProduct
+        }
+      }
+    }
+  }
 ` as const;

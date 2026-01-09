@@ -72,7 +72,7 @@ export function Aside({
   );
 }
 
-const AsideContext = createContext<AsideContextValue | null>(null);
+export const AsideContext = createContext<AsideContextValue | null>(null);
 
 Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
   const [type, setType] = useState<AsideType>('closed');

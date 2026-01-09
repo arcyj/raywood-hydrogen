@@ -1,7 +1,8 @@
 import {useOptimisticCart} from '@shopify/hydrogen';
 import {Link} from 'react-router';
+import {useContext} from 'react';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import {useAside} from '~/components/Aside';
+import {AsideContext} from './Aside';
 import {CartLineItem} from '~/components/CartLineItem';
 import {CartSummary} from './CartSummary';
 
@@ -10,13 +11,14 @@ export type CartLayout = 'page' | 'aside';
 export type CartMainProps = {
   cart: CartApiQueryFragment | null;
   layout: CartLayout;
+  onClose?: () => void;
 };
 
 /**
  * The main cart component that displays the cart items and summary.
  * It is used by both the /cart route and the cart aside dialog.
  */
-export function CartMain({layout, cart: originalCart}: CartMainProps) {
+export function CartMain({layout, cart: originalCart, onClose}: CartMainProps) {
   // The useOptimisticCart hook applies pending actions to the cart
   // so the user immediately sees feedback when they modify the cart.
   const cart = useOptimisticCart(originalCart);
@@ -30,12 +32,12 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
 
   return (
     <div className={className}>
-      <CartEmpty hidden={linesCount} layout={layout} />
+      <CartEmpty hidden={linesCount} layout={layout} onClose={onClose} />
       <div className="cart-details">
         <div aria-labelledby="cart-lines">
           <ul>
             {(cart?.lines?.nodes ?? []).map((line) => (
-              <CartLineItem key={line.id} line={line} layout={layout} />
+              <CartLineItem key={line.id} line={line} layout={layout} onClose={onClose} />
             ))}
           </ul>
         </div>
@@ -47,11 +49,16 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
 
 function CartEmpty({
   hidden = false,
+  onClose,
 }: {
   hidden: boolean;
   layout?: CartMainProps['layout'];
+  onClose?: () => void;
 }) {
-  const {close} = useAside();
+  // Safely get close function - prefer onClose prop, fallback to Aside context
+  const aside = AsideContext ? useContext(AsideContext) : null;
+  const close = onClose || aside?.close;
+
   return (
     <div hidden={hidden}>
       <br />

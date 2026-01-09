@@ -8,12 +8,14 @@ import type {
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
+import { Navbar } from './Navbar';
 import {CartMain} from '~/components/CartMain';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import { useBreakpoints } from '~/hooks/useBreakpoints';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -32,12 +34,18 @@ export function PageLayout({
   isLoggedIn,
   publicStoreDomain,
 }: PageLayoutProps) {
+  const isDesktop = useBreakpoints().isDesktop;
   return (
     <Aside.Provider>
-      <CartAside cart={cart} />
-      <SearchAside />
-      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      {header && (
+      {isDesktop && (
+        <>
+          <CartAside cart={cart} />
+          <SearchAside />
+          <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+        </>
+      )}
+
+      {header && isDesktop && (
         <Header
           header={header}
           cart={cart}
@@ -46,6 +54,14 @@ export function PageLayout({
         />
       )}
       <main>{children}</main>
+      {header && !isDesktop && (
+        <Navbar
+          header={header}
+          cart={cart}
+          isLoggedIn={isLoggedIn}
+          publicStoreDomain={publicStoreDomain}
+        />
+      )}
       <Footer
         footer={footer}
         header={header}
@@ -68,6 +84,16 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
     </Aside>
   );
 }
+
+// function NavBarAside() {
+//   return (
+//     <Aside type="navbar" heading="MENU">
+//       <Drawer onClose={() => setShowMenu(false)} visible={showMenu} position="bottom" className='bg-slate-100/89 backdrop-blur-xl min-h-[600px]'>
+//         <DropDownMenu menu={menu} isLoggedIn={isLoggedIn} publicStoreDomain={publicStoreDomain} primaryDomainUrl={publicStoreDomain} />
+//       </Drawer>
+//     </Aside>
+//   );
+// }
 
 function SearchAside() {
   const queriesDatalistId = useId();

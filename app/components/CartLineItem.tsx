@@ -4,7 +4,8 @@ import {CartForm, Image, type OptimisticCartLine} from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {Link} from 'react-router';
 import {ProductPrice} from './ProductPrice';
-import {useAside} from './Aside';
+import {useContext} from 'react';
+import {AsideContext} from './Aside';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
@@ -16,14 +17,19 @@ type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 export function CartLineItem({
   layout,
   line,
+  onClose,
 }: {
   layout: CartLayout;
   line: CartLine;
+  onClose?: () => void;
 }) {
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
-  const {close} = useAside();
+  
+  // Safely get close function - prefer onClose prop, fallback to Aside context
+  const aside = AsideContext ? useContext(AsideContext) : null;
+  const close = onClose || aside?.close;
 
   return (
     <li key={id} className="cart-line">
@@ -43,7 +49,7 @@ export function CartLineItem({
           prefetch="intent"
           to={lineItemUrl}
           onClick={() => {
-            if (layout === 'aside') {
+            if (layout === 'aside' && close) {
               close();
             }
           }}

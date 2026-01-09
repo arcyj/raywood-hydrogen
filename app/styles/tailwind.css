@@ -4,3 +4,108 @@
  */
 
 @import 'tailwindcss';
+
+@theme {
+  --color-gray: rgba(17 5 22/.40);
+  --color-lightGrey: #F5F7FA;
+  --color-primary: #6610F2;
+  --font-serif: 'Gilroy', sans-serif;
+
+  --breakpoint-desktop: 990px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-mediumDesktop: 1200px;
+  --breakpoint-largeDesktop: 1400px;
+
+  --spacing-2: 2px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-28: 28px;
+  --spacing-32: 32px;
+  --spacing-36: 36px;
+  --spacing-40: 40px;
+  --spacing-44: 44px;
+  --spacing-48: 48px;
+  --spacing-56: 56px;
+  --spacing-60: 60px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --spacing-128: 128px;
+  --spacing-256: 256px;
+}
+
+@layer utilities {
+  .text-h1 {
+    font: 700 28px/34px 'Gilroy', sans-serif;
+  }
+
+  .text-h2 {
+    font: 600 22px/32px 'Gilroy', sans-serif;
+  }
+
+  .text-h3 {
+    font: 700 26px/24px 'Gilroy', sans-serif;
+  }
+
+  .text-h4 {
+    font: 700 16px/18px 'Gilroy', sans-serif;
+  }
+
+  .text-small {
+    font: 700 12px/20px 'Gilroy', sans-serif;
+  }
+
+  .text-medium {
+    font: 500 13px/22px 'Gilroy', sans-serif;
+  }
+
+  .text-regular {
+    font: 400 17px/26px 'Gilroy', sans-serif;
+  }
+
+  .text-regular-semi {
+    font: 500 17px/26px 'Gilroy', sans-serif;
+  }
+
+  .text-medium-semi {
+    font: 600 15px/22px 'Gilroy', sans-serif;
+  }
+
+  .text-large {
+    font: 500 20px/26px 'Gilroy', sans-serif;
+  }
+
+  .text-large-semi {
+    font: 600 20px/26px 'Gilroy', sans-serif;
+  }
+
+  /* Mobile overrides */
+  @media (max-width: 768px) {
+    .text-h1 {
+      font-size: 22px;
+      line-height: 32px;
+    }
+
+    .text-h2 {
+      font-size: 20px;
+      line-height: 32px;
+    }
+
+    .text-h3,
+    .text-small,
+    .text-medium,
+    .text-regular-semi,
+    .text-large-semi {
+      font-size: 15px;
+      line-height: 27px;
+    }
+
+    .text-h4 {
+      font-size: 15px;
+      line-height: 18px;
+    }
+  }
+}
