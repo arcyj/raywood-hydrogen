@@ -48,16 +48,16 @@ export function TopBar() {
         )}
         {isCollectionPage && (
           <>
-          <Button
-            onClick={handleBack}
-            variant="action"
-            size="extra-small"
-            className=""
-            aria-label="Go back"
-            IconBefore={ChevronLeftIcon}
-          >
-            Back
-          </Button>
+            <Button
+              onClick={handleBack}
+              variant="action"
+              size="extra-small"
+              className=""
+              aria-label="Go back"
+              IconBefore={ChevronLeftIcon}
+            >
+              Back
+            </Button>
             <button
               onClick={handleFilter}
               className="p-2 hover:opacity-70 transition-opacity"
