@@ -70,7 +70,7 @@ export function Navbar({
         onClose={onClose}
         visible={activeMenu !== null}
         position="bottom"
-        className="bg-white min-h-[600px] px-12 pt-16 rounded-t-xl"
+        className="bg-white px-12 pt-16 rounded-t-xl"
       >
         {renderMenuContent()}
       </Drawer>

@@ -365,6 +365,9 @@ export type WishlistProductFragment = Pick<
   featuredImage?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
   >;
+  selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.ProductVariant, 'id' | 'availableForSale'>
+  >;
 };
 
 export type WishlistProductQueryVariables = StorefrontAPI.Exact<{
@@ -381,6 +384,9 @@ export type WishlistProductQuery = {
       };
       featuredImage?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+      >;
+      selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.ProductVariant, 'id' | 'availableForSale'>
       >;
     }
   >;
@@ -1370,7 +1376,7 @@ interface GeneratedQueryTypes {
     return: RecommendedProductsQuery;
     variables: RecommendedProductsQueryVariables;
   };
-  '#graphql\n              query WishlistProduct(\n                $country: CountryCode\n                $language: LanguageCode\n                $handle: String!\n              ) @inContext(country: $country, language: $language) {\n                product(handle: $handle) {\n                  ...WishlistProduct\n                }\n              }\n              #graphql\n  fragment WishlistProduct on Product {\n    id\n    title\n    handle\n    vendor\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n\n            ': {
+  '#graphql\n              query WishlistProduct(\n                $country: CountryCode\n                $language: LanguageCode\n                $handle: String!\n              ) @inContext(country: $country, language: $language) {\n                product(handle: $handle) {\n                  ...WishlistProduct\n                }\n              }\n              #graphql\n  fragment WishlistProduct on Product {\n    id\n    title\n    handle\n    vendor\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    selectedOrFirstAvailableVariant {\n      id\n      availableForSale\n    }\n  }\n\n            ': {
     return: WishlistProductQuery;
     variables: WishlistProductQueryVariables;
   };

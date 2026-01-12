@@ -33,7 +33,7 @@ export function CartMain({layout, cart: originalCart, onClose}: CartMainProps) {
   return (
     <div className={className}>
       <CartEmpty hidden={linesCount} layout={layout} onClose={onClose} />
-      <div className="cart-details">
+      <div className="cart-details pb-[120px]">
         <div aria-labelledby="cart-lines">
           <ul>
             {(cart?.lines?.nodes ?? []).map((line) => (
