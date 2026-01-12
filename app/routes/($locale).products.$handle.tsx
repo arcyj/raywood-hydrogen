@@ -213,8 +213,8 @@ export default function Product() {
             selectedVariant={selectedVariant}
             quantity={productCount}
           />
-          <AddToWishlistButton 
-            variant='icon' 
+          <AddToWishlistButton
+            variant='icon'
             product={selectedVariant}
             productData={{
               id: product.id,

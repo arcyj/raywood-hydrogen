@@ -39,14 +39,14 @@ const DrawerCloseButton: FC<IDrawerCloseButtonProps> = ({ className, onClick }) 
 const DrawerBackDrop: FC<{ onClick?: () => void }> = ({ onClick }) => (
   <TransitionChild
     as={Fragment}
-    enter="ease-in-out duration-500"
-    enterFrom="opacity-0"
+    enter="ease-in-out duration-100"
+    enterFrom="opacity-70"
     enterTo="opacity-100"
-    leave="ease-in-out duration-500"
+    leave="ease-in-out duration-100"
     leaveFrom="opacity-100"
-    leaveTo="opacity-0"
+    leaveTo="opacity-70"
   >
-    <div className="fixed inset-0 bg-gray/80 backdrop-blur-[1px]" onClick={onClick} />
+    <div className="fixed inset-0 bg-gray/80" onClick={onClick} />
   </TransitionChild>
 );
 
@@ -64,7 +64,7 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
     ['translate-y-[0px]']: position === 'bottom',
   });
 
-  const containerClasses = twClasses(['drawer-container fixed flex max-w-full h-[calc(100%-45px)] bg-white'], {
+  const containerClasses = twClasses(['drawer-container fixed flex max-w-full h-[calc(100%-75px)] bg-white rounded-xl'], {
     ['inset-y-0 right-0']: position === 'right',
     ['inset-y-0 left-0']: position === 'left',
     ['inset-x-0 bottom-0 w-full left-0']: position === 'bottom',
@@ -92,10 +92,10 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
           <div className={containerClasses}>
             <TransitionChild
               as={Fragment}
-              enter="transform transition ease-in-out duration-300 max-tablet:duration-100"
+              enter="transform transition ease-in-out duration-100 max-tablet:duration-100"
               enterFrom={transitionEnterLeaveFrom}
               enterTo={position === 'bottom' ? 'translate-y-0' : 'translate-x-0'}
-              leave="transform transition ease-in-out duration-300 max-tablet:duration-100"
+              leave="transform transition ease-in-out duration-100 max-tablet:duration-100"
               leaveFrom={position === 'bottom' ? 'translate-y-0' : 'translate-x-0'}
               leaveTo={transitionEnterLeaveFrom}
             >

@@ -3,6 +3,7 @@ import {useLoaderData} from 'react-router';
 import {getPaginationVariables, Image, Money} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ProductItem} from '~/components/ProductItem';
+import {ProductItemSkeleton} from '~/components/ProductItemSkeleton';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
 
 export const meta: Route.MetaFunction = () => {
@@ -56,6 +57,8 @@ export default function Collection() {
       <PaginatedResourceSection<CollectionItemFragment>
         connection={products}
         resourcesClassName="products-grid"
+        skeletonComponent={ProductItemSkeleton}
+        skeletonCount={8}
       >
         {({node: product, index}) => (
           <ProductItem

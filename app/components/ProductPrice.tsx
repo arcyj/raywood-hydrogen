@@ -17,7 +17,7 @@ export function ProductPrice({
   const initial = 'font-semibold';
 
   const textClasses = twClasses([initial], {
-    'text-[14px] desktop:text-[18px]': size === 'small',
+    'text-[16px] desktop:text-[18px]': size === 'small',
     'text-[24px] desktop:text-[26px]': size === 'large',
   }, );
 

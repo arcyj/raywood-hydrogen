@@ -1,6 +1,7 @@
 import { Add, Remove } from '~/components/icons';
 import { twClasses } from '~/helpers/twMerge';
 import type { FC, JSX } from 'react';
+import { IconButton } from './IconButton';
 
 const CounterStyle = {
   initial: 'flex items-center justify-between w-full',
@@ -19,7 +20,7 @@ interface ICounterProps {
 
 export const Counter: FC<ICounterProps> = ({
   count = 1,
-  label = <>Label</>,
+  label = <></>,
   maxCount = 50,
   minCount = 0,
   countChange,
@@ -47,19 +48,15 @@ export const Counter: FC<ICounterProps> = ({
   const isMaxCountReached = incrementDisabled || count === maxCount;
   const isMinCountReached = decrementDisabled || count === minCount;
 
-  const buttonClasses = 'rounded-lg p-8 bg-lightGrey hover:bg-surface-low-secondary-active disabled:opacity-40 disabled:cursor-not-allowed';
+  const buttonClasses = 'rounded-lg p-8 hover:bg-surface-low-secondary-active disabled:opacity-40 disabled:cursor-not-allowed';
 
   return (
     <div className={classes}>
       {label}
       <div className="flex items-center justify-between">
-        <button className={buttonClasses} onClick={handleDecrement} disabled={isMinCountReached}>
-          <Remove size={24} />
-        </button>
+        <IconButton variant='filled' Icon={Remove} className={buttonClasses} onClick={handleDecrement} disabled={isMinCountReached}/>
         <span className="text-small px-12">{count}</span>
-        <button className={buttonClasses} onClick={handleIncrement} disabled={isMaxCountReached}>
-          <Add size={24} />
-        </button>
+        <IconButton variant='filled' Icon={Add} className={buttonClasses} onClick={handleIncrement} disabled={isMaxCountReached}/>
       </div>
     </div>
   );

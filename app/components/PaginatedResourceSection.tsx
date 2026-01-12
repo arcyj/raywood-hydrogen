@@ -8,10 +8,14 @@ export function PaginatedResourceSection<NodesType>({
   connection,
   children,
   resourcesClassName,
+  skeletonComponent,
+  skeletonCount = 8,
 }: {
   connection: React.ComponentProps<typeof Pagination<NodesType>>['connection'];
   children: React.FunctionComponent<{node: NodesType; index: number}>;
   resourcesClassName?: string;
+  skeletonComponent?: React.ComponentType;
+  skeletonCount?: number;
 }) {
   return (
     <Pagination connection={connection}>
@@ -20,15 +24,59 @@ export function PaginatedResourceSection<NodesType>({
           children({node, index}),
         );
 
+        // Show skeletons when loading and no nodes (initial load scenario)
+        const showSkeletons = isLoading && nodes.length === 0;
+        // Show skeletons at the end when loading more items
+        const showLoadingMoreSkeletons = isLoading && nodes.length > 0;
+
+        const skeletons = skeletonComponent
+          ? Array.from({length: skeletonCount}, (_, index) => {
+              const Skeleton = skeletonComponent;
+              return <Skeleton key={`skeleton-${index}`} />;
+            })
+          : null;
+
         return (
           <div>
             <PreviousLink>
               {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
             </PreviousLink>
             {resourcesClassName ? (
-              <div className={resourcesClassName}>{resourcesMarkup}</div>
+              <div className={resourcesClassName}>
+                {showSkeletons ? (
+                  skeletons
+                ) : (
+                  <>
+                    {resourcesMarkup}
+                    {showLoadingMoreSkeletons && skeletonComponent && (
+                      <div className="loading-more-skeletons">
+                        {Array.from({length: Math.min(skeletonCount, 8)}, (_, index) => {
+                          const Skeleton = skeletonComponent;
+                          return <Skeleton key={`loading-skeleton-${index}`} />;
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             ) : (
-              resourcesMarkup
+              <>
+                {showSkeletons ? (
+                  skeletons
+                ) : (
+                  <>
+                    {resourcesMarkup}
+                    {showLoadingMoreSkeletons && skeletonComponent && (
+                      <div className="loading-more-skeletons">
+                        {Array.from({length: Math.min(skeletonCount, 8)}, (_, index) => {
+                          const Skeleton = skeletonComponent;
+                          return <Skeleton key={`loading-skeleton-${index}`} />;
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
             )}
             <NextLink>
               {isLoading ? 'Loading...' : <span>Load more ↓</span>}

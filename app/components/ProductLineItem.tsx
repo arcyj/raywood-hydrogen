@@ -1,6 +1,7 @@
 import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
 import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Image, type OptimisticCartLine, Money} from '@shopify/hydrogen';
+import { TrashIcon } from '@radix-ui/react-icons';
 import {useVariantUrl} from '~/lib/variants';
 import {Link} from 'react-router';
 import {ProductPrice} from './ProductPrice';
@@ -13,6 +14,8 @@ import type {
   CollectionItemFragment,
   RecommendedProductFragment,
 } from 'storefrontapi.generated';
+import { IconButton } from './ui/IconButton';
+import { AddToCartButton } from './AddToCartButton';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 type Product = ProductItemFragment | CollectionItemFragment | RecommendedProductFragment;
@@ -25,14 +28,18 @@ type ProductLineItemProps =
       layout?: CartLayout;
       onClose?: () => void;
       showCartControls?: boolean;
+      onRemove?: never;
     }
   | {
       // Product mode
       line?: never;
       product: Product;
       layout?: never;
-      onClose?: never;
+      onClose?: () => void;
       showCartControls?: false;
+      onRemove?: () => void;
+      variantId?: string;
+      variantAvailableForSale?: boolean;
     };
 
 /**
@@ -49,7 +56,16 @@ export function ProductLineItem(props: ProductLineItemProps) {
   }
 
   if (isProduct) {
-    return <ProductView product={props.product} />;
+    const productProps = props as Extract<ProductLineItemProps, {product: Product}>;
+    return (
+      <ProductView
+        product={productProps.product}
+        onRemove={productProps.onRemove}
+        onClose={productProps.onClose}
+        variantId={productProps.variantId}
+        variantAvailableForSale={productProps.variantAvailableForSale}
+      />
+    );
   }
 
   return null;
@@ -78,16 +94,17 @@ function CartLineItemView({
   const close = onClose || aside?.close;
 
   return (
-    <li key={id} className="cart-line">
+    <li key={id} className="flex bg-lightGrey rounded-md px-4 py-8 ">
       {image && (
-        <Image
-          alt={title}
-          aspectRatio="1/1"
-          data={image}
-          height={100}
-          loading="lazy"
-          width={100}
-        />
+          <Image
+            alt={title}
+            aspectRatio="1/1"
+            data={image}
+            height={100}
+            loading="lazy"
+            width={100}
+            className='p-4 mr-4 mix-blend-darken'
+          />
       )}
 
       <div>
@@ -100,12 +117,10 @@ function CartLineItemView({
             }
           }}
         >
-          <p>
-            <strong>{product.title}</strong>
-          </p>
+          <h4 className="text-h4 pt-4 line-clamp-2 overflow-hidden text-ellipsis">{product.title}</h4>
         </Link>
-        <ProductPrice price={line?.cost?.totalAmount} />
-        {selectedOptions.length > 0 && (
+        <ProductPrice size='small' price={line?.cost?.totalAmount} />
+        {/* {selectedOptions.length > 0 && (
           <ul>
             {selectedOptions.map((option) => (
               <li key={option.name}>
@@ -115,7 +130,7 @@ function CartLineItemView({
               </li>
             ))}
           </ul>
-        )}
+        )} */}
         {showCartControls && <CartLineQuantity line={line} />}
       </div>
     </li>
@@ -125,34 +140,83 @@ function CartLineItemView({
 /**
  * Renders a product as a line item (without cart controls)
  */
-function ProductView({product}: {product: Product}) {
+function ProductView({
+  product,
+  onRemove,
+  onClose,
+  variantId,
+  variantAvailableForSale,
+}: {
+  product: Product;
+  onRemove?: () => void;
+  onClose?: () => void;
+  variantId?: string;
+  variantAvailableForSale?: boolean;
+}) {
   const productUrl = useVariantUrl(product.handle);
   const image = 'featuredImage' in product ? product.featuredImage : null;
   const price = 'priceRange' in product ? product.priceRange.minVariantPrice : null;
+  const aside = AsideContext ? useContext(AsideContext) : null;
+  const close = onClose || aside?.close;
+
+  // Debug: Log variant ID to verify it's being passed correctly
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Add to cart - variantId:', variantId, 'availableForSale:', variantAvailableForSale);
+  }
 
   return (
-    <li className="product-line">
+    <li className="product-line flex bg-lightGrey rounded-md px-4 py-8">
       {image && (
-        <Image
-          alt={image.altText || product.title}
-          aspectRatio="1/1"
-          data={image}
-          height={100}
-          loading="lazy"
-          width={100}
-        />
+        <Link
+          to={productUrl}
+          onClick={onClose}
+          prefetch="intent"
+          className="flex-shrink-0"
+        >
+          <Image
+            alt={image.altText || product.title}
+            aspectRatio="1/1"
+            data={image}
+            height={100}
+            loading="lazy"
+            width={100}
+            className="p-4 mr-4 mix-blend-darken"
+          />
+        </Link>
       )}
 
-      <div>
-        <Link prefetch="intent" to={productUrl}>
-          <p>
-            <strong>{product.title}</strong>
-          </p>
-        </Link>
-        {price && <ProductPrice price={price} />}
+      <div className="flex-1 flex flex-col gap-2 min-w-0">
         {'vendor' in product && product.vendor && (
-          <small className="text-gray">{product.vendor}</small>
+          <p className="text-sm text-gray-600">{product.vendor}</p>
         )}
+        <Link
+          prefetch="intent"
+          to={productUrl}
+          onClick={onClose}
+          className="hover:underline"
+        >
+          <h4 className="text-h4 pt-4 line-clamp-2 overflow-hidden text-ellipsis">{product.title}</h4>
+        </Link>
+        {price && <ProductPrice price={price} size="small" />}
+        <div className="mt-auto flex gap-8 items-center flex-wrap">
+          {variantId ? (
+            <AddToCartButton
+              size='small'
+              disabled={variantAvailableForSale === false}
+              lines={[
+                {
+                  merchandiseId: variantId,
+                  quantity: 1,
+                },
+              ]}
+            >
+              {variantAvailableForSale === false ? 'Sold out' : 'Add to cart'}
+            </AddToCartButton>
+          ) : (
+            <span className="text-sm text-gray-500">Variant not available</span>
+          )}
+          {onRemove && <WishlistRemoveButton onRemove={onRemove} />}
+        </div>
       </div>
     </li>
   );
@@ -174,6 +238,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
         lineId={lineId}
         quantity={quantity}
         isOptimistic={!!isOptimistic}
+        className="mr-8"
       />
       <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
     </div>
@@ -188,10 +253,12 @@ function CounterWithCartUpdate({
   lineId,
   quantity,
   isOptimistic,
+  className
 }: {
   lineId: string;
   quantity: number;
   isOptimistic: boolean;
+  className?: string;
 }) {
   const [targetQuantity, setTargetQuantity] = useState<number>(quantity);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
@@ -232,7 +299,7 @@ function CounterWithCartUpdate({
         maxCount={10}
         incrementDisabled={isOptimistic}
         decrementDisabled={quantity <= 1 || isOptimistic}
-        className="flex flex-col items-start justify-center"
+        className={`flex flex-col items-start justify-center ${className}`}
       />
     </CartLineUpdateButton>
   );
@@ -252,15 +319,39 @@ function CartLineRemoveButton({
 }) {
   return (
     <CartForm
-      fetcherKey={getUpdateKey(lineIds)}
+      fetcherKey={getRemoveKey(lineIds)}
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button disabled={disabled} type="submit">
-        Remove
-      </button>
+      {(fetcher) => (
+        <IconButton 
+          variant="filled" 
+          Icon={TrashIcon} 
+          disabled={disabled || fetcher.state !== 'idle'}
+          type="submit"
+        />
+      )}
     </CartForm>
+  );
+}
+
+/**
+ * A button that removes an item from the wishlist.
+ * Uses the same IconButton styling as CartLineRemoveButton for consistency.
+ */
+function WishlistRemoveButton({
+  onRemove,
+}: {
+  onRemove: () => void;
+}) {
+  return (
+    <IconButton
+      variant="filled"
+      Icon={TrashIcon}
+      onClick={onRemove}
+      disabled={false}
+    />
   );
 }
 
@@ -294,4 +385,14 @@ function CartLineUpdateButton({
  */
 function getUpdateKey(lineIds: string[]) {
   return [CartForm.ACTIONS.LinesUpdate, ...lineIds].join('-');
+}
+
+/**
+ * Returns a unique key for the remove action. This is used to make sure remove actions
+ * are properly tracked and don't conflict with update actions.
+ * @param lineIds - line ids affected by the remove
+ * @returns
+ */
+function getRemoveKey(lineIds: string[]) {
+  return [CartForm.ACTIONS.LinesRemove, ...lineIds].join('-');
 }

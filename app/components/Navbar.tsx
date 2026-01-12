@@ -1,4 +1,4 @@
-import {useState, createContext, useContext} from 'react';
+import {createContext, useContext} from 'react';
 import { Drawer } from './ui/Drawer';
 import { NavMenuItem } from './ui/NavMenuItem';
 import { DropDownMenu } from './ui/DropdownMenu';
@@ -26,6 +26,9 @@ interface NavbarProps {
   cart: Promise<CartApiQueryFragment | null>;
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
+  activeMenu: MenuType;
+  onMenuToggle: (menuType: MenuType) => void;
+  onClose: () => void;
 }
 
 export function Navbar({
@@ -33,21 +36,11 @@ export function Navbar({
   isLoggedIn,
   cart,
   publicStoreDomain,
+  activeMenu,
+  onMenuToggle,
+  onClose,
 }: NavbarProps) {
   const {menu} = header;
-  const [activeMenu, setActiveMenu] = useState<MenuType>(null);
-
-  const handleMenuToggle = (menuType: MenuType) => {
-    setActiveMenu(activeMenu === menuType ? null : menuType);
-  };
-
-  const handleClose = () => {
-    setActiveMenu(null);
-  };
-
-  const openCart = () => {
-    setActiveMenu('cart');
-  };
 
   const renderMenuContent = () => {
     switch (activeMenu) {
@@ -72,40 +65,40 @@ export function Navbar({
   };
 
   return (
-    <NavbarContext.Provider value={{openCart}}>
+    <>
       <Drawer
-        onClose={handleClose}
+        onClose={onClose}
         visible={activeMenu !== null}
         position="bottom"
         className="bg-white min-h-[600px] px-12 pt-16 rounded-t-xl"
       >
         {renderMenuContent()}
       </Drawer>
-      <nav className="fixed full bottom-0 w-full p-8 rounded-t-md z-10">
-        <div className="flex justify-center gap-12 m-4 bg-white shadow-lg rounded-full">
+      <nav className="fixed full bottom-0 w-full p-4 rounded-t-md z-10 bg-transparent">
+        <div className="grid grid-cols-4 gap-4 m-4 bg-white shadow-lg rounded-full">
           <NavMenuItem
-            onClick={() => handleMenuToggle('menu')}
+            onClick={() => onMenuToggle('menu')}
             Icon={() => <Menu />}
             label={'Menu'}
             active={activeMenu === 'menu'}
           />
           <NavMenuItem
-            onClick={() => handleMenuToggle('profile')}
+            onClick={() => onMenuToggle('profile')}
             Icon={() => <Profile />}
             label={'Account'}
           />
           <NavMenuItem
-            onClick={() => handleMenuToggle('wishlist')}
+            onClick={() => onMenuToggle('wishlist')}
             Icon={() => <Heart />}
             label={'Wishlist'}
           />
           <NavMenuItem
-            onClick={() => handleMenuToggle('cart')}
+            onClick={() => onMenuToggle('cart')}
             Icon={() => <Cart />}
             label={'Cart'}
           />
         </div>
       </nav>
-    </NavbarContext.Provider>
+    </>
   );
 }

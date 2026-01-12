@@ -12,8 +12,8 @@ export type IButtonVariant =
   | 'action'
   | 'menuLink';
 
-type IButtonSize = 'extra-small' | 'small' | 'medium' | 'large';
-interface RadixIconProps extends React.SVGAttributes<SVGElement> {
+export type IButtonSize = 'extra-small' | 'small' | 'medium' | 'large';
+export interface RadixIconProps extends React.SVGAttributes<SVGElement> {
     children?: never;
     color?: string;
 }

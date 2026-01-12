@@ -1,11 +1,9 @@
 import { Link } from 'react-router';
 import { useDrawer } from './ui/Drawer';
 import { useWishlist } from '~/hooks/useWishlist';
-import { Money, Image} from '@shopify/hydrogen';
-import { useVariantUrl } from '~/lib/variants';
-import type { MoneyV2 } from '@shopify/hydrogen/storefront-api-types';
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
+import { ProductLineItem } from './ProductLineItem';
 
 interface WishlistProduct {
   id: string;
@@ -21,6 +19,10 @@ interface WishlistProduct {
   featuredImage?: {
     url: string;
     altText?: string | null;
+  } | null;
+  selectedOrFirstAvailableVariant?: {
+    id: string;
+    availableForSale: boolean;
   } | null;
 }
 
@@ -93,11 +95,13 @@ export const WishlistMenu: FC = () => {
       ) : (
         <div className="flex flex-col gap-12">
           {products.map((product) => (
-            <WishlistItem
+            <ProductLineItem
               key={product.id}
-              product={product}
+              product={product as any}
               onRemove={() => removeFromWishlist(product.handle)}
               onClose={onClose}
+              variantId={product.selectedOrFirstAvailableVariant?.id}
+              variantAvailableForSale={product.selectedOrFirstAvailableVariant?.availableForSale}
             />
           ))}
         </div>
@@ -105,79 +109,3 @@ export const WishlistMenu: FC = () => {
     </div>
   );
 };
-
-function WishlistItem({
-  product,
-  onRemove,
-  onClose,
-}: {
-  product: WishlistProduct;
-  onRemove: () => void;
-  onClose: () => void;
-}) {
-  const variantUrl = useVariantUrl(product.handle);
-
-  return (
-    <div className="wishlist-item flex gap-16 border-b border-gray-200 pb-16 pt-12">
-      {/* Product Image */}
-      {product.featuredImage ? (
-        <Link
-          to={variantUrl}
-          onClick={onClose}
-          className="flex-shrink-0 w-[50px] h-[50px] "
-          prefetch="intent"
-        >
-          <Image
-            src={product.featuredImage.url}
-            alt={product.featuredImage.altText || product.title}
-            className="w-[50px] h-[50px] object-cover rounded"
-            sizes='50px'
-          />
-        </Link>
-      ) : (
-        <div className="w-[50px] h-[50px] bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
-          <span className="text-gray-400 text-sm">No Image</span>
-        </div>
-      )}
-
-      {/* Product Details */}
-      <div className="flex-1 flex flex-col gap-2 min-w-0">
-        {product.vendor && (
-          <p className="text-sm text-gray-600">{product.vendor}</p>
-        )}
-        <Link
-          to={variantUrl}
-          onClick={onClose}
-          prefetch="intent"
-          className="hover:underline"
-        >
-          <h3 className="font-semibold text-lg mb-4 mt-0 leading-[20px]">{product.title}</h3>
-        </Link>
-        {/* Price */}
-        {product.priceRange?.minVariantPrice ? (
-          <div className="text-lg font-bold mb-8">
-            <Money
-              data={{
-                amount: product.priceRange.minVariantPrice.amount,
-                currencyCode: product.priceRange.minVariantPrice.currencyCode,
-              } as MoneyV2}
-            />
-          </div>
-        ) : (
-          <div className="text-sm text-gray-500 mb-8">Price not available</div>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-8 mt-auto">
-          <button
-            type="button"
-            onClick={onRemove}
-            className="text-sm text-red-600 hover:text-red-800 underline"
-          >
-            Remove
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}

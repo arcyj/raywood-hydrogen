@@ -26,7 +26,7 @@ export function CartLineItem({
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
-  
+
   // Safely get close function - prefer onClose prop, fallback to Aside context
   const aside = AsideContext ? useContext(AsideContext) : null;
   const close = onClose || aside?.close;
@@ -129,14 +129,19 @@ function CartLineRemoveButton({
 }) {
   return (
     <CartForm
-      fetcherKey={getUpdateKey(lineIds)}
+      fetcherKey={getRemoveKey(lineIds)}
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button disabled={disabled} type="submit">
-        Remove
-      </button>
+      {(fetcher) => (
+        <button 
+          disabled={disabled || fetcher.state !== 'idle'} 
+          type="submit"
+        >
+          Remove
+        </button>
+      )}
     </CartForm>
   );
 }
@@ -171,4 +176,14 @@ function CartLineUpdateButton({
  */
 function getUpdateKey(lineIds: string[]) {
   return [CartForm.ACTIONS.LinesUpdate, ...lineIds].join('-');
+}
+
+/**
+ * Returns a unique key for the remove action. This is used to make sure remove actions
+ * are properly tracked and don't conflict with update actions.
+ * @param lineIds - line ids affected by the remove
+ * @returns
+ */
+function getRemoveKey(lineIds: string[]) {
+  return [CartForm.ACTIONS.LinesRemove, ...lineIds].join('-');
 }

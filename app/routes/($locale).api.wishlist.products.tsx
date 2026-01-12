@@ -19,6 +19,10 @@ const WISHLIST_PRODUCT_FRAGMENT = `#graphql
       width
       height
     }
+    selectedOrFirstAvailableVariant {
+      id
+      availableForSale
+    }
   }
 ` as const;
 

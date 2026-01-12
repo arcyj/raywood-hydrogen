@@ -1,5 +1,5 @@
 import {Await, Link} from 'react-router';
-import {Suspense, useId} from 'react';
+import {Suspense, useId, useState, useCallback, useMemo, useEffect} from 'react';
 import type {
   CartApiQueryFragment,
   FooterQuery,
@@ -8,7 +8,7 @@ import type {
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
-import { Navbar } from './Navbar';
+import { Navbar, NavbarContext } from './Navbar';
 import {CartMain} from '~/components/CartMain';
 import {
   SEARCH_ENDPOINT,
@@ -36,44 +36,82 @@ export function PageLayout({
   publicStoreDomain,
 }: PageLayoutProps) {
   const isDesktop = useBreakpoints().isDesktop;
+  const [activeMenu, setActiveMenu] = useState<'menu' | 'profile' | 'wishlist' | 'cart' | null>(null);
+
+  const openCart = useCallback(() => {
+    console.log('openCart called, setting activeMenu to cart', { isDesktop, activeMenu, currentActiveMenu: activeMenu });
+    setActiveMenu((prev) => {
+      console.log('Setting activeMenu from', prev, 'to cart');
+      return 'cart';
+    });
+  }, []);
+
+  // Expose openCart on window for debugging and as a fallback
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).__openCart = openCart;
+    }
+  }, [openCart]);
+
+  const handleMenuToggle = (menuType: 'menu' | 'profile' | 'wishlist' | 'cart' | null) => {
+    setActiveMenu(activeMenu === menuType ? null : menuType);
+  };
+
+  const handleClose = () => {
+    setActiveMenu(null);
+  };
+
+  // Memoize the context value to ensure it's stable
+  const navbarContextValue = useMemo(() => {
+    console.log('Creating navbar context value', { openCart: typeof openCart });
+    return {openCart};
+  }, [openCart]);
+
+  console.log('PageLayout render', { isDesktop, activeMenu, navbarContextValue, hasOpenCart: !!navbarContextValue?.openCart });
+
   return (
     <Aside.Provider>
-      {isDesktop && (
-        <>
-          <CartAside cart={cart} />
-          <SearchAside />
-          <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-        </>
-      )}
-      {!isDesktop && (
-        <>
-          <TopBar />
-          <SearchAside />
-          <FilterAside />
-        </>
-      )}
-      {header && isDesktop && (
-        <Header
+      <NavbarContext.Provider value={navbarContextValue}>
+        {isDesktop && (
+          <>
+            <CartAside cart={cart} />
+            <SearchAside />
+            <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+          </>
+        )}
+        {!isDesktop && (
+          <>
+            <TopBar />
+            <SearchAside />
+            <FilterAside />
+          </>
+        )}
+        {header && isDesktop && (
+          <Header
+            header={header}
+            cart={cart}
+            isLoggedIn={isLoggedIn}
+            publicStoreDomain={publicStoreDomain}
+          />
+        )}
+        <main>{children}</main>
+        {header && !isDesktop && (
+          <Navbar
+            header={header}
+            cart={cart}
+            isLoggedIn={isLoggedIn}
+            publicStoreDomain={publicStoreDomain}
+            activeMenu={activeMenu}
+            onMenuToggle={handleMenuToggle}
+            onClose={handleClose}
+          />
+        )}
+        <Footer
+          footer={footer}
           header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
           publicStoreDomain={publicStoreDomain}
         />
-      )}
-      <main>{children}</main>
-      {header && !isDesktop && (
-        <Navbar
-          header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
-          publicStoreDomain={publicStoreDomain}
-        />
-      )}
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
+      </NavbarContext.Provider>
     </Aside.Provider>
   );
 }
