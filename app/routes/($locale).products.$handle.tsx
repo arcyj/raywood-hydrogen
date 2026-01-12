@@ -208,29 +208,32 @@ export default function Product() {
               compareAtPrice={selectedVariant?.compareAtPrice}
             />
           </div>
-          <ProductForm
-            productOptions={productOptions}
-            selectedVariant={selectedVariant}
-            quantity={productCount}
-          />
-          <AddToWishlistButton
-            variant='icon'
-            product={selectedVariant}
-            productData={{
-              id: product.id,
-              vendor: product.vendor,
-              featuredImage: (() => {
-                const firstMedia = media.nodes?.[0];
-                if (firstMedia && 'image' in firstMedia && firstMedia.image) {
-                  return {
-                    url: firstMedia.image.url,
-                    altText: firstMedia.image.altText,
-                  };
-                }
-                return null;
-              })(),
-            }}
-          />
+          <div className='flex gap-12'>
+            <ProductForm
+              productOptions={productOptions}
+              selectedVariant={selectedVariant}
+              quantity={productCount}
+              className="flex-1"
+            />
+            <AddToWishlistButton
+              variant='icon'
+              product={selectedVariant}
+              productData={{
+                id: product.id,
+                vendor: product.vendor,
+                featuredImage: (() => {
+                  const firstMedia = media.nodes?.[0];
+                  if (firstMedia && 'image' in firstMedia && firstMedia.image) {
+                    return {
+                      url: firstMedia.image.url,
+                      altText: firstMedia.image.altText,
+                    };
+                  }
+                  return null;
+                })(),
+              }}
+            />
+          </div>
           <p className='text-large mt-32'>Description</p>
           <div className="mt-12">
             <ProductDetailItem label="EAN" value={selectedVariant?.barcode} />

@@ -1,9 +1,10 @@
 import { useWishlist } from '~/hooks/useWishlist';
 import { Button } from './ui/Button';
 import { Heart } from './icons/Heart';
+import { IconButton } from './ui/IconButton';
 
 // Support both product and variant structures
-type ProductInput = 
+type ProductInput =
   | {
       // Product structure
       id: string;
@@ -60,15 +61,15 @@ export function AddToWishlistButton({
   className = '',
 }: AddToWishlistButtonProps) {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  
+
   // Determine if this is a variant structure (has nested product)
   const isVariant = 'product' in product && product.product !== undefined;
-  
+
   // Get product handle - for variants, use product.handle, otherwise use product.handle directly
-  const productHandle = isVariant 
+  const productHandle = isVariant
     ? (product as Extract<ProductInput, { product: { handle: string } }>).product.handle
     : (product as Extract<ProductInput, { handle: string }>).handle;
-  
+
   const inWishlist = isInWishlist(productHandle);
 
   const handleClick = () => {
@@ -85,9 +86,15 @@ export function AddToWishlistButton({
     handleClick();
   };
 
+  console.log("inWishlist: => ", inWishlist)
+
   if (variant === 'icon') {
     return (
-      <button
+      <IconButton
+        Icon={Heart}
+        variant='secondary'
+        size='large'
+        active={inWishlist}
         type="button"
         onClick={(e) => {
           e.preventDefault();
@@ -97,12 +104,7 @@ export function AddToWishlistButton({
         className={`wishlist-icon-button ${className}`}
         aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
       >
-        <Heart
-          size={20}
-          className={inWishlist ? 'fill-current' : ''}
-          style={{ color: inWishlist ? '#ef4444' : 'currentColor' }}
-        />
-      </button>
+      </IconButton>
     );
   }
 

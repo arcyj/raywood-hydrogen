@@ -65,7 +65,7 @@ export function Navbar({
   };
 
   return (
-    <>
+    <div className="relative max-w-[640px]">
       <Drawer
         onClose={onClose}
         visible={activeMenu !== null}
@@ -75,7 +75,7 @@ export function Navbar({
         {renderMenuContent()}
       </Drawer>
       <nav className="fixed full bottom-0 w-full p-4 rounded-t-md z-10 bg-transparent">
-        <div className="grid grid-cols-4 gap-4 m-4 bg-white shadow-lg rounded-full">
+        <div className="grid grid-cols-4 gap-4 m-4 bg-white shadow-lg rounded-full max-w-[550px] mx-auto">
           <NavMenuItem
             onClick={() => onMenuToggle('menu')}
             Icon={() => <Menu />}
@@ -99,6 +99,6 @@ export function Navbar({
           />
         </div>
       </nav>
-    </>
+    </div>
   );
 }

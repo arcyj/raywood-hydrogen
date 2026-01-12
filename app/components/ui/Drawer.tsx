@@ -64,7 +64,7 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
     ['translate-y-[0px]']: position === 'bottom',
   });
 
-  const containerClasses = twClasses(['drawer-container fixed flex max-w-full h-[calc(100%-75px)] bg-white rounded-xl'], {
+  const containerClasses = twClasses(['drawer-container fixed flex h-[calc(100%-75px)] bg-white rounded-xl max-w-[550px] mx-auto'], {
     ['inset-y-0 right-0']: position === 'right',
     ['inset-y-0 left-0']: position === 'left',
     ['inset-x-0 bottom-0 w-full left-0']: position === 'bottom',

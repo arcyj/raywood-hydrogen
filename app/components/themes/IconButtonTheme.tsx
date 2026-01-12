@@ -3,7 +3,7 @@ import type { RadixIconProps } from './ButtonTheme';
 import type { IIconProps } from '../icons/icon.types';
 import type { FC } from 'react';
 
-type IIconButtonVariant = 'filled' | 'outlined' | 'ghost';
+type IIconButtonVariant = 'filled' | 'outlined' | 'ghost' | 'secondary';
 type IIconLinkTheme = 'light' | 'dark';
 export type IIconButtonSize = 'small' | 'medium' | 'large';
 
@@ -20,8 +20,15 @@ const IconButtonTheme = {
   initial: twc`flex items-center justify-center rounded-[4px] focus-visible:glow-focus focus:outline-none`,
   variants: {
     filled: twc`border-transparent-full bg-[#d7dae0] text-text-buttons-secondary`,
-    outlined: twc`border border-solid border-layout-medium bg-transparent-full text-text-buttons-tertiary`,
+    secondary: twc`border-transparent-full`,
+    outlined: twc`border border-solid border-grey bg-grey`,
     ghost: twc`border-transparent-full bg-transparent-full text-text-buttons-tertiary`,
+  },
+  state: {
+    secondary: {
+      'DEFAULT': twc`bg-lightGrey`,
+      active: twc`bg-[#e7b8f6]`
+    },
   },
   theme: {
     light: twc``,
@@ -54,7 +61,7 @@ const IconButtonTheme = {
   sizes: {
     small: twc`h-[32px] w-[32px]`,
     medium: twc`h-[40px] w-[40px]`,
-    large: twc`h-[48px] w-[48px]`,
+    large: twc`text-label-l h-56 px-16`,
   },
 };
 
@@ -62,6 +69,7 @@ export const iconButtonClasses = ({
   variant,
   theme = 'light',
   size,
+  active = false,
   keyPressed = false,
   disabled = false,
   loading = false,
@@ -70,6 +78,7 @@ export const iconButtonClasses = ({
   variant: IIconButtonVariant;
   theme?: IIconLinkTheme;
   size: IIconButtonSize;
+  active?: boolean;
   keyPressed?: boolean;
   disabled?: boolean;
   loading?: boolean;
@@ -83,12 +92,26 @@ export const iconButtonClasses = ({
       IconButtonTheme.sizes[size],
     ],
     {
-      [IconButtonTheme.hover[variant]]: !disabled && !loading,
-      [IconButtonTheme.mousePress[variant]]: !disabled && !loading,
-      [IconButtonTheme.keyPress[variant]]: !disabled && !loading && keyPressed,
+      ...(IconButtonTheme.hover[variant as keyof typeof IconButtonTheme.hover] && {
+        [IconButtonTheme.hover[variant as keyof typeof IconButtonTheme.hover]]: !disabled && !loading,
+      }),
+      ...(IconButtonTheme.mousePress[variant as keyof typeof IconButtonTheme.mousePress] && {
+        [IconButtonTheme.mousePress[variant as keyof typeof IconButtonTheme.mousePress]]: !disabled && !loading,
+      }),
+      ...(IconButtonTheme.keyPress[variant as keyof typeof IconButtonTheme.keyPress] && {
+        [IconButtonTheme.keyPress[variant as keyof typeof IconButtonTheme.keyPress]]: !disabled && !loading && keyPressed,
+      }),
       [IconButtonTheme.cursor['initial']]: !disabled && !loading,
       [IconButtonTheme.cursor['disabled']]: disabled || loading,
-      [IconButtonTheme.disable[variant]]: disabled || loading,
+      ...(IconButtonTheme.disable[variant as keyof typeof IconButtonTheme.disable] && {
+        [IconButtonTheme.disable[variant as keyof typeof IconButtonTheme.disable]]: disabled || loading,
+      }),
+      ...(IconButtonTheme.state[variant as keyof typeof IconButtonTheme.state]?.active && {
+        [IconButtonTheme.state[variant as keyof typeof IconButtonTheme.state].active]: active,
+      }),
+      ...(IconButtonTheme.state[variant as keyof typeof IconButtonTheme.state]?.['DEFAULT'] && {
+        [IconButtonTheme.state[variant as keyof typeof IconButtonTheme.state]['DEFAULT']]: !active,
+      }),
     },
     className,
   );

@@ -12,15 +12,17 @@ export function ProductForm({
   productOptions,
   selectedVariant,
   quantity = 1,
+  className
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   quantity: number;
+  className?: string;
 }) {
   const navigate = useNavigate();
   const {open} = useAside();
   return (
-    <div className="product-form">
+    <div className={`product-form ${className ? ` ${className}` : ''}`}>
       {productOptions.map((option) => {
         // If there is only a single value in the option values, don't display the option
         if (option.optionValues.length === 1) return null;

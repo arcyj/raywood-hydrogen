@@ -7,6 +7,7 @@ import type { FC, MouseEvent, KeyboardEvent } from 'react';
 interface IIconButtonProps extends IIconCoreProps {
   loading?: boolean;
   type?: 'button' | 'submit' | 'reset';
+  active?: boolean;
   onClick?(e?: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>): void;
 }
 
@@ -16,6 +17,7 @@ export const IconButton: FC<IIconButtonProps> = ({
   size = 'medium',
   disabled = false,
   loading = false,
+  active = false,
   Icon,
   testName = '',
   type = 'button',
@@ -43,6 +45,7 @@ export const IconButton: FC<IIconButtonProps> = ({
     keyPressed: isKeyPressed,
     disabled,
     loading,
+    active,
     className,
   });
 
