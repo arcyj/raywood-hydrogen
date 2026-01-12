@@ -68,13 +68,20 @@ export const Button: FC<IButtonProps> = ({
       onKeyUp={handleKeyUp}
       tabIndex={disabled || loading ? -1 : 0}
     >
-      <div className="flex items-center justify-center" style={{ visibility: loading ? 'hidden' : 'visible' }}>
-        {IconBefore && <IconBefore size={24} className="tw-mr-2" />}
+      <div
+        className="flex items-center justify-center"
+        style={{visibility: loading ? 'hidden' : 'visible'}}
+      >
+        {IconBefore && (
+          <span className="mr-4" >
+            <IconBefore size={24}/>
+          </span>
+        )}
         {children}
-        {IconAfter && <IconAfter size={24} className="tw-ml-2" />}
+        {IconAfter && <IconAfter size={24} className="ml-2" />}
       </div>
       {loading ? (
-        <div style={{ position: 'absolute' }}>
+        <div style={{position: 'absolute'}}>
           <Spinner theme={isTertiaryOnDark ? 'dark' : 'light'} />
         </div>
       ) : null}

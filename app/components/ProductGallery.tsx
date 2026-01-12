@@ -1,5 +1,6 @@
 import {useState} from 'react';
 import {Swiper, SwiperSlide} from 'swiper/react';
+import { useBreakpoints } from '~/hooks/useBreakpoints';
 import {Navigation, Thumbs, FreeMode} from 'swiper/modules';
 import type {Swiper as SwiperType} from 'swiper';
 import {Image} from '@shopify/hydrogen';
@@ -16,6 +17,7 @@ export function ProductGallery({
   media: ProductFragment['media']['nodes'];
 }) {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
+  const isDesktop = useBreakpoints().isDesktop;
 
   if (!media || media.length === 0) {
     return null;
@@ -51,7 +53,7 @@ export function ProductGallery({
       </Swiper>
 
       {/* Thumbnails Swiper */}
-      {media.length > 1 && (
+      {isDesktop && media.length > 1 && (
         <Swiper
           modules={[FreeMode, Navigation, Thumbs]}
           onSwiper={setThumbsSwiper}

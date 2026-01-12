@@ -177,6 +177,7 @@ module.exports = {
       addComponents(typographyConfig);
       addComponents({
         '.container': {
+          backgroundColor: 'white',
           width: '100%',
           paddingLeft: '24px',
           paddingRight: '24px',

@@ -3,7 +3,7 @@ import {Link} from 'react-router';
 import {useContext} from 'react';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {AsideContext} from './Aside';
-import {CartLineItem} from '~/components/CartLineItem';
+import {ProductLineItem} from '~/components/ProductLineItem';
 import {CartSummary} from './CartSummary';
 
 export type CartLayout = 'page' | 'aside';
@@ -37,7 +37,7 @@ export function CartMain({layout, cart: originalCart, onClose}: CartMainProps) {
         <div aria-labelledby="cart-lines">
           <ul>
             {(cart?.lines?.nodes ?? []).map((line) => (
-              <CartLineItem key={line.id} line={line} layout={layout} onClose={onClose} />
+              <ProductLineItem key={line.id} line={line} layout={layout} onClose={onClose} />
             ))}
           </ul>
         </div>

@@ -18,7 +18,7 @@ interface IDropDownMenuProps {
 
 const dropDownMenuItemStyle = {
   base: {
-    initial: twc`w-[300px] rounded-md shadow-black/5`,
+    initial: twc`w-full rounded-md shadow-black/5`,
   },
 };
 
@@ -122,7 +122,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
   return (
     <Accordion.Item value={item.id}>
       <Accordion.Header>
-        <Accordion.Trigger className="flex w-full items-center justify-between px-16 py-12 text-left text-body-regular font-medium leading-none text-text-layout-powerful hover:bg-gray-100">
+        <Accordion.Trigger className="flex w-full border-b-2 border-lightGrey items-center justify-between py-16 text-left text-body-regular font-semibold leading-none text-text-layout-powerful hover:bg-gray-100">
           {hasSubItems ? (
             item.title
           ) : (
@@ -144,8 +144,8 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
         </Accordion.Trigger>
       </Accordion.Header>
       {hasSubItems && (
-        <Accordion.Content className="px-16 pb-12 pt-0 text-body-regular text-text-layout-secondary">
-          <nav className="flex flex-col gap-8">
+        <Accordion.Content className="my-8 text-body-regular text-text-layout-secondary">
+          <nav className="flex flex-col mb-4">
             {item.items.map((subItem) => {
               if (!subItem.url) return null;
               const subUrl = processUrl(subItem.url);
@@ -156,7 +156,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
                   end
                   prefetch="intent"
                   style={activeLinkStyle}
-                  className="hover:text-text-layout-powerful transition-colors"
+                  className="hover:text-text-layout-powerful transition-colors mb-4 py-8 px-8 bg-lightGrey rounded-md"
                   onClick={onClose}
                 >
                   {subItem.title}

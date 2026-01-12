@@ -77,16 +77,17 @@ export function Navbar({
         onClose={handleClose}
         visible={activeMenu !== null}
         position="bottom"
-        className="bg-white min-h-[600px]"
+        className="bg-white min-h-[600px] px-12 pt-16 rounded-t-xl"
       >
         {renderMenuContent()}
       </Drawer>
-      <nav className="fixed bottom-0 left-0 w-full bg-white backdrop-blur-xl border-t border-gray-200 p-8 rounded-t-md z-10">
-        <div className="flex justify-center gap-12">
+      <nav className="fixed full bottom-0 w-full p-8 rounded-t-md z-10">
+        <div className="flex justify-center gap-12 m-4 bg-white shadow-lg rounded-full">
           <NavMenuItem
             onClick={() => handleMenuToggle('menu')}
             Icon={() => <Menu />}
             label={'Menu'}
+            active={activeMenu === 'menu'}
           />
           <NavMenuItem
             onClick={() => handleMenuToggle('profile')}

@@ -9,6 +9,7 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
+import { AddToWishlistButton } from '~/components/AddToWishlistButton';
 import {ProductPrice} from '~/components/ProductPrice';
 import {ProductGallery} from '~/components/ProductGallery';
 import {ProductForm} from '~/components/ProductForm';
@@ -211,6 +212,24 @@ export default function Product() {
             productOptions={productOptions}
             selectedVariant={selectedVariant}
             quantity={productCount}
+          />
+          <AddToWishlistButton 
+            variant='icon' 
+            product={selectedVariant}
+            productData={{
+              id: product.id,
+              vendor: product.vendor,
+              featuredImage: (() => {
+                const firstMedia = media.nodes?.[0];
+                if (firstMedia && 'image' in firstMedia && firstMedia.image) {
+                  return {
+                    url: firstMedia.image.url,
+                    altText: firstMedia.image.altText,
+                  };
+                }
+                return null;
+              })(),
+            }}
           />
           <p className='text-large mt-32'>Description</p>
           <div className="mt-12">

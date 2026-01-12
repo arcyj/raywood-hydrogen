@@ -61,17 +61,17 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
   const transitionEnterLeaveFrom = twClasses([''], {
     ['translate-x-full']: position === 'right',
     ['-translate-x-full']: position === 'left',
-    ['translate-y-[70px]']: position === 'bottom',
+    ['translate-y-[0px]']: position === 'bottom',
   });
 
-  const containerClasses = twClasses(['drawer-container fixed flex max-w-full'], {
+  const containerClasses = twClasses(['drawer-container fixed flex max-w-full h-[calc(100%-45px)] bg-white'], {
     ['inset-y-0 right-0']: position === 'right',
     ['inset-y-0 left-0']: position === 'left',
-    ['inset-x-[71px] bottom-[71px] w-full left-0']: position === 'bottom',
+    ['inset-x-0 bottom-0 w-full left-0']: position === 'bottom',
   });
 
   const panelClasses = twClasses(
-    ['drawer-panel pointer-events-auto relative overflow-y-auto'],
+    ['drawer-panel pointer-events-auto relative overflow-y-auto mb-[80px]'],
     {
       ['h-full']: position !== 'bottom',
       ['w-full']: position == 'bottom',

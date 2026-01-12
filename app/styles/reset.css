@@ -24,10 +24,20 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+
 }
 
 body > main {
-  margin: 0 1rem 1rem 1rem;
+  padding: 8px 8px;
+  background-color: #fff;
+  margin-top: 41px;
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  body {
+    background-color: #1d1229;
+  }
 }
 
 section {

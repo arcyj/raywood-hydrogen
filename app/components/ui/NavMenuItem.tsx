@@ -7,6 +7,7 @@ interface IButtonProps {
   Icon: FC<IIconProps>;
   label?: string;
   type?: 'button' | 'submit';
+  active?: boolean;
   className?: string;
   onClick?: (e: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => void;
 }
@@ -16,7 +17,7 @@ const navMenuItemStyle = {
     initial: twc`relative rounded-md p-8 bg-white flex flex-col items-center justify-center`,
   },
   label: {
-    initial: twc`text-sm text-text-layout-primary mt-2`,
+    initial: twc`text-sm text-text-layout-primary mt-2 font-semibold`,
   },
 };
 
