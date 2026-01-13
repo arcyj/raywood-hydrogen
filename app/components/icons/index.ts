@@ -6,3 +6,5 @@ export { Add } from './Add';
 export { Remove } from './Remove';
 export { Back } from './Back';
 export { Filter } from './Filter';
+export { Error } from './Error';
+export { Warning } from './Warning';

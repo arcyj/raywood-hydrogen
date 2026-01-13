@@ -7,6 +7,7 @@ import {
   type PredictiveSearchReturn,
 } from '~/lib/search';
 import {useAside} from './Aside';
+import {usePlaypeak} from '~/lib/playpeakContext';
 
 type PredictiveSearchItems = PredictiveSearchReturn['result']['items'];
 
@@ -44,6 +45,10 @@ export function SearchResultsPredictive({
 }: SearchResultsPredictiveProps) {
   const aside = useAside();
   const {term, inputRef, fetcher, total, items} = usePredictiveSearch();
+  
+  // Use PlaypeakContext for closing search drawer (used in SearchDrawer)
+  // This will throw if not in PlaypeakProvider, but SearchDrawer always is
+  const playpeakContext = usePlaypeak();
 
   /*
    * Utility that resets the search input
@@ -56,11 +61,16 @@ export function SearchResultsPredictive({
   }
 
   /**
-   * Utility that resets the search input and closes the search aside
+   * Utility that resets the search input and closes the search drawer/aside
    */
   function closeSearch() {
     resetInput();
-    aside.close();
+    // Use PlaypeakContext if search drawer is open, otherwise use Aside for desktop
+    if (playpeakContext.isDrawerOpen('search')) {
+      playpeakContext.closeSearchDrawer();
+    } else {
+      aside.close();
+    }
   }
 
   return children({
@@ -88,7 +98,7 @@ function SearchResultsPredictiveArticles({
   if (!articles.length) return null;
 
   return (
-    <div className="predictive-search-result" key="articles">
+    <div className="predictive-search-result overflow-y-scroll" key="articles">
       <h5>Articles</h5>
       <ul>
         {articles.map((article) => {
@@ -264,7 +274,13 @@ function SearchResultsPredictiveEmpty({
   term: React.MutableRefObject<string>;
 }) {
   if (!term.current) {
-    return null;
+    return (
+      <div className="flex justify-center items-center h-full">
+        <span className="block h-full mt-[90px]">
+          Type to search...
+        </span>
+      </div>
+    );
   }
 
   return (

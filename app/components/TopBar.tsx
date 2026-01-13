@@ -4,12 +4,14 @@ import { twClasses } from "~/helpers/twMerge";
 import { ChevronLeftIcon, MagnifyingGlassIcon, MixerHorizontalIcon } from "@radix-ui/react-icons";
 import { Filter } from "./icons";
 import { useAside } from "./Aside";
+import { usePlaypeak } from "~/lib/playpeakContext";
 import { Button } from "./ui/Button";
 
 export function TopBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { open } = useAside();
+  const { openSearchDrawer, closeSearchDrawer, isDrawerOpen } = usePlaypeak();
 
   const initial = 'fixed top-0 left-0 border-t-4 border-[#1D1229]/69 flex w-full justify-between px-4 pb-8 z-20 bg-[#1D1229]';
 
@@ -27,8 +29,12 @@ export function TopBar() {
     open('filter');
   };
 
-  const handleSearch = () => {
-    open('search');
+    const handleSearchToggle = () => {
+    if (isDrawerOpen('search')) {
+      closeSearchDrawer();
+    } else {
+      openSearchDrawer();
+    }
   };
 
   return (
@@ -67,7 +73,7 @@ export function TopBar() {
       </div>
       <div className="mt-4 ml-auto">
           <Button
-            onClick={handleSearch}
+            onClick={handleSearchToggle}
             variant="action"
             size="extra-small"
             className=""

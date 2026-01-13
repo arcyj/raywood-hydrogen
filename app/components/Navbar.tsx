@@ -10,17 +10,6 @@ import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 
 type MenuType = 'menu' | 'profile' | 'wishlist' | 'cart' | null;
 
-interface NavbarContextValue {
-  openCart: () => void;
-}
-
-export const NavbarContext = createContext<NavbarContextValue | null>(null);
-
-export const useNavbar = () => {
-  const context = useContext(NavbarContext);
-  return context;
-};
-
 interface NavbarProps {
   header: HeaderQuery;
   cart: Promise<CartApiQueryFragment | null>;
@@ -70,12 +59,13 @@ export function Navbar({
         onClose={onClose}
         visible={activeMenu !== null}
         position="bottom"
-        className="bg-white px-12 pt-16 rounded-t-xl"
+        className='bg-white'
+        panelClassName="bg-white px-12 pt-16 rounded-t-xl"
       >
         {renderMenuContent()}
       </Drawer>
       <nav className="fixed full bottom-0 w-full p-4 rounded-t-md z-10 bg-transparent">
-        <div className="grid grid-cols-4 gap-4 m-4 bg-white shadow-lg rounded-full max-w-[550px] mx-auto">
+        <div className="grid grid-cols-4 p-4 gap-4 m-4 bg-lightGrey shadow-large rounded-lg max-w-[350px] mx-auto">
           <NavMenuItem
             onClick={() => onMenuToggle('menu')}
             Icon={() => <Menu />}
@@ -85,16 +75,19 @@ export function Navbar({
           <NavMenuItem
             onClick={() => onMenuToggle('profile')}
             Icon={() => <Profile />}
+            active={activeMenu === 'profile'}
             label={'Account'}
           />
           <NavMenuItem
             onClick={() => onMenuToggle('wishlist')}
             Icon={() => <Heart />}
+            active={activeMenu === 'wishlist'}
             label={'Wishlist'}
           />
           <NavMenuItem
             onClick={() => onMenuToggle('cart')}
             Icon={() => <Cart />}
+            active={activeMenu === 'cart'}
             label={'Cart'}
           />
         </div>

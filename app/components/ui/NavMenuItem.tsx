@@ -14,7 +14,9 @@ interface IButtonProps {
 
 const navMenuItemStyle = {
   base: {
-    initial: twc`relative rounded-md p-8 bg-white flex flex-col items-center justify-center`,
+    initial: twc`relative rounded-md p-8 flex flex-col items-center justify-center`,
+    inActive: twc`bg-white`,
+    active: twc`bg-lightGrey inset-shadow-sm`,
   },
   label: {
     initial: twc`text-sm text-text-layout-primary mt-2 font-semibold`,
@@ -25,14 +27,18 @@ export const NavMenuItem: FC<IButtonProps> = ({
   Icon,
   label,
   type = 'button',
+  active = false,
   onClick,
   className,
 }) => {
   const { base } = navMenuItemStyle;
 
   const classes = useMemo(
-    () => twClasses([base['initial']], {}, className),
-    [base, className],
+    () => twClasses([base['initial']], {
+      [base['active']]: active,
+      [base['inActive']]: !active,
+    }, className),
+    [base, active, className],
   );
   const labelClasses = useMemo(
     () => twClasses([navMenuItemStyle.label['initial']], {}),

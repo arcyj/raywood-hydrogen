@@ -7,6 +7,7 @@ import {
 } from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
+import {usePlaypeak} from '~/lib/playpeakContext';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -128,9 +129,9 @@ function HeaderMenuMobileToggle() {
 }
 
 function SearchToggle() {
-  const {open} = useAside();
+  const {openSearchDrawer} = usePlaypeak();
   return (
-    <button className="reset" onClick={() => open('search')}>
+    <button className="reset" onClick={openSearchDrawer}>
       Search
     </button>
   );

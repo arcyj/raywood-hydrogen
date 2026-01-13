@@ -3,7 +3,7 @@ import { Button } from './ui/Button';
 import {type FetcherWithComponents} from 'react-router';
 import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen';
 import type { IButtonSize } from './themes/ButtonTheme';
-import { useNavbar } from './Navbar';
+import { usePlaypeak } from '~/lib/playpeakContext';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
 
 function AddToCartButtonInner({
@@ -25,29 +25,22 @@ function AddToCartButtonInner({
 }) {
   const previousStateRef = useRef<string>('idle');
   const hasCalledSuccessRef = useRef<boolean>(false);
-  
+
   // Get navbar context - use a ref to ensure we have the latest value
-  const navbarContext = useNavbar();
+  const navbarContext = usePlaypeak();
   const navbarRef = useRef(navbarContext);
-  
+
   useEffect(() => {
     navbarRef.current = navbarContext;
   }, [navbarContext]);
-  
-  // Debug: Log context availability
-  useEffect(() => {
-    console.log('AddToCartButton mounted/updated', { 
-      navbar: navbarContext, 
-      hasOpenCart: !!navbarContext?.openCart,
-      isMobileDevice: typeof window !== 'undefined' ? window.innerWidth <= 768 : false 
-    });
-  }, [navbarContext]);
-  
+
+
+
   const breakpoints = useBreakpoints();
   const { isMobile, isDesktop } = breakpoints;
-  
+
   // More reliable mobile check - check window width directly
-  const isMobileDevice = typeof window !== 'undefined' 
+  const isMobileDevice = typeof window !== 'undefined'
     ? window.innerWidth <= 768
     : isMobile;
 
@@ -89,28 +82,12 @@ function AddToCartButtonInner({
     // Use isMobileDevice for more reliable detection
     // Use ref to get latest context value
     const currentNavbar = navbarRef.current;
-    console.log('handleClick called', { 
-      isMobileDevice, 
-      isDesktop, 
-      navbar: currentNavbar, 
-      hasOpenCart: !!currentNavbar?.openCart,
-      windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'N/A' 
-    });
-    
     if (isMobileDevice) {
       if (currentNavbar?.openCart) {
-        console.log('Calling navbar.openCart()');
         currentNavbar.openCart();
       } else {
-        console.warn('Navbar context not available on mobile, trying window fallback', { 
-          navbar: currentNavbar, 
-          isMobileDevice, 
-          isDesktop,
-          navbarContextValue: currentNavbar 
-        });
         // Fallback: try to call openCart from window if context is not available
         if (typeof window !== 'undefined' && (window as any).__openCart) {
-          console.log('Using window fallback to open cart');
           (window as any).__openCart();
         }
       }
