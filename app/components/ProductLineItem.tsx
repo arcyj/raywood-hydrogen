@@ -161,7 +161,11 @@ function ProductView({
 
   // Debug: Log variant ID to verify it's being passed correctly
   if (process.env.NODE_ENV === 'development') {
-    console.log('Add to cart - variantId:', variantId, 'availableForSale:', variantAvailableForSale);
+    console.log('ProductLineItem - variantId:', variantId, 'availableForSale:', variantAvailableForSale, 'product:', product.title);
+    // Verify variant ID format - should be GID format like "gid://shopify/ProductVariant/123456"
+    if (variantId && !variantId.startsWith('gid://shopify/ProductVariant/')) {
+      console.warn('⚠️ Variant ID may be in wrong format. Expected GID format, got:', variantId);
+    }
   }
 
   return (
@@ -209,6 +213,12 @@ function ProductView({
                   quantity: 1,
                 },
               ]}
+              onSuccess={() => {
+                // Log success for debugging
+                if (process.env.NODE_ENV === 'development') {
+                  console.log('✅ Product added to cart from wishlist:', product.title, variantId);
+                }
+              }}
             >
               {variantAvailableForSale === false ? 'Sold out' : 'Add to cart'}
             </AddToCartButton>

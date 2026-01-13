@@ -48,6 +48,18 @@ function AddToCartButtonInner({
   useEffect(() => {
     const wasNotIdle = previousStateRef.current !== 'idle';
     const isNowIdle = fetcher.state === 'idle';
+
+    // Log all fetcher data for debugging
+    if (wasNotIdle && isNowIdle) {
+      console.log('AddToCartButton fetcher data:', fetcher.data);
+      if (fetcher.data?.errors) {
+        console.error('AddToCartButton error:', fetcher.data.errors);
+      }
+      if (fetcher.data?.warnings) {
+        console.warn('AddToCartButton warnings:', fetcher.data.warnings);
+      }
+    }
+
     const hasData = fetcher.data && !fetcher.data.errors;
 
     // If we transitioned from a non-idle state to idle with successful data, call onSuccess
@@ -76,25 +88,15 @@ function AddToCartButtonInner({
     }
   }, [fetcher.state, fetcher.data, onSuccess, isMobileDevice]);
 
-  // Handle onClick - on mobile, also open cart immediately
+  // Handle onClick - on desktop, open cart aside if onClick is provided
+  // On mobile, we wait for successful form submission before opening cart
   const handleClick = () => {
-    // Open cart drawer on mobile immediately when button is clicked
-    // Use isMobileDevice for more reliable detection
-    // Use ref to get latest context value
-    const currentNavbar = navbarRef.current;
-    if (isMobileDevice) {
-      if (currentNavbar?.openCart) {
-        currentNavbar.openCart();
-      } else {
-        // Fallback: try to call openCart from window if context is not available
-        if (typeof window !== 'undefined' && (window as any).__openCart) {
-          (window as any).__openCart();
-        }
-      }
-    } else if (isDesktop && onClick) {
-      // Only call desktop onClick on desktop (for cart aside)
+    // Only handle desktop onClick for cart aside
+    // Don't open cart on mobile here - wait for successful submission
+    if (isDesktop && onClick) {
       onClick();
     }
+    // On mobile, the cart will open after successful submission (see useEffect above)
   };
 
   return (
@@ -134,6 +136,11 @@ export function AddToCartButton({
   onClick?: () => void;
   onSuccess?: () => void;
 }) {
+  // Debug: Log lines being sent to cart
+  if (process.env.NODE_ENV === 'development') {
+    console.log('AddToCartButton - lines:', lines);
+  }
+
   return (
     <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
       {(fetcher: FetcherWithComponents<any>) => (

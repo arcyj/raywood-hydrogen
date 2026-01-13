@@ -144,7 +144,7 @@ function SearchResultsProducts({
               </div>
               <div>
                 <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                  {isLoading ? 'Loading...' : <span>Load more 2 ↓</span>}
                 </NextLink>
               </div>
             </div>
