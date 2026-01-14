@@ -34,6 +34,6 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ['.tryhydrogen.dev'],
+    allowedHosts: ['.tryhydrogen.dev', 'https://karisa-feigned-commonsensibly.ngrok-free.dev'],
   },
 });
