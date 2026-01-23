@@ -1,13 +1,22 @@
 import {Suspense} from 'react';
 import {Await, NavLink, useAsyncValue} from 'react-router';
+import { Image } from "@shopify/hydrogen";
 import {
   type CartViewPayload,
   useAnalytics,
   useOptimisticCart,
 } from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
-import {useAside} from '~/components/Aside';
+
 import {usePlaypeak} from '~/lib/playpeakContext';
+
+import {useAside} from '~/components/Aside';
+import { NavMenuItem } from './ui/NavMenuItem';
+import { Cart, Heart, Profile } from './icons';
+import { MagnifyingGlassIcon, ArrowRightIcon, ChevronDownIcon } from "@radix-ui/react-icons";
+import { Dropdown } from './ui/Dropdown';
+import { processUrl } from '~/helpers/processUrl';
+import { Link } from './ui/Link';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -25,20 +34,54 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu} = header;
+  console.log(header)
   return (
-    <header className="header">
+    <header className="header flex justify-between items-center shadow-md rounded-b-xl">
       <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
+        <Image src="./images/LogoPlaypeak.svg" alt="Logo" width={100} height={0} />
       </NavLink>
       <HeaderMenu
         menu={menu}
         viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
+        primaryDomainUrl={shop.primaryDomain.url}
         publicStoreDomain={publicStoreDomain}
       />
       <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
     </header>
   );
+}
+
+// Helper function to extract icon URL from menu item resource
+function getMenuIconUrl(item: any): string | null {
+  // Check if item has resource and is a collection type
+  if (!item?.resource || item.type !== 'COLLECTION') {
+    return null;
+  }
+
+  // Type guard to check if resource is a Collection with metafield
+  const resource = item.resource as any;
+  if (resource?.metafield) {
+    const metafield = resource.metafield;
+
+    // Check if metafield has a reference (MediaImage or File)
+    if (metafield.reference) {
+      // MediaImage reference
+      if (metafield.reference.image?.url) {
+        return metafield.reference.image.url;
+      }
+      // File reference
+      if (metafield.reference.url) {
+        return metafield.reference.url;
+      }
+    }
+
+    // Fallback to value if it's a string URL
+    if (metafield.value && typeof metafield.value === 'string') {
+      return metafield.value;
+    }
+  }
+
+  return null;
 }
 
 export function HeaderMenu({
@@ -56,18 +99,8 @@ export function HeaderMenu({
   const {close} = useAside();
 
   return (
+
     <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink
-          end
-          onClick={close}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to="/"
-        >
-          Home
-        </NavLink>
-      )}
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
 
@@ -78,18 +111,65 @@ export function HeaderMenu({
           item.url.includes(primaryDomainUrl)
             ? new URL(item.url).pathname
             : item.url;
+
+        const iconUrl = getMenuIconUrl(item);
+        const hasSubmenu = item.items.length > 0;
+
         return (
-          <NavLink
-            className="header-menu-item"
-            end
-            key={item.id}
-            onClick={close}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
-          >
-            {item.title}
-          </NavLink>
+          <Dropdown key={item.id} openOnHover={true}>
+            <Dropdown.Button>
+              <NavLink
+                className="text-link flex items-center px-8 hover:bg-lightGrey rounded-lg py-8 active:bg-accentGrey active:inset-shadow-sm"
+                end
+                key={item.id}
+                onClick={close}
+                prefetch="intent"
+                style={activeLinkStyle}
+                to={url}
+              >
+                {iconUrl && (
+                  <Image
+                    src={iconUrl}
+                    alt={item.title}
+                    width={18}
+                    height={18}
+                    className="inline-block mr-8"
+                  />
+                )}
+                {item.title}
+                {hasSubmenu ? <ChevronDownIcon className='ml-4 h-[20px] w-[20px]' /> : null }
+              </NavLink>
+            </Dropdown.Button>
+            {hasSubmenu ? (
+              <Dropdown.Content>
+                <div className="flex flex-col rounded-md">
+                  {item.items.map((subItem) => {
+                    if (!subItem.url) return null;
+                    const subUrl = processUrl(subItem.url);
+                    return (
+                      <Link
+                        key={subItem.id}
+                        href={subUrl}
+                        prefetch="intent"
+                        IconAfter={ArrowRightIcon}
+                        className="text-link w-full block px-12 py-12 bg-lightGrey border-solid border-b-2 border-b-accentGrey hover:bg-accentGrey active:inset-shadow-sm"
+                      >
+                        {subItem.title}
+                      </Link>
+                    );
+                  })}
+                  <Link
+                    IconAfter={ArrowRightIcon}
+                    href={url}
+                    prefetch="intent"
+                    className="text-link w-full block px-12 py-12 text-white bg-primary border-solid border-b-2 border-b-primary"
+                  >
+                    View all {item.title}
+                  </Link>
+                </div>
+              </Dropdown.Content>
+            ) : null}
+          </Dropdown>
         );
       })}
     </nav>
@@ -102,61 +182,57 @@ function HeaderCtas({
 }: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
   return (
     <nav className="header-ctas" role="navigation">
-      <HeaderMenuMobileToggle />
       <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense fallback="Sign in">
+        <Suspense
+          fallback={
+            <NavMenuItem
+              onClick={() => {}}
+              Icon={() => <Profile />}
+              label={'Sign in'}
+              variant='menu'
+            />
+          }
+        >
           <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
+            {(isLoggedIn) => (
+              <NavMenuItem
+                onClick={() => {}}
+                Icon={() => <Profile />}
+                label={isLoggedIn ? 'Account' : 'Sign in'}
+                variant='menu'
+              />
+            )}
           </Await>
         </Suspense>
       </NavLink>
       <SearchToggle />
+      <WishlistToggle />
       <CartToggle cart={cart} />
     </nav>
-  );
-}
-
-function HeaderMenuMobileToggle() {
-  const {open} = useAside();
-  return (
-    <button
-      className="header-menu-mobile-toggle reset"
-      onClick={() => open('mobile')}
-    >
-      <h3>☰</h3>
-    </button>
   );
 }
 
 function SearchToggle() {
   const {openSearchDrawer} = usePlaypeak();
   return (
-    <button className="reset" onClick={openSearchDrawer}>
-      Search
-    </button>
+    <NavMenuItem
+      onClick={openSearchDrawer}
+      Icon={() => <MagnifyingGlassIcon className='w-[20px] h-[20px]' />}
+      label={'Search'}
+      variant='menu'
+    />
   );
 }
 
-function CartBadge({count}: {count: number | null}) {
-  const {open} = useAside();
-  const {publish, shop, cart, prevCart} = useAnalytics();
-
+function WishlistToggle() {
+  const {openWishlist} = usePlaypeak();
   return (
-    <a
-      href="/cart"
-      onClick={(e) => {
-        e.preventDefault();
-        open('cart');
-        publish('cart_viewed', {
-          cart,
-          prevCart,
-          shop,
-          url: window.location.href || '',
-        } as CartViewPayload);
-      }}
-    >
-      Cart {count === null ? <span>&nbsp;</span> : count}
-    </a>
+    <NavMenuItem
+      onClick={openWishlist}
+      Icon={() => <Heart />}
+      label={'Wishlist'}
+      variant='menu'
+    />
   );
 }
 
@@ -170,9 +246,31 @@ function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
   );
 }
 
+function CartBadge({count}: {count: number | null}) {
+  const {publish, shop, cart, prevCart} = useAnalytics();
+  const {openCart} = usePlaypeak();
+  return (
+    <NavMenuItem
+      onClick={() => {
+          openCart();
+          publish('cart_viewed', {
+            cart,
+            prevCart,
+            shop,
+            url: window.location.href || '',
+          } as CartViewPayload);
+      }}
+      Icon={() => <Cart />}
+      label={count === null ? 'Cart' : `Cart ${count}`}
+      variant='menu'
+    />
+  );
+}
+
 function CartBanner() {
   const originalCart = useAsyncValue() as CartApiQueryFragment | null;
   const cart = useOptimisticCart(originalCart);
+
   return <CartBadge count={cart?.totalQuantity ?? 0} />;
 }
 

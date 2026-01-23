@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { Spinner } from '../icons/Spinner';
 import { iconButtonClasses } from '../themes/IconButtonTheme';
 import type { IIconCoreProps } from '../themes/IconButtonTheme';
-import type { FC, MouseEvent, KeyboardEvent } from 'react';
+import type { MouseEvent, KeyboardEvent } from 'react';
 
 interface IIconButtonProps extends IIconCoreProps {
   loading?: boolean;
@@ -11,7 +11,7 @@ interface IIconButtonProps extends IIconCoreProps {
   onClick?(e?: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>): void;
 }
 
-export const IconButton: FC<IIconButtonProps> = ({
+export const IconButton = forwardRef<HTMLButtonElement, IIconButtonProps>(({
   className = '',
   variant = 'outlined',
   size = 'medium',
@@ -22,7 +22,7 @@ export const IconButton: FC<IIconButtonProps> = ({
   testName = '',
   type = 'button',
   onClick,
-}) => {
+}, ref) => {
   const [isKeyPressed, setIsKeyPressed] = useState(false);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -51,6 +51,7 @@ export const IconButton: FC<IIconButtonProps> = ({
 
   return (
     <button
+      ref={ref}
       className={classes}
       disabled={disabled}
       data-qa-button={testName}
@@ -62,4 +63,6 @@ export const IconButton: FC<IIconButtonProps> = ({
       {loading ? <Spinner size="small" /> : <Icon size={size === 'large' ? 24 : 20} />}
     </button>
   );
-};
+});
+
+IconButton.displayName = 'IconButton';

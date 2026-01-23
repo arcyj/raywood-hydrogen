@@ -21,7 +21,7 @@ export function ProductItem({
   const image = product.featuredImage;
   return (
     <Link
-      className="product-item bg-lightGrey rounded px-12 pt-12 pb-24 "
+      className="product-item bg-lightGrey rounded px-12 pt-12 pb-24 active:bg-accentGrey active:inset-shadow-sm hover:shadow-md transition-all duration-100 ease-in-out"
       key={product.id}
       prefetch="intent"
       to={variantUrl}

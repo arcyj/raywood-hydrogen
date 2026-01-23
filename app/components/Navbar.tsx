@@ -64,7 +64,7 @@ export function Navbar({
       >
         {renderMenuContent()}
       </Drawer>
-      <nav className="fixed full bottom-0 w-full p-4 rounded-t-md z-10 bg-transparent">
+      <nav className="fixed full bottom-0 w-full p-4 rounded-t-md z-[9999] bg-transparent">
         <div className="grid grid-cols-4 p-4 gap-4 m-4 bg-lightGrey shadow-large rounded-lg max-w-[350px] mx-auto">
           <NavMenuItem
             onClick={() => onMenuToggle('menu')}

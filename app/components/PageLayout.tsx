@@ -1,5 +1,4 @@
-import {Await, Link} from 'react-router';
-import {Suspense, useId, useCallback, useMemo, useEffect} from 'react';
+import {useEffect} from 'react';
 import type {
   CartApiQueryFragment,
   FooterQuery,
@@ -9,11 +8,13 @@ import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
 import { Navbar } from './Navbar';
-import {CartMain} from '~/components/CartMain';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { SearchDrawer } from './SearchDrawer';
 import { TopBar } from './TopBar';
 import { PlaypeakProvider, usePlaypeak } from '~/lib/playpeakContext';
+import { FilterDrawer } from './FilterDrawer';
+import { WishlistDrawer } from './WishlistDrawer';
+import { CartDrawer } from './CartDrawer';
 
 
 interface PageLayoutProps {
@@ -85,18 +86,18 @@ function PageLayoutContent({
 
   return (
     <Aside.Provider>
+      <FilterDrawer />
       {isDesktop && (
         <>
-          <CartAside cart={cart} />
+          <CartDrawer cart={cart} />
           <SearchDrawer />
-          <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+          <WishlistDrawer />
         </>
       )}
       {!isDesktop && (
         <>
           <TopBar />
           <SearchDrawer />
-          <FilterAside />
         </>
       )}
       {header && isDesktop && (
@@ -128,19 +129,19 @@ function PageLayoutContent({
   );
 }
 
-function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
-  return (
-    <Aside type="cart" heading="CART">
-      <Suspense fallback={<p>Loading cart ...</p>}>
-        <Await resolve={cart}>
-          {(cart) => {
-            return <CartMain cart={cart} layout="aside" />;
-          }}
-        </Await>
-      </Suspense>
-    </Aside>
-  );
-}
+// function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
+//   return (
+//     <Aside type="cart" heading="CART">
+//       <Suspense fallback={<p>Loading cart ...</p>}>
+//         <Await resolve={cart}>
+//           {(cart) => {
+//             return <CartMain cart={cart} layout="aside" />;
+//           }}
+//         </Await>
+//       </Suspense>
+//     </Aside>
+//   );
+// }
 
 // function NavBarAside() {
 //   return (
@@ -151,36 +152,3 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 //     </Aside>
 //   );
 // }
-
-function MobileMenuAside({
-  header,
-  publicStoreDomain,
-}: {
-  header: PageLayoutProps['header'];
-  publicStoreDomain: PageLayoutProps['publicStoreDomain'];
-}) {
-  return (
-    header.menu &&
-    header.shop.primaryDomain?.url && (
-      <Aside type="mobile" heading="MENU">
-        <HeaderMenu
-          menu={header.menu}
-          viewport="mobile"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
-        />
-      </Aside>
-    )
-  );
-}
-
-function FilterAside() {
-  return (
-    <Aside type="filter" heading="FILTERS">
-      <div className="filter-content">
-        <p>Filter options will be implemented here.</p>
-        {/* TODO: Add filter UI components */}
-      </div>
-    </Aside>
-  );
-}

@@ -8,6 +8,7 @@
 @theme {
   --color-gray: rgba(17 5 22/.40);
   --color-lightGrey: #F5F7FA;
+  --color-accentGrey: #EEEEEE;
   --color-primary: #6610F2;
   --font-serif: 'Gilroy', sans-serif;
 
@@ -86,6 +87,14 @@
 
   .text-large-semi {
     font: 600 20px/26px 'Gilroy', sans-serif;
+  }
+
+  .text-link {
+    font: 600 15px/15px 'Gilroy', sans-serif;
+  }
+
+  .subText-link {
+    font: 600 15px/15px 'Gilroy', sans-serif;
   }
 
   /* Mobile overrides */

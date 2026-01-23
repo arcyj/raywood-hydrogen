@@ -171,6 +171,27 @@ const MENU_FRAGMENT = `#graphql
     title
     type
     url
+    resource {
+      ... on Collection {
+        id
+        metafield(namespace: "custom", key: "menu_icon") {
+          id
+          value
+          reference {
+            ... on MediaImage {
+              id
+              image {
+                id
+                url
+                altText
+                width
+                height
+              }
+            }
+          }
+        }
+      }
+    }
   }
   fragment ChildMenuItem on MenuItem {
     ...MenuItem

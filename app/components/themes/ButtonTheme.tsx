@@ -27,40 +27,40 @@ export interface ILinkButtonCoreProps {
   disabled?: boolean;
   testName?: string;
   IconBefore?: FC<IIconProps> | React.ForwardRefExoticComponent<RadixIconProps & React.RefAttributes<SVGSVGElement>>;
-  IconAfter?: FC<IIconProps>;
+  IconAfter?: FC<IIconProps> | React.ForwardRefExoticComponent<RadixIconProps & React.RefAttributes<SVGSVGElement>>;
 }
 
 const ButtonTheme = {
   base: {
-    button: twc`inline-flex items-center justify-center rounded text-center no-underline font-semibold`,
-    link: twc`inline-flex`,
+    button: twc`inline-flex items-center justify-center rounded text-center no-underline font-semibold transition-all duration-100 ease-in-out`,
+    link: twc`inline-flex items-center justify-between`,
     linkText: twc`text-text-layout-powerful`,
     linkTextActive: twc`border-text-layout-accent text-text-layout-accent`,
   },
   variants: {
     primary: twc`border-2 border-[#943BF2] bg-[#943BF2] text-white`,
-    secondary: twc`border-0 bg-surface-high-secondary-active text-text-buttons-secondary`,
+    secondary: twc`border-0 bg-lightGrey`,
     tertiary: twc`border border-solid border-buttons-tertiary bg-transparent-full text-text-buttons-tertiary`,
     tertiaryOnDark: twc`border border-solid border-buttons-tertiary-dark bg-transparent-full text-text-buttons-tertiary-dark`,
     action: twc`border-0 bg-[#35204d] text-white text-text-layout-primary rounded-xl`,
     link: twc`text-label-m border-0 border-b border-solid border-layout-powerful bg-transparent-full p-0 no-underline font-semibold`,
-    menuLink: twc`text-body-regular border-0 bg-transparent-full p-0 no-underline`,
+    menuLink: twc`text-link flex items-center px-8 rounded-lg py-8 active:bg-accentGrey active:inset-shadow-sm`,
   },
   hover: {
     primary: twc`hover:bg-[#AE6AF5] hover:border-[#AE6AF5]`,
-    secondary: twc`hover:bg-surface-high-secondary-focus`,
+    secondary: twc`hover:shadow-lg`,
     tertiary: twc`hover:border-layout-accent hover:bg-surface-low-brand-focus hover:text-text-buttons-tertiary-focus`,
     tertiaryOnDark: twc`hover:bg-transparent-low-dark hover:text-text-buttons-tertiary-focus-dark`,
     link: twc`hover:border-text-link-focus hover:text-text-link-focus`,
-    menuLink: twc`hover:text-text-layout-accent`,
+    menuLink: twc`hover:bg-lightGrey`,
   },
   mousePress: {
     primary: twc`active:bg-surface-high-primary-action`,
-    secondary: twc`active:bg-surface-high-secondary-action`,
+    secondary: twc`active:bg-accentGrey active:inset-shadow-sm`,
     tertiary: twc`active:border-text-buttons-tertiary-focus active:bg-foreground-lowest active:ring-1 active:ring-text-buttons-tertiary-focus`,
     tertiaryOnDark: twc`active:border-2 active:bg-transparent-medium-dark`,
     link: twc`active:border-text-link-action active:text-text-link-action`,
-    menuLink: twc`active:text-text-link-action`,
+    menuLink: twc`active:bg-accentGrey active:inset-shadow-sm`,
   },
   keyPress: {
     primary: twc`!bg-surface-high-primary-action`,
@@ -74,7 +74,7 @@ const ButtonTheme = {
   },
   focus: {
     primary: twc`outline-none focus-visible:glow-focus`,
-    secondary: twc`outline-none focus-visible:glow-focus`,
+    secondary: twc`focus-visible:glow-focus`,
     tertiary: twc`outline-none focus-visible:glow-focus focus-visible:border-text-buttons-tertiary-focus focus-visible:bg-surface-low-brand-focus focus-visible:text-text-buttons-tertiary-focus`,
     tertiaryOnDark: twc`outline-none focus-visible:glow-focus focus-visible:bg-transparent-medium-dark`,
     link: twc`focus:outline-none focus-visible:border-text-link-focus focus-visible:text-text-link-focus focus-visible:shadow-[0_0px_0px_2px_rgba(49,145,245,0.5)]`,

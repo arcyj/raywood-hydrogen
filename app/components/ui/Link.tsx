@@ -1,13 +1,17 @@
+import {NavLink} from 'react-router';
 import { buttonClasses } from '../themes/ButtonTheme';
 import type { ILinkButtonCoreProps } from '../themes/ButtonTheme';
-import type { FC } from 'react';
+import type { MouseEvent, KeyboardEvent, FC } from 'react';
 
 type ILinkTarget = '_self' | '_blank' | '_parent' | '_top';
+type IPrefetch = "intent" | "render" | "none" | "viewport";
 
 interface IAsapLinkProps extends ILinkButtonCoreProps {
   href: string;
   active?: boolean;
+  prefetch?: IPrefetch;
   target?: ILinkTarget;
+  onClick?: (e: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => void;
 }
 
 export const Link: FC<IAsapLinkProps> = ({
@@ -21,6 +25,8 @@ export const Link: FC<IAsapLinkProps> = ({
   IconBefore,
   IconAfter,
   testName = '',
+  prefetch = 'intent',
+  onClick,
   children,
 }) => {
 
@@ -33,11 +39,15 @@ export const Link: FC<IAsapLinkProps> = ({
     className,
   });
 
+   const handleClicked = (event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => {
+    onClick && onClick(event);
+  };
+
   return (
-    <a href={href} className={classes} target={target} data-qa-link={testName} tabIndex={disabled ? -1 : 0}>
-      {IconBefore && <IconBefore size={24} className="tw-mr-2" />}
+    <NavLink to={href} end className={classes} prefetch={prefetch} target={target} data-qa-link={testName} tabIndex={disabled ? -1 : 0}  onClick={handleClicked}>
+      {IconBefore && <IconBefore size={24} className="mr-2" />}
       {children}
-      {IconAfter && <IconAfter size={24} className="tw-pl-2" />}
-    </a>
+      {IconAfter && <IconAfter size={24} className="ml-8" />}
+    </NavLink>
   );
 };

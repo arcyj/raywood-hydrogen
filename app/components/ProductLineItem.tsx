@@ -335,9 +335,9 @@ function CartLineRemoveButton({
       inputs={{lineIds}}
     >
       {(fetcher) => (
-        <IconButton 
-          variant="filled" 
-          Icon={TrashIcon} 
+        <IconButton
+          variant="filled"
+          Icon={TrashIcon}
           disabled={disabled || fetcher.state !== 'idle'}
           type="submit"
         />

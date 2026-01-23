@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react';
 
-export type DrawerType = 'search' | 'menu' | 'profile' | 'wishlist' | 'cart' | null;
+export type DrawerType = 'search' | 'menu' | 'profile' | 'wishlist' | 'cart' | 'filter' | null;
 
 interface PlaypeakContextValue {
   // Dark mode
@@ -18,9 +18,13 @@ interface PlaypeakContextValue {
   openSearchDrawer: () => void;
   closeSearchDrawer: () => void;
   openCart: () => void;
+  closeCart: () => void;
   openMenu: () => void;
   openProfile: () => void;
   openWishlist: () => void;
+  closeWishlist: () => void;
+  openFilter: () => void;
+  closeFilter: () => void;
 }
 
 const PlaypeakContext = createContext<PlaypeakContextValue | null>(null);
@@ -95,6 +99,28 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
     openDrawer('cart');
   }, [openDrawer]);
 
+  const closeCart = useCallback(() => {
+    if (activeDrawer === 'cart') {
+      closeDrawer();
+    }
+  }, [activeDrawer, closeDrawer]);
+
+  const openFilter = useCallback(() => {
+    openDrawer('filter');
+  }, [openDrawer]);
+
+  const closeFilter = useCallback(() => {
+    if (activeDrawer === 'filter') {
+      closeDrawer();
+    }
+  }, [activeDrawer, closeDrawer]);
+
+  const closeWishlist = useCallback(() => {
+    if (activeDrawer === 'wishlist') {
+      closeDrawer();
+    }
+  }, [activeDrawer, closeDrawer]);
+
   const openMenu = useCallback(() => {
     openDrawer('menu');
   }, [openDrawer]);
@@ -119,9 +145,13 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
       openSearchDrawer,
       closeSearchDrawer,
       openCart,
+      closeCart,
       openMenu,
       openProfile,
       openWishlist,
+      closeWishlist,
+      openFilter,
+      closeFilter,
     }),
     [
       darkMode,
@@ -134,9 +164,13 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
       openSearchDrawer,
       closeSearchDrawer,
       openCart,
+      closeCart,
       openMenu,
       openProfile,
       openWishlist,
+      closeWishlist,
+      openFilter,
+      closeFilter,
     ],
   );
 

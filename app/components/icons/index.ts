@@ -8,3 +8,6 @@ export { Back } from './Back';
 export { Filter } from './Filter';
 export { Error } from './Error';
 export { Warning } from './Warning';
+export { ChevronLeft } from './ChevronLeft';
+export { ChevronRight } from './ChevronRight';
+export { Search } from './Search'

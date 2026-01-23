@@ -20,6 +20,8 @@ interface IDrawerProps {
   position?: 'left' | 'right' | 'bottom' | 'top';
   className?: string;
   panelClassName?: string;
+  header?: ReactNode;
+  footer?: ReactNode;
 }
 
 interface IDrawerCloseButtonProps {
@@ -40,14 +42,14 @@ const DrawerCloseButton: FC<IDrawerCloseButtonProps> = ({ className, onClick }) 
 const DrawerBackDrop: FC<{ onClick?: () => void }> = ({ onClick }) => (
   <TransitionChild
     as={Fragment}
-    enter="ease-in-out duration-100"
-    enterFrom="opacity-70"
+    enter="ease duration-100"
+    enterFrom="opacity-20"
     enterTo="opacity-100"
-    leave="ease-in-out duration-100"
+    leave="ease duration-100"
     leaveFrom="opacity-100"
-    leaveTo="opacity-70"
+    leaveTo="opacity-20"
   >
-    <div className="fixed inset-0 bg-gray/80" onClick={onClick} />
+    <div className="fixed inset-0 bg-gray/80 z-[999]" onClick={onClick} />
   </TransitionChild>
 );
 
@@ -58,29 +60,28 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
   children,
   panelClassName,
   className,
+  header,
+  footer,
 }) => {
   const lockScroll = useScrollLocker();
-  const transitionEnterLeaveFrom = twClasses([''], {
+  const transitionEnterLeaveFrom = twClasses(['opacity-0'], {
     ['translate-x-full']: position === 'right',
     ['-translate-x-full']: position === 'left',
     ['translate-y-full']: position === 'bottom',
     ['-translate-y-full']: position === 'top',
   });
 
-  const containerClasses = twClasses(['drawer-container fixed flex rounded-xl mx-auto'], {
-    ['inset-y-0 right-0 h-[calc(100%-75px)] max-w-[550px]']: position === 'right',
-    ['inset-y-0 left-0 h-[calc(100%-75px)] max-w-[550px]']: position === 'left',
+  const containerClasses = twClasses(['drawer-container fixed flex max-tablet:rounded-xl mx-auto z-[9998]'], {
+    ['inset-y-0 right-0  max-w-[550px]']: position === 'right',
+    ['inset-y-0 left-0  max-w-[550px]']: position === 'left',
     ['inset-x-0 bottom-0 w-full h-[calc(100%-75px)] max-w-[550px]']: position === 'bottom',
     ['inset-x-0 top-0 w-full']: position === 'top',
   }, className);
 
   const panelClasses = twClasses(
-    ['drawer-panel pointer-events-auto relative overflow-y-auto'],
+    ['drawer-panel pointer-events-auto relative flex flex-col h-full'],
     {
-      ['h-full mb-[80px]']: position === 'right' || position === 'left',
       ['w-full']: position === 'bottom' || position === 'top',
-      ['mb-[80px]']: position === 'bottom',
-      ['mt-[45px]']: position === 'top',
     },
     panelClassName,
   );
@@ -111,22 +112,35 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
   return (
     <DrawerContext.Provider value={{ onClose }}>
       <Transition show={visible} as={Fragment}>
-        <div className="relative z-10">
+
           <DrawerBackDrop onClick={onClose} />
           <div className={containerClasses}>
             <TransitionChild
               as={Fragment}
-              enter="transform transition ease-in-out duration-100 max-tablet:duration-100"
+              enter="transform transition ease duration-200"
               enterFrom={transitionEnterLeaveFrom}
-              enterTo={position === 'bottom' || position === 'top' ? 'translate-y-0' : 'translate-x-0'}
-              leave="transform transition ease-in-out duration-100 max-tablet:duration-100"
-              leaveFrom={position === 'bottom' || position === 'top' ? 'translate-y-0' : 'translate-x-0'}
+              enterTo={`opacity-100 ${position === 'bottom' || position === 'top' ? 'translate-y-0' : 'translate-x-0'}`}
+              leave="transform transition ease duration-150"
+              leaveFrom={`opacity-100 ${position === 'bottom' || position === 'top' ? 'translate-y-0' : 'translate-x-0'}`}
               leaveTo={transitionEnterLeaveFrom}
             >
-              <div className={panelClasses}>{children}</div>
+              <div className={panelClasses}>
+                {header && (
+                  <div className="drawer-header flex-shrink-0">
+                    {header}
+                  </div>
+                )}
+                <div className="drawer-content flex-1 overflow-y-auto min-h-0">
+                  {children}
+                </div>
+                {footer && (
+                  <div className="drawer-footer flex-shrink-0 max-tablet:pb-80">
+                    {footer}
+                  </div>
+                )}
+              </div>
             </TransitionChild>
           </div>
-        </div>
       </Transition>
     </DrawerContext.Provider>
   );

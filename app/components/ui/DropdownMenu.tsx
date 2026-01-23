@@ -3,8 +3,9 @@ import { Accordion } from "radix-ui";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { NavLink } from 'react-router';
 import { twc, twClasses } from '~/helpers/twMerge';
-import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
-import type { MouseEvent, KeyboardEvent, FC } from 'react';
+import { processUrl } from '~/helpers/processUrl';
+import type {HeaderQuery} from 'storefrontapi.generated';
+import type { FC } from 'react';
 import { useDrawer } from './Drawer';
 
 
@@ -30,7 +31,6 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
 }) => {
   const { base } = dropDownMenuItemStyle;
 
-  console.log(menu);
   const classes = useMemo(
     () => twClasses([base['initial']], {}, className),
     [base, className],
@@ -97,27 +97,6 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
   if (!item || !url) return null;
 
   const hasSubItems = item.items && item.items.length > 0;
-
-  // Process sub-item URLs - convert absolute URLs to relative paths
-  const processUrl = (itemUrl: string): string => {
-    // If it's already a relative path, return as-is
-    if (itemUrl.startsWith('/')) {
-      return itemUrl;
-    }
-
-    // If it's an absolute URL, extract the pathname
-    if (itemUrl.startsWith('http://') || itemUrl.startsWith('https://')) {
-      try {
-        return new URL(itemUrl).pathname;
-      } catch {
-        // If URL parsing fails, return as-is
-        return itemUrl;
-      }
-    }
-
-    // For any other format, return as-is
-    return itemUrl;
-  };
 
   return (
     <Accordion.Item value={item.id}>

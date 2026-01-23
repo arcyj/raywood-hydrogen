@@ -9,18 +9,23 @@ interface IButtonProps {
   type?: 'button' | 'submit';
   active?: boolean;
   className?: string;
+  variant?: 'menu' | 'navBar'
   onClick?: (e: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => void;
 }
 
 const navMenuItemStyle = {
   base: {
-    initial: twc`relative rounded-md p-8 flex flex-col items-center justify-center`,
+    initial: twc`relative rounded-md p-8 flex flex-col items-center justify-center cursor-pointer`,
     inActive: twc`bg-white`,
     active: twc`bg-lightGrey inset-shadow-sm`,
   },
   label: {
     initial: twc`text-sm text-text-layout-primary mt-2 font-semibold`,
   },
+  variants: {
+    navBar: '',
+    menu: "hover:bg-lightGrey rounded-lg py-8 active:bg-accentGrey active:inset-shadow-sm"
+  }
 };
 
 export const NavMenuItem: FC<IButtonProps> = ({
@@ -29,12 +34,13 @@ export const NavMenuItem: FC<IButtonProps> = ({
   type = 'button',
   active = false,
   onClick,
+  variant = 'navBar',
   className,
 }) => {
-  const { base } = navMenuItemStyle;
+  const { base, variants } = navMenuItemStyle;
 
   const classes = useMemo(
-    () => twClasses([base['initial']], {
+    () => twClasses([base['initial'], variants[variant]], {
       [base['active']]: active,
       [base['inActive']]: !active,
     }, className),

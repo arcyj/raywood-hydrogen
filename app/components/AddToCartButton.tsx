@@ -26,15 +26,7 @@ function AddToCartButtonInner({
   const previousStateRef = useRef<string>('idle');
   const hasCalledSuccessRef = useRef<boolean>(false);
 
-  // Get navbar context - use a ref to ensure we have the latest value
-  const navbarContext = usePlaypeak();
-  const navbarRef = useRef(navbarContext);
-
-  useEffect(() => {
-    navbarRef.current = navbarContext;
-  }, [navbarContext]);
-
-
+  const {openCart} = usePlaypeak();
 
   const breakpoints = useBreakpoints();
   const { isMobile, isDesktop } = breakpoints;
@@ -49,31 +41,11 @@ function AddToCartButtonInner({
     const wasNotIdle = previousStateRef.current !== 'idle';
     const isNowIdle = fetcher.state === 'idle';
 
-    // Log all fetcher data for debugging
-    if (wasNotIdle && isNowIdle) {
-      console.log('AddToCartButton fetcher data:', fetcher.data);
-      if (fetcher.data?.errors) {
-        console.error('AddToCartButton error:', fetcher.data.errors);
-      }
-      if (fetcher.data?.warnings) {
-        console.warn('AddToCartButton warnings:', fetcher.data.warnings);
-      }
-    }
-
     const hasData = fetcher.data && !fetcher.data.errors;
 
     // If we transitioned from a non-idle state to idle with successful data, call onSuccess
     if (wasNotIdle && isNowIdle && hasData && !hasCalledSuccessRef.current) {
       hasCalledSuccessRef.current = true;
-
-      // Open cart drawer on mobile when item is successfully added
-      // This works for all AddToCartButton instances (product page, wishlist, etc.)
-      // Use isMobileDevice for more reliable detection
-      // Use ref to get latest context value
-      const currentNavbar = navbarRef.current;
-      if (isMobileDevice && currentNavbar?.openCart) {
-        currentNavbar.openCart();
-      }
 
       if (onSuccess) {
         onSuccess();
@@ -88,11 +60,8 @@ function AddToCartButtonInner({
     }
   }, [fetcher.state, fetcher.data, onSuccess, isMobileDevice]);
 
-  // Handle onClick - on desktop, open cart aside if onClick is provided
-  // On mobile, we wait for successful form submission before opening cart
   const handleClick = () => {
-    // Only handle desktop onClick for cart aside
-    // Don't open cart on mobile here - wait for successful submission
+    openCart();
     if (isDesktop && onClick) {
       onClick();
     }
