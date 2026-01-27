@@ -39,17 +39,20 @@ const DrawerCloseButton: FC<IDrawerCloseButtonProps> = ({ className, onClick }) 
   );
 };
 
-const DrawerBackDrop: FC<{ onClick?: () => void }> = ({ onClick }) => (
+const DrawerBackDrop: FC<{onClick?: () => void}> = ({onClick}) => (
   <TransitionChild
     as={Fragment}
     enter="ease duration-100"
     enterFrom="opacity-20"
-    enterTo="opacity-100"
+    enterTo="opacity-90"
     leave="ease duration-100"
     leaveFrom="opacity-100"
     leaveTo="opacity-20"
   >
-    <div className="fixed inset-0 bg-gray/80 z-[999]" onClick={onClick} />
+    <div
+      className="fixed inset-0 bg-gray z-[999] backdrop-blur-[2px]"
+      onClick={onClick}
+    />
   </TransitionChild>
 );
 
@@ -134,7 +137,7 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
                   {children}
                 </div>
                 {footer && (
-                  <div className="drawer-footer flex-shrink-0 max-tablet:pb-80">
+                  <div className="drawer-footer flex-shrink-0 max-desktop:pb-80">
                     {footer}
                   </div>
                 )}

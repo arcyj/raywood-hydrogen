@@ -16,7 +16,7 @@ import { Cart, Heart, Profile } from './icons';
 import { MagnifyingGlassIcon, ArrowRightIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 import { Dropdown } from './ui/Dropdown';
 import { processUrl } from '~/helpers/processUrl';
-import { Link } from './ui/Link';
+import { ButtonLink } from './ui/Link';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -147,7 +147,7 @@ export function HeaderMenu({
                     if (!subItem.url) return null;
                     const subUrl = processUrl(subItem.url);
                     return (
-                      <Link
+                      <ButtonLink
                         key={subItem.id}
                         href={subUrl}
                         prefetch="intent"
@@ -155,17 +155,17 @@ export function HeaderMenu({
                         className="text-link w-full block px-12 py-12 bg-lightGrey border-solid border-b-2 border-b-accentGrey hover:bg-accentGrey active:inset-shadow-sm"
                       >
                         {subItem.title}
-                      </Link>
+                      </ButtonLink>
                     );
                   })}
-                  <Link
+                  <ButtonLink
                     IconAfter={ArrowRightIcon}
                     href={url}
                     prefetch="intent"
                     className="text-link w-full block px-12 py-12 text-white bg-primary border-solid border-b-2 border-b-primary"
                   >
                     View all {item.title}
-                  </Link>
+                  </ButtonLink>
                 </div>
               </Dropdown.Content>
             ) : null}

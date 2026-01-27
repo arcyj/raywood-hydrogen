@@ -6,7 +6,7 @@ import type { MouseEvent, KeyboardEvent, FC } from 'react';
 type ILinkTarget = '_self' | '_blank' | '_parent' | '_top';
 type IPrefetch = "intent" | "render" | "none" | "viewport";
 
-interface IAsapLinkProps extends ILinkButtonCoreProps {
+interface IButtonLinkProps extends ILinkButtonCoreProps {
   href: string;
   active?: boolean;
   prefetch?: IPrefetch;
@@ -14,7 +14,7 @@ interface IAsapLinkProps extends ILinkButtonCoreProps {
   onClick?: (e: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => void;
 }
 
-export const Link: FC<IAsapLinkProps> = ({
+export const ButtonLink: FC<IButtonLinkProps> = ({
   href,
   className = '',
   target = '_self',

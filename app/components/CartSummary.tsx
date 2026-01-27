@@ -4,7 +4,7 @@ import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useEffect, useRef} from 'react';
 import {useFetcher} from 'react-router';
 import type {FetcherWithComponents} from 'react-router';
-import { Link } from './ui/Link';
+import { ButtonLink } from './ui/Link';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -13,7 +13,7 @@ type CartSummaryProps = {
 
 export function CartSummary({cart, layout}: CartSummaryProps) {
   const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside border-t-2 border-lightGrey';
+    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside border-t-2 border-lightGrey max-desktop:pb-[80px] px-12 pb-12';
 
   return (
     <div aria-labelledby="cart-summary" className={className}>
@@ -37,9 +37,9 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
 
   return (
     <div>
-      <Link href={checkoutUrl} target="_self" variant='primary' className='w-full'>
+      <ButtonLink href={checkoutUrl} target="_self" variant='primary' className='w-full'>
         <p>Continue to Checkout &rarr;</p>
-      </Link>
+      </ButtonLink>
       <br />
     </div>
   );
