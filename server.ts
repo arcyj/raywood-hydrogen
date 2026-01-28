@@ -2,6 +2,7 @@
 import {storefrontRedirect} from '@shopify/hydrogen';
 import {createRequestHandler} from '@shopify/hydrogen/oxygen';
 import {createHydrogenRouterContext} from '~/lib/context';
+import * as serverBuild from 'virtual:react-router/server-build';
 
 /**
  * Export a fetch handler in module format.
@@ -25,7 +26,7 @@ export default {
        */
       const handleRequest = createRequestHandler({
         // eslint-disable-next-line import/no-unresolved
-        build: await import('virtual:react-router/server-build'),
+        build: serverBuild,
         mode: process.env.NODE_ENV,
         getLoadContext: () => hydrogenContext,
       });

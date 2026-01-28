@@ -70,6 +70,7 @@ export default [
     },
     rules: {
       'eslint-comments/no-unused-disable': 'error',
+      'import/no-unresolved': ['error', {ignore: ['^virtual:']}],
       'no-console': [
         'warn',
         {
