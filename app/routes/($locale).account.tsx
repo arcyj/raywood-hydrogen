@@ -7,6 +7,7 @@ import {
 } from 'react-router';
 import type {Route} from './+types/account';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
+import {Button} from '~/components/ui/Button';
 
 export function shouldRevalidate() {
   return true;
@@ -44,45 +45,64 @@ export default function AccountLayout() {
     : 'Account Details';
 
   return (
-    <div className="account">
-      <h1>{heading}</h1>
-      <br />
+    <div className="account max-w-6xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">{heading}</h1>
       <AccountMenu />
-      <br />
-      <br />
-      <Outlet context={{customer}} />
+      <div className="mt-8">
+        <Outlet context={{customer}} />
+      </div>
     </div>
   );
 }
 
 function AccountMenu() {
-  function isActiveStyle({
-    isActive,
-    isPending,
-  }: {
-    isActive: boolean;
-    isPending: boolean;
-  }) {
-    return {
-      fontWeight: isActive ? 'bold' : undefined,
-      color: isPending ? 'grey' : 'black',
-    };
-  }
-
   return (
-    <nav role="navigation">
-      <NavLink to="/account/orders" style={isActiveStyle}>
-        Orders &nbsp;
+    <nav role="navigation" className="flex items-center gap-4 pb-6 border-b border-gray-200">
+      <NavLink
+        to="/account/orders"
+        className={({isActive, isPending}) =>
+          `text-base font-medium transition-colors ${
+            isPending
+              ? 'text-gray-400'
+              : isActive
+                ? 'text-[#943BF2] border-b-2 border-[#943BF2] pb-1'
+                : 'text-gray-700 hover:text-[#943BF2]'
+          }`
+        }
+      >
+        Orders
       </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/profile" style={isActiveStyle}>
-        &nbsp; Profile &nbsp;
+      <span className="text-gray-300">|</span>
+      <NavLink
+        to="/account/profile"
+        className={({isActive, isPending}) =>
+          `text-base font-medium transition-colors ${
+            isPending
+              ? 'text-gray-400'
+              : isActive
+                ? 'text-[#943BF2] border-b-2 border-[#943BF2] pb-1'
+                : 'text-gray-700 hover:text-[#943BF2]'
+          }`
+        }
+      >
+        Profile
       </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/addresses" style={isActiveStyle}>
-        &nbsp; Addresses &nbsp;
+      <span className="text-gray-300">|</span>
+      <NavLink
+        to="/account/addresses"
+        className={({isActive, isPending}) =>
+          `text-base font-medium transition-colors ${
+            isPending
+              ? 'text-gray-400'
+              : isActive
+                ? 'text-[#943BF2] border-b-2 border-[#943BF2] pb-1'
+                : 'text-gray-700 hover:text-[#943BF2]'
+          }`
+        }
+      >
+        Addresses
       </NavLink>
-      &nbsp;|&nbsp;
+      <span className="flex-1"></span>
       <Logout />
     </nav>
   );
@@ -90,8 +110,10 @@ function AccountMenu() {
 
 function Logout() {
   return (
-    <Form className="account-logout" method="POST" action="/account/logout">
-      &nbsp;<button type="submit">Sign out</button>
+    <Form method="POST" action="/account/logout">
+      <Button type="submit" variant="tertiary" size="medium">
+        Sign out
+      </Button>
     </Form>
   );
 }

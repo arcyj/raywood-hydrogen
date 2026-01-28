@@ -5,7 +5,7 @@ import {
   useSearchParams,
 } from 'react-router';
 import type {Route} from './+types/account.orders._index';
-import {useRef} from 'react';
+import {useRef, useState, useEffect} from 'react';
 import {
   Money,
   getPaginationVariables,
@@ -23,6 +23,8 @@ import type {
   OrderItemFragment,
 } from 'customer-accountapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {Input} from '~/components/ui/Input';
+import {Button} from '~/components/ui/Button';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;
@@ -64,8 +66,11 @@ export default function Orders() {
 
   return (
     <div className="orders">
+      <h2 className="text-2xl font-semibold mb-6">Orders</h2>
       <OrderSearchForm currentFilters={filters} />
-      <OrdersTable orders={orders} filters={filters} />
+      <div className="mt-8">
+        <OrdersTable orders={orders} filters={filters} />
+      </div>
     </div>
   );
 }
@@ -80,7 +85,7 @@ function OrdersTable({
   const hasFilters = !!(filters.name || filters.confirmationNumber);
 
   return (
-    <div className="acccount-orders" aria-live="polite">
+    <div className="account-orders" aria-live="polite">
       {orders?.nodes.length ? (
         <PaginatedResourceSection connection={orders}>
           {({node: order}) => <OrderItem key={order.id} order={order} />}
@@ -94,23 +99,27 @@ function OrdersTable({
 
 function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
   return (
-    <div>
+    <div className="py-12 text-center">
       {hasFilters ? (
-        <>
-          <p>No orders found matching your search.</p>
-          <br />
-          <p>
-            <Link to="/account/orders">Clear filters →</Link>
-          </p>
-        </>
+        <div className="space-y-4">
+          <p className="text-gray-600">No orders found matching your search.</p>
+          <Link
+            to="/account/orders"
+            className="text-[#943BF2] hover:text-[#AE6AF5] font-medium inline-flex items-center gap-1"
+          >
+            Clear filters →
+          </Link>
+        </div>
       ) : (
-        <>
-          <p>You haven&apos;t placed any orders yet.</p>
-          <br />
-          <p>
-            <Link to="/collections">Start Shopping →</Link>
-          </p>
-        </>
+        <div className="space-y-4">
+          <p className="text-gray-600">You haven&apos;t placed any orders yet.</p>
+          <Link
+            to="/collections"
+            className="text-[#943BF2] hover:text-[#AE6AF5] font-medium inline-flex items-center gap-1"
+          >
+            Start Shopping →
+          </Link>
+        </div>
       )}
     </div>
   );
@@ -128,20 +137,26 @@ function OrderSearchForm({
     navigation.location?.pathname?.includes('orders');
   const formRef = useRef<HTMLFormElement>(null);
 
+  const [orderNumber, setOrderNumber] = useState(currentFilters.name || '');
+  const [confirmationNumber, setConfirmationNumber] = useState(
+    currentFilters.confirmationNumber || '',
+  );
+
+  useEffect(() => {
+    setOrderNumber(currentFilters.name || '');
+    setConfirmationNumber(currentFilters.confirmationNumber || '');
+  }, [currentFilters.name, currentFilters.confirmationNumber]);
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
     const params = new URLSearchParams();
 
-    const name = formData.get(ORDER_FILTER_FIELDS.NAME)?.toString().trim();
-    const confirmationNumber = formData
-      .get(ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER)
-      ?.toString()
-      .trim();
+    const name = orderNumber.trim();
+    const confNumber = confirmationNumber.trim();
 
     if (name) params.set(ORDER_FILTER_FIELDS.NAME, name);
-    if (confirmationNumber)
-      params.set(ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER, confirmationNumber);
+    if (confNumber)
+      params.set(ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER, confNumber);
 
     setSearchParams(params);
   };
@@ -155,43 +170,44 @@ function OrderSearchForm({
       className="order-search-form"
       aria-label="Search orders"
     >
-      <fieldset className="order-search-fieldset">
-        <legend className="order-search-legend">Filter Orders</legend>
+      <fieldset className="border border-gray-200 rounded-lg p-6 space-y-4">
+        <legend className="text-lg font-medium px-2">Filter Orders</legend>
 
-        <div className="order-search-inputs">
-          <input
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
             type="search"
             name={ORDER_FILTER_FIELDS.NAME}
             placeholder="Order #"
-            aria-label="Order number"
-            defaultValue={currentFilters.name || ''}
-            className="order-search-input"
+            value={orderNumber}
+            handleChange={(value) => setOrderNumber(value)}
           />
-          <input
+          <Input
             type="search"
             name={ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER}
             placeholder="Confirmation #"
-            aria-label="Confirmation number"
-            defaultValue={currentFilters.confirmationNumber || ''}
-            className="order-search-input"
+            value={confirmationNumber}
+            handleChange={(value) => setConfirmationNumber(value)}
           />
         </div>
 
-        <div className="order-search-buttons">
-          <button type="submit" disabled={isSearching}>
+        <div className="flex gap-3">
+          <Button type="submit" disabled={isSearching} loading={isSearching}>
             {isSearching ? 'Searching' : 'Search'}
-          </button>
+          </Button>
           {hasFilters && (
-            <button
+            <Button
               type="button"
+              variant="tertiary"
               disabled={isSearching}
               onClick={() => {
                 setSearchParams(new URLSearchParams());
+                setOrderNumber('');
+                setConfirmationNumber('');
                 formRef.current?.reset();
               }}
             >
               Clear
-            </button>
+            </Button>
           )}
         </div>
       </fieldset>
@@ -202,21 +218,46 @@ function OrderSearchForm({
 function OrderItem({order}: {order: OrderItemFragment}) {
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
   return (
-    <>
-      <fieldset>
-        <Link to={`/account/orders/${btoa(order.id)}`}>
-          <strong>#{order.number}</strong>
+    <div className="border border-gray-200 rounded-lg p-6 mb-4 hover:shadow-md transition-shadow">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center gap-4">
+            <Link
+              to={`/account/orders/${btoa(order.id)}`}
+              className="text-lg font-semibold text-[#943BF2] hover:text-[#AE6AF5]"
+            >
+              #{order.number}
+            </Link>
+            <span className="text-sm text-gray-500">
+              {new Date(order.processedAt).toDateString()}
+            </span>
+          </div>
+          {order.confirmationNumber && (
+            <p className="text-sm text-gray-600">
+              Confirmation: {order.confirmationNumber}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+              {order.financialStatus}
+            </span>
+            {fulfillmentStatus && (
+              <span className="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+                {fulfillmentStatus}
+              </span>
+            )}
+          </div>
+          <div className="text-lg font-semibold">
+            <Money data={order.totalPrice} />
+          </div>
+        </div>
+        <Link
+          to={`/account/orders/${btoa(order.id)}`}
+          className="text-[#943BF2] hover:text-[#AE6AF5] font-medium inline-flex items-center gap-1 whitespace-nowrap"
+        >
+          View Order →
         </Link>
-        <p>{new Date(order.processedAt).toDateString()}</p>
-        {order.confirmationNumber && (
-          <p>Confirmation: {order.confirmationNumber}</p>
-        )}
-        <p>{order.financialStatus}</p>
-        {fulfillmentStatus && <p>{fulfillmentStatus}</p>}
-        <Money data={order.totalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
-      </fieldset>
-      <br />
-    </>
+      </div>
+    </div>
   );
 }

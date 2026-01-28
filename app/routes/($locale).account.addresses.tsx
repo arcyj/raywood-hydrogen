@@ -17,6 +17,9 @@ import {
   DELETE_ADDRESS_MUTATION,
   CREATE_ADDRESS_MUTATION,
 } from '~/graphql/customer-account/CustomerAddressMutations';
+import {Input} from '~/components/ui/Input';
+import {Button} from '~/components/ui/Button';
+import {useState, useEffect} from 'react';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -262,23 +265,28 @@ export default function Addresses() {
 
   return (
     <div className="account-addresses">
-      <h2>Addresses</h2>
-      <br />
+      <h2 className="text-2xl font-semibold mb-6">Addresses</h2>
       {!addresses.nodes.length ? (
-        <p>You have no addresses saved.</p>
-      ) : (
-        <div>
-          <div>
-            <legend>Create address</legend>
+        <div className="py-8">
+          <p className="text-gray-600 mb-4">You have no addresses saved.</p>
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-medium mb-4">Create address</h3>
             <NewAddressForm />
           </div>
-          <br />
-          <hr />
-          <br />
-          <ExistingAddresses
-            addresses={addresses}
-            defaultAddress={defaultAddress}
-          />
+        </div>
+      ) : (
+        <div className="space-y-8">
+          <div className="border-b border-gray-200 pb-6">
+            <h3 className="text-lg font-medium mb-4">Create address</h3>
+            <NewAddressForm />
+          </div>
+          <div>
+            <h3 className="text-lg font-medium mb-4">Existing addresses</h3>
+            <ExistingAddresses
+              addresses={addresses}
+              defaultAddress={defaultAddress}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -307,11 +315,12 @@ function NewAddressForm() {
       defaultAddress={null}
     >
       {({stateForMethod}) => (
-        <div>
+        <div className="pt-4">
           <button
             disabled={stateForMethod('POST') !== 'idle'}
-            formMethod="POST"
             type="submit"
+            formMethod="POST"
+            className="inline-flex items-center justify-center rounded text-center no-underline font-semibold transition-all duration-100 ease-in-out border-2 border-[#943BF2] bg-[#943BF2] text-white hover:bg-[#AE6AF5] hover:border-[#AE6AF5] text-label-l h-56 px-16 disabled:bg-surface-high-primary-disabled disabled:cursor-not-allowed"
           >
             {stateForMethod('POST') !== 'idle' ? 'Creating' : 'Create'}
           </button>
@@ -326,34 +335,36 @@ function ExistingAddresses({
   defaultAddress,
 }: Pick<CustomerFragment, 'addresses' | 'defaultAddress'>) {
   return (
-    <div>
-      <legend>Existing addresses</legend>
+    <div className="space-y-6">
       {addresses.nodes.map((address) => (
-        <AddressForm
-          key={address.id}
-          addressId={address.id}
-          address={address}
-          defaultAddress={defaultAddress}
-        >
-          {({stateForMethod}) => (
-            <div>
-              <button
-                disabled={stateForMethod('PUT') !== 'idle'}
-                formMethod="PUT"
-                type="submit"
-              >
-                {stateForMethod('PUT') !== 'idle' ? 'Saving' : 'Save'}
-              </button>
-              <button
-                disabled={stateForMethod('DELETE') !== 'idle'}
-                formMethod="DELETE"
-                type="submit"
-              >
-                {stateForMethod('DELETE') !== 'idle' ? 'Deleting' : 'Delete'}
-              </button>
-            </div>
-          )}
-        </AddressForm>
+        <div key={address.id} className="border border-gray-200 rounded-lg p-6">
+          <AddressForm
+            addressId={address.id}
+            address={address}
+            defaultAddress={defaultAddress}
+          >
+            {({stateForMethod}) => (
+              <div className="flex gap-3 pt-4">
+                <button
+                  disabled={stateForMethod('PUT') !== 'idle'}
+                  formMethod="PUT"
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded text-center no-underline font-semibold transition-all duration-100 ease-in-out border-2 border-[#943BF2] bg-[#943BF2] text-white hover:bg-[#AE6AF5] hover:border-[#AE6AF5] text-label-l h-56 px-16 disabled:bg-surface-high-primary-disabled disabled:cursor-not-allowed"
+                >
+                  {stateForMethod('PUT') !== 'idle' ? 'Saving' : 'Save'}
+                </button>
+                <button
+                  disabled={stateForMethod('DELETE') !== 'idle'}
+                  formMethod="DELETE"
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded text-center no-underline font-semibold transition-all duration-100 ease-in-out border border-solid border-buttons-tertiary bg-transparent-full text-text-buttons-tertiary hover:border-layout-accent hover:bg-surface-low-brand-focus hover:text-text-buttons-tertiary-focus text-label-l h-56 px-16 disabled:border-layout-high disabled:text-text-layout-medium disabled:cursor-not-allowed"
+                >
+                  {stateForMethod('DELETE') !== 'idle' ? 'Deleting' : 'Delete'}
+                </button>
+              </div>
+            )}
+          </AddressForm>
+        </div>
       ))}
     </div>
   );
@@ -376,136 +387,138 @@ export function AddressForm({
   const action = useActionData<ActionResponse>();
   const error = action?.error?.[addressId];
   const isDefaultAddress = defaultAddress?.id === addressId;
+
+  const [formData, setFormData] = useState({
+    firstName: address?.firstName ?? '',
+    lastName: address?.lastName ?? '',
+    company: address?.company ?? '',
+    address1: address?.address1 ?? '',
+    address2: address?.address2 ?? '',
+    city: address?.city ?? '',
+    zoneCode: address?.zoneCode ?? '',
+    zip: address?.zip ?? '',
+    territoryCode: address?.territoryCode ?? '',
+    phoneNumber: address?.phoneNumber ?? '',
+  });
+
+  useEffect(() => {
+    setFormData({
+      firstName: address?.firstName ?? '',
+      lastName: address?.lastName ?? '',
+      company: address?.company ?? '',
+      address1: address?.address1 ?? '',
+      address2: address?.address2 ?? '',
+      city: address?.city ?? '',
+      zoneCode: address?.zoneCode ?? '',
+      zip: address?.zip ?? '',
+      territoryCode: address?.territoryCode ?? '',
+      phoneNumber: address?.phoneNumber ?? '',
+    });
+  }, [address]);
+
+  const updateField = (field: keyof typeof formData) => (value: string) => {
+    setFormData((prev) => ({...prev, [field]: value}));
+  };
+
   return (
     <Form id={addressId}>
-      <fieldset>
+      <fieldset className="space-y-4">
         <input type="hidden" name="addressId" defaultValue={addressId} />
-        <label htmlFor="firstName">First name*</label>
-        <input
-          aria-label="First name"
-          autoComplete="given-name"
-          defaultValue={address?.firstName ?? ''}
-          id="firstName"
-          name="firstName"
-          placeholder="First name"
-          required
-          type="text"
-        />
-        <label htmlFor="lastName">Last name*</label>
-        <input
-          aria-label="Last name"
-          autoComplete="family-name"
-          defaultValue={address?.lastName ?? ''}
-          id="lastName"
-          name="lastName"
-          placeholder="Last name"
-          required
-          type="text"
-        />
-        <label htmlFor="company">Company</label>
-        <input
-          aria-label="Company"
-          autoComplete="organization"
-          defaultValue={address?.company ?? ''}
-          id="company"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            name="firstName"
+            type="text"
+            placeholder="First name"
+            value={formData.firstName}
+            handleChange={updateField('firstName')}
+          />
+          <Input
+            name="lastName"
+            type="text"
+            placeholder="Last name"
+            value={formData.lastName}
+            handleChange={updateField('lastName')}
+          />
+        </div>
+        <Input
           name="company"
+          type="text"
           placeholder="Company"
-          type="text"
+          value={formData.company}
+          handleChange={updateField('company')}
         />
-        <label htmlFor="address1">Address line*</label>
-        <input
-          aria-label="Address line 1"
-          autoComplete="address-line1"
-          defaultValue={address?.address1 ?? ''}
-          id="address1"
+        <Input
           name="address1"
-          placeholder="Address line 1*"
-          required
           type="text"
+          placeholder="Address line 1"
+          value={formData.address1}
+          handleChange={updateField('address1')}
         />
-        <label htmlFor="address2">Address line 2</label>
-        <input
-          aria-label="Address line 2"
-          autoComplete="address-line2"
-          defaultValue={address?.address2 ?? ''}
-          id="address2"
+        <Input
           name="address2"
+          type="text"
           placeholder="Address line 2"
-          type="text"
+          value={formData.address2}
+          handleChange={updateField('address2')}
         />
-        <label htmlFor="city">City*</label>
-        <input
-          aria-label="City"
-          autoComplete="address-level2"
-          defaultValue={address?.city ?? ''}
-          id="city"
-          name="city"
-          placeholder="City"
-          required
-          type="text"
-        />
-        <label htmlFor="zoneCode">State / Province*</label>
-        <input
-          aria-label="State/Province"
-          autoComplete="address-level1"
-          defaultValue={address?.zoneCode ?? ''}
-          id="zoneCode"
-          name="zoneCode"
-          placeholder="State / Province"
-          required
-          type="text"
-        />
-        <label htmlFor="zip">Zip / Postal Code*</label>
-        <input
-          aria-label="Zip"
-          autoComplete="postal-code"
-          defaultValue={address?.zip ?? ''}
-          id="zip"
-          name="zip"
-          placeholder="Zip / Postal Code"
-          required
-          type="text"
-        />
-        <label htmlFor="territoryCode">Country Code*</label>
-        <input
-          aria-label="territoryCode"
-          autoComplete="country"
-          defaultValue={address?.territoryCode ?? ''}
-          id="territoryCode"
-          name="territoryCode"
-          placeholder="Country"
-          required
-          type="text"
-          maxLength={2}
-        />
-        <label htmlFor="phoneNumber">Phone</label>
-        <input
-          aria-label="Phone Number"
-          autoComplete="tel"
-          defaultValue={address?.phoneNumber ?? ''}
-          id="phoneNumber"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            name="city"
+            type="text"
+            placeholder="City"
+            value={formData.city}
+            handleChange={updateField('city')}
+          />
+          <Input
+            name="zoneCode"
+            type="text"
+            placeholder="State / Province"
+            value={formData.zoneCode}
+            handleChange={updateField('zoneCode')}
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            name="zip"
+            type="text"
+            placeholder="Zip / Postal Code"
+            value={formData.zip}
+            handleChange={updateField('zip')}
+          />
+          <Input
+            name="territoryCode"
+            type="text"
+            placeholder="Country Code"
+            value={formData.territoryCode}
+            handleChange={updateField('territoryCode')}
+          />
+        </div>
+        <Input
           name="phoneNumber"
-          placeholder="+16135551111"
-          pattern="^\+?[1-9]\d{3,14}$"
           type="tel"
+          placeholder="+16135551111"
+          value={formData.phoneNumber}
+          handleChange={updateField('phoneNumber')}
         />
-        <div>
+        <div className="flex items-center gap-2 pt-2">
           <input
             defaultChecked={isDefaultAddress}
-            id="defaultAddress"
+            id={`defaultAddress-${addressId}`}
             name="defaultAddress"
             type="checkbox"
+            className="w-4 h-4 text-[#943BF2] border-gray-300 rounded focus:ring-[#943BF2]"
           />
-          <label htmlFor="defaultAddress">Set as default address</label>
+          <label
+            htmlFor={`defaultAddress-${addressId}`}
+            className="text-sm text-gray-700 cursor-pointer"
+          >
+            Set as default address
+          </label>
         </div>
-        {error ? (
-          <p>
-            <mark>
-              <small>{error}</small>
-            </mark>
-          </p>
-        ) : (
-          <br />
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
         )}
         {children({
           stateForMethod: (method) => (formMethod === method ? state : 'idle'),

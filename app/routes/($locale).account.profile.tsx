@@ -9,6 +9,9 @@ import {
   useOutletContext,
 } from 'react-router';
 import type {Route} from './+types/account.profile';
+import {Input} from '~/components/ui/Input';
+import {Button} from '~/components/ui/Button';
+import {useState, useEffect} from 'react';
 
 export type ActionResponse = {
   error: string | null;
@@ -85,48 +88,51 @@ export default function AccountProfile() {
   const action = useActionData<ActionResponse>();
   const customer = action?.customer ?? account?.customer;
 
+  const [firstName, setFirstName] = useState(customer.firstName ?? '');
+  const [lastName, setLastName] = useState(customer.lastName ?? '');
+
+  useEffect(() => {
+    setFirstName(customer.firstName ?? '');
+    setLastName(customer.lastName ?? '');
+  }, [customer.firstName, customer.lastName]);
+
   return (
     <div className="account-profile">
-      <h2>My profile</h2>
-      <br />
-      <Form method="PUT">
-        <legend>Personal information</legend>
-        <fieldset>
-          <label htmlFor="firstName">First name</label>
-          <input
-            id="firstName"
-            name="firstName"
-            type="text"
-            autoComplete="given-name"
-            placeholder="First name"
-            aria-label="First name"
-            defaultValue={customer.firstName ?? ''}
-            minLength={2}
-          />
-          <label htmlFor="lastName">Last name</label>
-          <input
-            id="lastName"
-            name="lastName"
-            type="text"
-            autoComplete="family-name"
-            placeholder="Last name"
-            aria-label="Last name"
-            defaultValue={customer.lastName ?? ''}
-            minLength={2}
-          />
+      <h2 className="text-2xl font-semibold mb-6">My profile</h2>
+      <Form method="PUT" className="max-w-2xl">
+        <fieldset className="space-y-6">
+          <legend className="text-lg font-medium mb-4">Personal information</legend>
+          <div className="space-y-4">
+            <Input
+              name="firstName"
+              type="text"
+              placeholder="First name"
+              value={firstName}
+              handleChange={(value) => setFirstName(value)}
+            />
+            <Input
+              name="lastName"
+              type="text"
+              placeholder="Last name"
+              value={lastName}
+              handleChange={(value) => setLastName(value)}
+            />
+          </div>
+          {action?.error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{action.error}</p>
+            </div>
+          )}
+          <div className="pt-4">
+            <Button
+              type="submit"
+              disabled={state !== 'idle'}
+              loading={state !== 'idle'}
+            >
+              {state !== 'idle' ? 'Updating' : 'Update'}
+            </Button>
+          </div>
         </fieldset>
-        {action?.error ? (
-          <p>
-            <mark>
-              <small>{action.error}</small>
-            </mark>
-          </p>
-        ) : (
-          <br />
-        )}
-        <button type="submit" disabled={state !== 'idle'}>
-          {state !== 'idle' ? 'Updating' : 'Update'}
-        </button>
       </Form>
     </div>
   );
