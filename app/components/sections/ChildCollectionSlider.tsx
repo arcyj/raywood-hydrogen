@@ -3,9 +3,11 @@ import type { CollectionQuery } from 'storefrontapi.generated';
 import { Slider } from '~/components/Slider';
 import type { FC } from 'react';
 
-interface IChildCollectionSlider {}
+interface IChildCollectionSlider {
+  className?: string;
+}
 
-export const ChildCollectionSlider: FC<IChildCollectionSlider> = () => {
+export const ChildCollectionSlider: FC<IChildCollectionSlider> = ({className}) => {
   const {childCollections} = useLoaderData<
       CollectionQuery & {
         childCollections: Array<{ id: string; handle: string; title: string; image:{url: string} }>;
@@ -14,7 +16,7 @@ export const ChildCollectionSlider: FC<IChildCollectionSlider> = () => {
   return(
     <>
       {childCollections && childCollections.length > 0 && (
-        <div className="mb-12">
+        <div className={className}>
           <Slider
             settings={{slidesToShow: 'auto', spaceBetween:8, dots: false}}
           >

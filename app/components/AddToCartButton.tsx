@@ -105,11 +105,6 @@ export function AddToCartButton({
   onClick?: () => void;
   onSuccess?: () => void;
 }) {
-  // Debug: Log lines being sent to cart
-  if (process.env.NODE_ENV === 'development') {
-    console.log('AddToCartButton - lines:', lines);
-  }
-
   return (
     <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
       {(fetcher: FetcherWithComponents<any>) => (

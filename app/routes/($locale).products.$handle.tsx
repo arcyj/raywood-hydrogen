@@ -16,8 +16,12 @@ import {ProductForm} from '~/components/ProductForm';
 import { ProductDetailItem } from '~/components/ui/ProductDetailItem';
 import { ShippingOptions } from '~/components/ShippingOptions';
 import {ProductItem} from '~/components/ProductItem';
+import { Breadcrumb } from '~/components/sections/Breadcrumb';
+import { Accordion } from '~/components/ui/Accordion';
+import {getMetafield, parseMetaobjectFromMetafield} from '~/lib/metafields';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import { Counter } from '~/components/ui/Counter';
+import { ProductStockStatus } from '~/components/ui/ProductStockStatus';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
@@ -68,8 +72,31 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   // The API handle might be localized, so redirect to the localized handle
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
+  // Fetch first collection's breadcrumb data (title + parent) for breadcrumb
+  const firstCollectionHandle = product.collections?.nodes?.[0]?.handle;
+  let breadcrumbCollection: { title: string; handle: string } | null = null;
+  let breadcrumbParentCollection: { title: string; handle: string } | null = null;
+
+  if (firstCollectionHandle) {
+    const breadcrumbResult = await context.storefront.query<{
+      collection: { title: string; handle: string; parentCollection?: { reference?: { title: string; handle: string } | null } | null } | null;
+    }>(COLLECTION_BREADCRUMB_QUERY, {
+      variables: { handle: firstCollectionHandle },
+    });
+    const col = breadcrumbResult?.collection;
+    if (col) {
+      breadcrumbCollection = { title: col.title, handle: col.handle };
+      const parentRef = col.parentCollection?.reference;
+      if (parentRef) {
+        breadcrumbParentCollection = { title: parentRef.title, handle: parentRef.handle };
+      }
+    }
+  }
+
   return {
     product,
+    breadcrumbCollection,
+    breadcrumbParentCollection,
   };
 }
 
@@ -126,7 +153,7 @@ function loadDeferredDataWithProduct(
 
 export default function Product() {
   const data = useLoaderData<typeof loader>();
-  const {product, relatedProducts} = data;
+  const {product, relatedProducts, breadcrumbCollection, breadcrumbParentCollection} = data;
   const [productCount, setProductCount] = useState(1);
 
   // Optimistically selects a variant with given available variant information
@@ -147,51 +174,37 @@ export default function Product() {
 
   const {media, title, descriptionHtml, vendor, metafields} = product;
 
-  // Find the expansion metaobject metafield
-  // Handles cases where metafield might be null, or namespace might be null, undefined, or empty
-  const expansionMetafield = metafields?.find(
-    (m: {namespace?: string | null; key: string} | null) => {
-      if (!m) return false;
-      const hasMatchingNamespace = m.namespace === 'custom' || !m.namespace;
-      return hasMatchingNamespace && m.key === 'expansion';
-    }
-  );
+  const getMeta = (namespace: string, key: string) =>
+    getMetafield(metafields, namespace, key, {matchNullNamespace: true});
 
-  // Access the metaobject reference
-  const expansionMetaobject = expansionMetafield?.reference as
-    | {
-        id: string;
-        type: string;
-        fields: Array<{
-          key: string;
-          value: string;
-          reference?: unknown;
-        }>;
-      }
-    | undefined;
-
-  // Convert metaobject fields array to an object for easier access
-  const expansionData = expansionMetaobject?.fields.reduce(
-    (acc, field) => {
-      acc[field.key] = field.value;
-      return acc;
-    },
-    {} as Record<string, string>
-  );
+  const expansionData = parseMetaobjectFromMetafield(getMeta('custom', 'expansion'));
+  const languageData = parseMetaobjectFromMetafield(getMeta('details', 'language'));
+  const ageMetafield = getMeta('details', 'age');
 
     const handleCountChange = (val: number) => {
       setProductCount(val);
     };
 
+
   return (
     <div className="container mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-32 min-w-0">
+      <Breadcrumb
+        collection={breadcrumbCollection ?? undefined}
+        parentCollection={breadcrumbParentCollection ?? undefined}
+        product={{title: product.title}}
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-64 min-w-0">
         <div className="min-w-0">
           <ProductGallery media={media.nodes} />
         </div>
         <div className="product-main">
           <span className="text-small text-gray">{vendor}</span>
           <h1 className="text-h1 mt-4 mb-12">{title}</h1>
+          <ProductStockStatus
+            availableForSale={!!selectedVariant?.availableForSale}
+            quantity={selectedVariant?.quantityAvailable ?? undefined}
+            className="mb-12"
+          />
           <div className="flex items-end justify-between mb-24">
             <div>
               <Counter
@@ -208,7 +221,7 @@ export default function Product() {
               compareAtPrice={selectedVariant?.compareAtPrice}
             />
           </div>
-          <div className='flex gap-12'>
+          <div className="flex gap-12">
             <ProductForm
               productOptions={productOptions}
               selectedVariant={selectedVariant}
@@ -216,7 +229,7 @@ export default function Product() {
               className="flex-1"
             />
             <AddToWishlistButton
-              variant='icon'
+              variant="icon"
               product={selectedVariant}
               productData={{
                 id: product.id,
@@ -234,24 +247,62 @@ export default function Product() {
               }}
             />
           </div>
-          <p className='text-large mt-32'>Description</p>
-          <div className="mt-12">
-            <ProductDetailItem label="EAN" value={selectedVariant?.barcode} />
-            <ProductDetailItem
-              label="Expansion"
-              value={expansionData?.title || ''}
-            />
-            <ProductDetailItem
-              label="Recommended Age"
-              value={expansionData?.age || ''}
-            />
-            <ProductDetailItem
-              label="Language"
-              value={expansionData?.language || ''}
-            />
-          </div>
-          <div className="mt-24 text-regular" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-          <ShippingOptions />
+          <Accordion className="mt-32">
+            <Accordion.Item value="specification">
+              <Accordion.Trigger>
+                <p className="text-large">Specification</p>
+              </Accordion.Trigger>
+              <Accordion.Content data-state="open" className='pb-12'>
+                <div className="mt-12 grid tablet:grid-cols-2">
+                  <ProductDetailItem
+                    label="Expansion"
+                    value={
+                      typeof expansionData?.title === 'string' ? expansionData.title : ''
+                    }
+                  />
+                  <ProductDetailItem label="EAN" value={selectedVariant?.barcode ?? ''} />
+                  <ProductDetailItem
+                    label="Recommended Age"
+                    value={(ageMetafield?.value as string) ?? ''}
+                  />
+                  <ProductDetailItem
+                    label="Language"
+                    value={
+                      (typeof languageData?.value === 'string' ? languageData.value : undefined) ??
+                      (typeof languageData?.name === 'string' ? languageData.name : '') ??
+                      ''
+                    }
+                    icon={
+                      typeof languageData?.icon === 'object' && languageData?.icon?.url
+                        ? languageData.icon
+                        : undefined
+                    }
+                  />
+                </div>
+              </Accordion.Content>
+            </Accordion.Item>
+            {descriptionHtml.length > 0 ?
+              <Accordion.Item value="description">
+                <Accordion.Trigger>
+                  <p className="text-large">Description</p>
+                </Accordion.Trigger>
+                <Accordion.Content data-state="open" className='pb-12'>
+                  <div
+                    className="mt-24 text-regular"
+                    dangerouslySetInnerHTML={{__html: descriptionHtml}}
+                  />
+                </Accordion.Content>
+              </Accordion.Item>
+            : null}
+             <Accordion.Item value="shipping">
+                <Accordion.Trigger>
+                  <p className="text-large">Shipping Options</p>
+                </Accordion.Trigger>
+                <Accordion.Content data-state="open" className='pb-12'>
+                  <ShippingOptions />
+                </Accordion.Content>
+              </Accordion.Item>
+          </Accordion>
         </div>
       </div>
 
@@ -367,6 +418,7 @@ const PRODUCT_FRAGMENT = `#graphql
     description
     encodedVariantExistence
     encodedVariantAvailability
+    availableForSale
     options {
       name
       optionValues {
@@ -407,7 +459,7 @@ const PRODUCT_FRAGMENT = `#graphql
     }
     metafields(identifiers: [
       {namespace: "custom", key: "expansion"}
-      {namespace: "custom", key: "language"}
+      {namespace: "details", key: "language"}
       {namespace: "details", key: "age"}
     ]) {
       id
@@ -428,6 +480,13 @@ const PRODUCT_FRAGMENT = `#graphql
                 fields {
                   key
                   value
+                }
+              }
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
                 }
               }
             }
@@ -454,12 +513,30 @@ const PRODUCT_QUERY = `#graphql
   ${PRODUCT_FRAGMENT}
 ` as const;
 
+const COLLECTION_BREADCRUMB_QUERY = `#graphql
+  query CollectionBreadcrumb($handle: String!) {
+    collection(handle: $handle) {
+      title
+      handle
+      parentCollection: metafield(namespace: "category", key: "parent") {
+        reference {
+          ... on Collection {
+            title
+            handle
+          }
+        }
+      }
+    }
+  }
+` as const;
+
 const RELATED_PRODUCTS_QUERY = `#graphql
   fragment RelatedProduct on Product {
     id
     title
     handle
     vendor
+    availableForSale
     priceRange {
       minVariantPrice {
         amount

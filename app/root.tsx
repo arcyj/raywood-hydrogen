@@ -12,7 +12,8 @@ import {
 } from 'react-router';
 import type {Route} from './+types/root';
 import favicon from '~/assets/favicon.svg';
-import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import {FOOTER_QUERY, HEADER_QUERY, LOCALIZATION_QUERY} from '~/lib/fragments';
+import {buildLocaleOptionsFromApi} from '~/lib/i18n';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import resetStyles from '~/styles/reset.css?url';
@@ -101,17 +102,23 @@ export async function loader(args: Route.LoaderArgs) {
 async function loadCriticalData({context}: Route.LoaderArgs) {
   const {storefront} = context;
 
-  const [header] = await Promise.all([
+  const [header, localization] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
         headerMenuHandle: 'main-menu', // Adjust to your header menu handle
       },
     }),
-    // Add other queries here, so that they are loaded in parallel
+    storefront
+      .query(LOCALIZATION_QUERY, {
+        cache: storefront.CacheLong(),
+      })
+      .catch(() => null),
   ]);
 
-  return {header};
+  const availableLocales = buildLocaleOptionsFromApi(localization);
+
+  return {header, availableLocales};
 }
 
 /**

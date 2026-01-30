@@ -5,7 +5,6 @@ export const ShippingOptions: FC = () => {
   return (
     <>
       <div className='bg-lightGrey rounded-lg p-24 max-w-[750px] mt-32'>
-        <h3 className='text-dark text-large mb-16'>Shipping options</h3>
         <div className=''>
           <p className='text-medium-semi mb-12'>Baltic region (Estonia, Latvia, Lithuania)</p>
           <div className='flex items-center justify-between gap-16 mb-16 mt-8 w-full'>

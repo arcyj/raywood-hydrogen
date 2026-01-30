@@ -14,6 +14,7 @@ import {ProductItem} from '~/components/ProductItem';
 import { SortByFilter } from '~/components/filters/SortByFilter';
 import {ProductItemSkeleton} from '~/components/ProductItemSkeleton';
 import { ChildCollectionSlider } from '~/components/sections/ChildCollectionSlider';
+import { Breadcrumb } from '~/components/sections/Breadcrumb';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 
 // Helpers
@@ -117,6 +118,10 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     }
   }
 
+  type CollectionWithParent = typeof collection & {parentCollection?: {reference?: {handle: string; title: string} | null} | null};
+  const parentRef = (collection as CollectionWithParent).parentCollection?.reference;
+  const parentCollection = parentRef ? { title: parentRef.title, handle: parentRef.handle } : null;
+
   const allFilterValues = collection.products.filters.flatMap(
     (filter) => filter.values,
   );
@@ -156,6 +161,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     appliedFilters,
     collections: flattenConnection(collections),
     childCollections,
+    parentCollection,
   };
 }
 
@@ -170,7 +176,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 
 export default function Collection() {
-  const {collection} = useLoaderData<typeof loader>();
+  const {collection, parentCollection} = useLoaderData<typeof loader>();
   const { isDrawerOpen, closeFilter, openFilter } = usePlaypeak();
 
   const handleFilter = () => {
@@ -183,12 +189,16 @@ export default function Collection() {
 
   return (
     <div className="collection container mx-auto pt-12">
-      <ChildCollectionSlider />
+      <Breadcrumb
+        collection={{ title: collection.title, handle: collection.handle }}
+        parentCollection={parentCollection ?? undefined}
+      />
+      <h1 className="text-h1 my-12 tablet:my-24">{collection.title}</h1>
+      <ChildCollectionSlider className="mb-24"/>
       <div className="flex flex-col tablet:flex-row justify-between tablet:items-center">
-        <h1 className="text-h1 my-12 tablet:my-24">{collection.title}</h1>
-        <div className="flex items-center gap-8 mb-12 tablet:mb-0">
-          <SortByFilter/>
+        <div className="flex items-center gap-8 mb-24">
           <Button onClick={handleFilter} variant="secondary" size='small' IconBefore={Filter}>All filters</Button>
+          <SortByFilter/>
         </div>
       </div>
       <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 min-h-screen">
@@ -231,6 +241,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     handle
     title
     vendor
+    availableForSale
     featuredImage {
       id
       altText
@@ -315,6 +326,15 @@ const COLLECTION_QUERY = `#graphql
                 url
               }
             }
+          }
+        }
+      }
+      parentCollection: metafield(namespace: "category", key: "parent") {
+        reference {
+          ... on Collection {
+            id
+            handle
+            title
           }
         }
       }

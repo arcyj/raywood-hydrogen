@@ -15,6 +15,7 @@ import { PlaypeakProvider, usePlaypeak } from '~/lib/playpeakContext';
 import { FilterDrawer } from './FilterDrawer';
 import { WishlistDrawer } from './WishlistDrawer';
 import { CartDrawer } from './CartDrawer';
+import { DesktopTopBar } from './sections/DesktopTopBar';
 
 
 interface PageLayoutProps {
@@ -99,6 +100,9 @@ function PageLayoutContent({
           <TopBar />
           <SearchDrawer />
         </>
+      )}
+       {isDesktop && (
+        <DesktopTopBar isLoggedIn={isLoggedIn} />
       )}
       {header && isDesktop && (
         <Header

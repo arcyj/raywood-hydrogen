@@ -86,8 +86,6 @@ export function AddToWishlistButton({
     handleClick();
   };
 
-  console.log("inWishlist: => ", inWishlist)
-
   if (variant === 'icon') {
     return (
       <IconButton

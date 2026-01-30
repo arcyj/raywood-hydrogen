@@ -265,6 +265,7 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     id
     title
     handle
+    availableForSale
     priceRange {
       minVariantPrice {
         amount
@@ -295,6 +296,7 @@ const LATEST_ADDED_PRODUCTS_QUERY = `#graphql
     title
     handle
     vendor
+    availableForSale
     priceRange {
       minVariantPrice {
         amount

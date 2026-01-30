@@ -253,3 +253,25 @@ export const FOOTER_QUERY = `#graphql
   }
   ${MENU_FRAGMENT}
 ` as const;
+
+/**
+ * Fetches all available countries (markets) with currency from Shopify Admin.
+ * One option per country; no language variants.
+ * @see https://shopify.dev/docs/api/storefront/latest/queries/localization
+ */
+export const LOCALIZATION_QUERY = `#graphql
+  query Localization @inContext(language: EN) {
+    localization {
+      availableCountries {
+        isoCode
+        name
+        currency {
+          isoCode
+        }
+        defaultLanguage {
+          isoCode
+        }
+      }
+    }
+  }
+` as const;

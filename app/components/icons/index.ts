@@ -10,4 +10,5 @@ export { Error } from './Error';
 export { Warning } from './Warning';
 export { ChevronLeft } from './ChevronLeft';
 export { ChevronRight } from './ChevronRight';
-export { Search } from './Search'
+export { Search } from './Search';
+export { Home } from './Home';

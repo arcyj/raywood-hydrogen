@@ -12,7 +12,7 @@ import {usePlaypeak} from '~/lib/playpeakContext';
 
 import {useAside} from '~/components/Aside';
 import { NavMenuItem } from './ui/NavMenuItem';
-import { Cart, Heart, Profile } from './icons';
+import { Cart, Heart } from './icons';
 import { MagnifyingGlassIcon, ArrowRightIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 import { Dropdown } from './ui/Dropdown';
 import { processUrl } from '~/helpers/processUrl';
@@ -34,7 +34,7 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu} = header;
-  console.log(header)
+
   return (
     <header className="header flex justify-between items-center shadow-md rounded-b-xl">
       <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
@@ -46,7 +46,9 @@ export function Header({
         primaryDomainUrl={shop.primaryDomain.url}
         publicStoreDomain={publicStoreDomain}
       />
-      <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
+      <div className="flex items-center gap-4">
+        <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
+      </div>
     </header>
   );
 }
@@ -182,29 +184,6 @@ function HeaderCtas({
 }: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
   return (
     <nav className="header-ctas" role="navigation">
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense
-          fallback={
-            <NavMenuItem
-              onClick={() => {}}
-              Icon={() => <Profile />}
-              label={'Sign in'}
-              variant='menu'
-            />
-          }
-        >
-          <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (
-              <NavMenuItem
-                onClick={() => {}}
-                Icon={() => <Profile />}
-                label={isLoggedIn ? 'Account' : 'Sign in'}
-                variant='menu'
-              />
-            )}
-          </Await>
-        </Suspense>
-      </NavLink>
       <SearchToggle />
       <WishlistToggle />
       <CartToggle cart={cart} />
