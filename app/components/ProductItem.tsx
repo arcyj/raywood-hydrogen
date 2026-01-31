@@ -32,6 +32,7 @@ export function ProductItem({
       key={product.id}
       prefetch="intent"
       to={variantUrl}
+      viewTransition
     >
       <div>
         {image && (

@@ -37,7 +37,7 @@ export function Header({
 
   return (
     <header className="header flex justify-between items-center shadow-md rounded-b-xl">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
+      <NavLink prefetch="intent" to="/" style={activeLinkStyle} viewTransition end>
         <Image src="./images/LogoPlaypeak.svg" alt="Logo" width={100} height={0} />
       </NavLink>
       <HeaderMenu
@@ -128,6 +128,7 @@ export function HeaderMenu({
                 prefetch="intent"
                 style={activeLinkStyle}
                 to={url}
+                viewTransition
               >
                 {iconUrl && (
                   <Image

@@ -44,7 +44,7 @@ export const ButtonLink: FC<IButtonLinkProps> = ({
   };
 
   return (
-    <NavLink to={href} end className={classes} prefetch={prefetch} target={target} data-qa-link={testName} tabIndex={disabled ? -1 : 0}  onClick={handleClicked}>
+    <NavLink to={href} end className={classes} prefetch={prefetch} target={target} data-qa-link={testName} tabIndex={disabled ? -1 : 0}  onClick={handleClicked} viewTransition>
       {IconBefore && <IconBefore size={24} className="mr-2" />}
       {children}
       {IconAfter && <IconAfter size={24} className="ml-8" />}
