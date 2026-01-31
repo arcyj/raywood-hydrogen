@@ -548,6 +548,22 @@ button.reset:hover:not(:has(> *)) {
   object-fit: contain;
 }
 
+/* Product gallery blur-in when deferred data resolves */
+@keyframes product-gallery-blur-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.product-gallery-slide-in {
+  animation: product-gallery-blur-in 0.4s ease-out forwards;
+}
+
 .product-price-on-sale {
   display: flex;
   grid-gap: 0.5rem;

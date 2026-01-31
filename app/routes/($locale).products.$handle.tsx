@@ -1,6 +1,7 @@
-import {redirect, useLoaderData, Await} from 'react-router';
+import {redirect, useLoaderData, Await, useAsyncValue} from 'react-router';
 import {Suspense, useState} from 'react';
 import type {Route} from './+types/products.$handle';
+import type {ProductFragment} from 'storefrontapi.generated';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -22,35 +23,78 @@ import {getMetafield, parseMetaobjectFromMetafield} from '~/lib/metafields';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import { Counter } from '~/components/ui/Counter';
 import { ProductStockStatus } from '~/components/ui/ProductStockStatus';
+import { ProductPageSkeleton } from '~/components/ProductPageSkeleton';
 
-export const meta: Route.MetaFunction = ({data}) => {
+export const meta: Route.MetaFunction = ({data}: {data?: {product?: {title?: string; handle?: string}}}) => {
   return [
-    {title: `Hydrogen | ${data?.product.title ?? ''}`},
+    {title: `Hydrogen | ${data?.product?.title ?? ''}`},
     {
       rel: 'canonical',
-      href: `/products/${data?.product.handle}`,
+      href: `/products/${data?.product?.handle ?? ''}`,
     },
   ];
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
+  // Critical: minimal product for meta, redirect, 404 — blocks only briefly for SEO
+  const criticalData = await loadCriticalData(args);
+  // Deferred: full product, breadcrumb, related products — page shows skeletons immediately
   const deferredData = loadDeferredData(args);
 
-  // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
-
-  // Now that we have the product, we can pass it to deferred data
-  const deferredDataWithProduct = loadDeferredDataWithProduct(args, criticalData.product);
-
-  return {...criticalData, relatedProducts: deferredDataWithProduct};
+  return {...criticalData, ...deferredData};
 }
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
+ * Load data required for initial response: meta (title, canonical), redirect, 404.
+ * Minimal product query keeps time-to-first-byte fast.
  */
 async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
+  const {handle} = params;
+  const {storefront} = context;
+
+  if (!handle) {
+    throw new Error('Expected product handle to be defined');
+  }
+
+  const result = await storefront.query<{product: {id: string; title: string; handle: string} | null}>(
+    MINIMAL_PRODUCT_QUERY,
+    {variables: {handle}},
+  );
+  const product = result?.product;
+
+  if (!product?.id) {
+    throw new Response(null, {status: 404});
+  }
+
+  redirectIfHandleIsLocalized(request, {handle, data: product});
+
+  return {product};
+}
+
+type FullProductPayload = {
+  product: ProductFragment;
+  breadcrumbCollection: { title: string; handle: string } | null;
+  breadcrumbParentCollection: { title: string; handle: string } | null;
+};
+
+/**
+ * Load data for rendering the product page. This data is deferred and will be
+ * fetched after the initial page load so the shell and skeletons render immediately.
+ * If it's unavailable, the page should still 200. Don't throw here or it will 500.
+ */
+function loadDeferredData(args: Route.LoaderArgs) {
+  const fullProductPromise = loadFullProductPayload(args);
+  const relatedProductsPromise = fullProductPromise.then((full) =>
+    loadRelatedProducts(args, full.product),
+  );
+
+  return {
+    fullProduct: fullProductPromise,
+    relatedProducts: relatedProductsPromise,
+  };
+}
+
+async function loadFullProductPayload({context, params, request}: Route.LoaderArgs): Promise<FullProductPayload> {
   const {handle} = params;
   const {storefront} = context;
 
@@ -62,17 +106,12 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     storefront.query(PRODUCT_QUERY, {
       variables: {handle, selectedOptions: getSelectedProductOptions(request)},
     }),
-    // Add other queries here, so that they are loaded in parallel
   ]);
 
   if (!product?.id) {
     throw new Response(null, {status: 404});
   }
 
-  // The API handle might be localized, so redirect to the localized handle
-  redirectIfHandleIsLocalized(request, {handle, data: product});
-
-  // Fetch first collection's breadcrumb data (title + parent) for breadcrumb
   const firstCollectionHandle = product.collections?.nodes?.[0]?.handle;
   let breadcrumbCollection: { title: string; handle: string } | null = null;
   let breadcrumbParentCollection: { title: string; handle: string } | null = null;
@@ -101,19 +140,9 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 }
 
 /**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- */
-function loadDeferredData({context, params}: Route.LoaderArgs) {
-  // This function is kept for future use
-  return {};
-}
-
-/**
  * Load related products based on the current product's collections
  */
-function loadDeferredDataWithProduct(
+function loadRelatedProducts(
   {context}: Route.LoaderArgs,
   product: {id: string; collections?: {nodes?: Array<{handle: string}> | null} | null}
 ) {
@@ -153,20 +182,35 @@ function loadDeferredDataWithProduct(
 
 export default function Product() {
   const data = useLoaderData<typeof loader>();
-  const {product, relatedProducts, breadcrumbCollection, breadcrumbParentCollection} = data;
+  const {fullProduct, relatedProducts} = data;
+
+  return (
+    <div className="container mx-auto">
+      <Suspense fallback={<ProductPageSkeleton />}>
+        <Await resolve={fullProduct}>
+          <ProductContent relatedProductsPromise={relatedProducts} />
+        </Await>
+      </Suspense>
+    </div>
+  );
+}
+
+function ProductContent({
+  relatedProductsPromise,
+}: {
+  relatedProductsPromise: Promise<{products: {nodes: Array<any>}} | null>;
+}) {
+  const fullData = useAsyncValue() as FullProductPayload;
+  const {product, breadcrumbCollection, breadcrumbParentCollection} = fullData;
   const [productCount, setProductCount] = useState(1);
 
-  // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
     getAdjacentAndFirstAvailableVariants(product),
   );
 
-  // Sets the search param to the selected variant without navigation
-  // only when no search params are set in the url
   useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
 
-  // Get the product options array
   const productOptions = getProductOptions({
     ...product,
     selectedOrFirstAvailableVariant: selectedVariant,
@@ -175,26 +219,30 @@ export default function Product() {
   const {media, title, descriptionHtml, vendor, metafields} = product;
 
   const getMeta = (namespace: string, key: string) =>
-    getMetafield(metafields, namespace, key, {matchNullNamespace: true});
+    getMetafield(
+      (metafields ?? []).filter(Boolean) as Array<{namespace?: string | null; key: string; [key: string]: unknown}>,
+      namespace,
+      key,
+      {matchNullNamespace: true},
+    );
 
   const expansionData = parseMetaobjectFromMetafield(getMeta('custom', 'expansion'));
   const languageData = parseMetaobjectFromMetafield(getMeta('details', 'language'));
   const ageMetafield = getMeta('details', 'age');
 
-    const handleCountChange = (val: number) => {
-      setProductCount(val);
-    };
-
+  const handleCountChange = (val: number) => {
+    setProductCount(val);
+  };
 
   return (
-    <div className="container mx-auto">
+    <>
       <Breadcrumb
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
         product={{title: product.title}}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-64 min-w-0">
-        <div className="min-w-0">
+        <div className="min-w-0 product-gallery-slide-in">
           <ProductGallery media={media.nodes} />
         </div>
         <div className="product-main">
@@ -202,7 +250,7 @@ export default function Product() {
           <h1 className="text-h1 mt-4 mb-12">{title}</h1>
           <ProductStockStatus
             availableForSale={!!selectedVariant?.availableForSale}
-            quantity={selectedVariant?.quantityAvailable ?? undefined}
+            quantity={(selectedVariant as {quantityAvailable?: number | null})?.quantityAvailable ?? undefined}
             className="mb-12"
           />
           <div className="flex items-end justify-between mb-24">
@@ -306,7 +354,7 @@ export default function Product() {
         </div>
       </div>
 
-      {relatedProducts && <RelatedProducts products={relatedProducts} />}
+      <RelatedProducts products={relatedProductsPromise} />
       <Analytics.ProductView
         data={{
           products: [
@@ -322,7 +370,7 @@ export default function Product() {
           ],
         }}
       />
-    </div>
+    </>
   );
 }
 
@@ -511,6 +559,16 @@ const PRODUCT_QUERY = `#graphql
     }
   }
   ${PRODUCT_FRAGMENT}
+` as const;
+
+const MINIMAL_PRODUCT_QUERY = `#graphql
+  query MinimalProduct($handle: String!) {
+    product(handle: $handle) {
+      id
+      title
+      handle
+    }
+  }
 ` as const;
 
 const COLLECTION_BREADCRUMB_QUERY = `#graphql
