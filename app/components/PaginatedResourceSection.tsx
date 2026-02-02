@@ -1,9 +1,16 @@
 import * as React from 'react';
+import {Link, useNavigation} from 'react-router';
 import {Pagination} from '@shopify/hydrogen';
 import { Button } from './ui/Button';
 
+type ConnectionWithNodes<NodesType> = {
+  nodes: NodesType[];
+  pageInfo: {hasNextPage: boolean};
+};
+
 /**
- * <PaginatedResourceSection > is a component that encapsulate how the previous and next behaviors throughout your application.
+ * <PaginatedResourceSection> encapsulates previous/next pagination.
+ * When nextPageUrl is provided (page-based), the list survives refresh; otherwise uses cursor-based Pagination.
  */
 export function PaginatedResourceSection<NodesType>({
   connection,
@@ -11,23 +18,40 @@ export function PaginatedResourceSection<NodesType>({
   resourcesClassName,
   skeletonComponent,
   skeletonCount = 8,
+  nextPageUrl,
 }: {
   connection: React.ComponentProps<typeof Pagination<NodesType>>['connection'];
   children: React.FunctionComponent<{node: NodesType; index: number}>;
   resourcesClassName?: string;
   skeletonComponent?: React.ComponentType;
   skeletonCount?: number;
+  /** When set, use page-based pagination (URL persists on refresh). Must match loader that uses ?page= */
+  nextPageUrl?: string | null;
 }) {
+  const navigation = useNavigation();
+
+  if (nextPageUrl != null) {
+    return (
+      <PageBasedSection<NodesType>
+        connection={connection as ConnectionWithNodes<NodesType>}
+        children={children}
+        resourcesClassName={resourcesClassName}
+        skeletonComponent={skeletonComponent}
+        skeletonCount={skeletonCount}
+        nextPageUrl={nextPageUrl}
+        isLoading={navigation.state === 'loading'}
+      />
+    );
+  }
+
   return (
     <Pagination connection={connection}>
-      {({nodes, isLoading, PreviousLink, NextLink}) => {
+      {({nodes, isLoading, NextLink}) => {
         const resourcesMarkup = nodes.map((node, index) =>
           children({node, index}),
         );
 
-        // Show skeletons when loading and no nodes (initial load scenario)
         const showSkeletons = isLoading && nodes.length === 0;
-        // Show skeletons at the end when loading more items
         const showLoadingMoreSkeletons = isLoading && nodes.length > 0;
 
         const skeletons = skeletonComponent
@@ -39,9 +63,6 @@ export function PaginatedResourceSection<NodesType>({
 
         return (
           <div>
-            <PreviousLink>
-              {isLoading ? 'Loading...' :  <Button variant="tertiary" className='w-full'>↑ Load previous</Button>}
-            </PreviousLink>
             {resourcesClassName ? (
               <div className={resourcesClassName}>
                 {showSkeletons ? (
@@ -80,11 +101,82 @@ export function PaginatedResourceSection<NodesType>({
               </>
             )}
             <NextLink>
-              {isLoading ? 'Loading...' : <Button variant="tertiary" className='w-full'>Load more ↓</Button>}
+              {isLoading ? 'Loading...' : <Button variant="secondary" className='w-full'>Load more ↓</Button>}
             </NextLink>
           </div>
         );
       }}
     </Pagination>
+  );
+}
+
+function PageBasedSection<NodesType>({
+  connection,
+  children,
+  resourcesClassName,
+  skeletonComponent,
+  skeletonCount,
+  nextPageUrl,
+  isLoading,
+}: {
+  connection: ConnectionWithNodes<NodesType>;
+  children: React.FunctionComponent<{node: NodesType; index: number}>;
+  resourcesClassName?: string;
+  skeletonComponent?: React.ComponentType;
+  skeletonCount?: number;
+  nextPageUrl: string;
+  isLoading: boolean;
+}) {
+  const nodes = connection.nodes ?? [];
+  const hasNextPage = connection.pageInfo?.hasNextPage ?? false;
+  const resourcesMarkup = nodes.map((node, index) =>
+    children({node, index}),
+  );
+
+  const showSkeletons = isLoading && nodes.length === 0;
+  const showLoadingMoreSkeletons = isLoading && nodes.length > 0;
+
+  const skeletons = skeletonComponent
+    ? Array.from({length: skeletonCount ?? 8}, (_, index) => {
+        const Skeleton = skeletonComponent;
+        return <Skeleton key={`skeleton-${index}`} />;
+      })
+    : null;
+
+  const content = (
+    <>
+      {showSkeletons ? (
+        skeletons
+      ) : (
+        <>
+          {resourcesMarkup}
+          {showLoadingMoreSkeletons && skeletonComponent && (
+            <div className="loading-more-skeletons">
+              {Array.from({length: Math.min(skeletonCount ?? 8, 8)}, (_, index) => {
+                const Skeleton = skeletonComponent;
+                return <Skeleton key={`loading-skeleton-${index}`} />;
+              })}
+            </div>
+          )}
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <div>
+      {resourcesClassName ? (
+        <div className={resourcesClassName}>{content}</div>
+      ) : (
+        content
+      )}
+      {hasNextPage && (
+        <div className="text-center">
+          <Link to={nextPageUrl} preventScrollReset replace>
+            {isLoading ? 'Loading...' : <Button variant="primary" className='w-full max-w-[450px] mx-auto'>Load more ↓</Button>}
+          </Link>
+        </div>
+      )}
+    </div>
   );
 }

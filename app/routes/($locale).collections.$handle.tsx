@@ -1,14 +1,15 @@
-import {redirect, useLoaderData, Link} from 'react-router';
+import * as React from 'react';
+import {redirect, useLoaderData, Link, useLocation, useSearchParams} from 'react-router';
 import type {Route} from './+types/collections.$handle';
 
-import {getPaginationVariables, Analytics, flattenConnection} from '@shopify/hydrogen';
+import {Analytics, flattenConnection, Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 // App
 import { usePlaypeak } from "~/lib/playpeakContext";
 
 // Components
-import { Filter } from '~/components/icons';
+import { Filter, LargeGrid, Remove, SmallGrid } from '~/components/icons';
 import { Button } from '~/components/ui/Button';
 import {ProductItem} from '~/components/ProductItem';
 import { SortByFilter } from '~/components/filters/SortByFilter';
@@ -16,11 +17,13 @@ import {ProductItemSkeleton} from '~/components/ProductItemSkeleton';
 import { ChildCollectionSlider } from '~/components/sections/ChildCollectionSlider';
 import { Breadcrumb } from '~/components/sections/Breadcrumb';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { ToggleGroup } from '~/components/ui/ToggleGroup';
 
 // Helpers
 import {parseAsCurrency} from '~/helpers/parseAsCurrency';
 import { getSortValuesFromParam } from '~/helpers/getSortValuesFromParam';
 import {FILTER_URL_PREFIX} from '../helpers/const';
+import {getAppliedFilterLink} from '~/helpers/filterInputToParams';
 
 // Types
 import type { SortParam } from '~/helpers/getSortValuesFromParam';
@@ -48,17 +51,17 @@ export async function loader(args: Route.LoaderArgs) {
 async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const {handle} = params;
   const {storefront} = context;
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 24,
-  });
   const locale = storefront.i18n;
-
 
   if (!handle) {
     throw redirect('/collections');
   }
 
   const searchParams = new URL(request.url).searchParams;
+  const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1);
+  const pageBy = 24;
+  const first = page * pageBy;
+
   const { sortKey, reverse } = getSortValuesFromParam(
     searchParams.get("sort") as SortParam,
   );
@@ -77,7 +80,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     storefront.query<CollectionQuery>(COLLECTION_QUERY, {
       variables: {
         handle,
-        ...paginationVariables,
+        first,
         filters,
         sortKey,
         reverse,
@@ -136,7 +139,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
           ? parseAsCurrency(filter.price.max, locale)
           : "";
         const label = min && max ? `${min} - ${max}` : "Price";
-        return { filter, label };
+        return { filter, label, imageUrl: undefined };
       }
 
       const foundValue = allFilterValues.find((value) => {
@@ -152,7 +155,9 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
         return null;
       }
 
-      return { filter, label: foundValue.label };
+      const imageUrl =
+        foundValue.swatch?.image?.image?.src ?? undefined;
+      return { filter, label: foundValue.label, imageUrl };
     })
     .filter((filter): filter is NonNullable<typeof filter> => filter !== null);
 
@@ -162,6 +167,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     collections: flattenConnection(collections),
     childCollections,
     parentCollection,
+    productsPage: page,
   };
 }
 
@@ -176,8 +182,16 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 
 export default function Collection() {
-  const {collection, parentCollection} = useLoaderData<typeof loader>();
-  const { isDrawerOpen, closeFilter, openFilter } = usePlaypeak();
+  const {collection, parentCollection, appliedFilters, productsPage} = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+
+  const nextPageUrl = React.useMemo(() => {
+    const sp = new URLSearchParams(location.search);
+    sp.set('page', String((productsPage ?? 1) + 1));
+    return `?${sp.toString()}`;
+  }, [location.search, productsPage]);
+  const { isDrawerOpen, closeFilter, openFilter, collectionGrid, setCollectionGrid } = usePlaypeak();
 
   const handleFilter = () => {
     if (isDrawerOpen('filter')) {
@@ -190,24 +204,88 @@ export default function Collection() {
   return (
     <div className="collection container mx-auto pt-12">
       <Breadcrumb
-        collection={{ title: collection.title, handle: collection.handle }}
+        collection={{title: collection.title, handle: collection.handle}}
         parentCollection={parentCollection ?? undefined}
       />
       <h1 className="text-h1 my-12 tablet:my-24">{collection.title}</h1>
-      <ChildCollectionSlider className="mb-24"/>
+      <ChildCollectionSlider className="mb-24" />
       <div className="flex flex-col tablet:flex-row justify-between tablet:items-center">
-        <div className="flex items-center gap-8 mb-24">
-          <Button onClick={handleFilter} variant="secondary" size='small' IconBefore={Filter}>All filters</Button>
-          <SortByFilter/>
+        <div className="flex items-center gap-8 mb-24 flex-wrap justify-between w-full">
+          <div className="flex items-center gap-8 flex-wrap">
+            <Button
+              onClick={handleFilter}
+              variant="secondary"
+              size="small"
+              IconBefore={Filter}
+            >
+              All filters
+            </Button>
+          </div>
+          <div className="flex-1">
+            {appliedFilters.length > 0 && (
+              <ul className="flex flex-wrap items-center gap-2 list-none p-0 m-0">
+                {appliedFilters.map((applied, index) => {
+                  const removeUrl = getAppliedFilterLink(
+                    {filter: applied.filter, label: applied.label},
+                    searchParams,
+                    location,
+                  );
+                  return (
+                    <li
+                      key={`${index}-${applied.label}-${JSON.stringify(applied.filter)}`}
+                      className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm mb-0"
+                    >
+                      {applied.imageUrl && (
+                        <Image
+                          src={applied.imageUrl}
+                          width={24}
+                          height={24}
+                          alt=""
+                          className="rounded object-cover shrink-0"
+                        />
+                      )}
+                      <span>{applied.label}</span>
+                      <Link
+                        to={removeUrl}
+                        className="inline-flex p-0.5 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-700"
+                        aria-label={`Remove ${applied.label}`}
+                      >
+                        <Remove size={16} />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+          <div className="flex items-center gap-8 flex-wrap">
+            <SortByFilter />
+            <ToggleGroup
+              value={String(collectionGrid)}
+              onValueChange={(v) => {
+                const n = v ? parseInt(v, 10) : NaN;
+                if (n === 4 || n === 6) setCollectionGrid(n);
+              }}
+              ariaLabel="Products per row"
+            >
+              <ToggleGroup.Item value="4">
+                <SmallGrid size={20} />
+              </ToggleGroup.Item>
+              <ToggleGroup.Item value="6">
+                <LargeGrid size={20} />
+              </ToggleGroup.Item>
+            </ToggleGroup>
+          </div>
         </div>
       </div>
-      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 min-h-screen">
+      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 min-h-screen mb-64">
         <div className="col-span-4 md:col-span-6 lg:col-span-12 bg-white">
           <PaginatedResourceSection<ProductItemFragment>
             connection={collection.products}
-            resourcesClassName="products-grid"
+            resourcesClassName={`products-grid auto-rows-[minmax(0,1fr)] ${collectionGrid === 4 ? 'products-grid--cols-4' : ''}`}
             skeletonComponent={ProductItemSkeleton}
-            skeletonCount={24}
+            skeletonCount={12}
+            nextPageUrl={nextPageUrl}
           >
             {({node: product, index}) => (
               <ProductItem

@@ -442,11 +442,17 @@ button.reset:hover:not(:has(> *)) {
 .products-grid {
   display: grid;
   grid-gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(var(--grid-item-width-mobile), 1fr));
+  grid-template-columns: repeat(2, minmax(var(--grid-item-width-mobile), 1fr));
   @media (min-width: 990px) {
-    grid-template-columns: repeat(auto-fit, minmax(var(--grid-item-width), 1fr));
+    grid-template-columns: repeat(6, minmax(var(--grid-item-width), 1fr));
   }
   margin-bottom: 2rem;
+}
+
+.products-grid--cols-4 {
+  @media (min-width: 990px) {
+    grid-template-columns: repeat(4, minmax(var(--grid-item-width), 1fr));
+  }
 }
 
 .product-item img {

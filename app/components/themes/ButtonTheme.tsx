@@ -48,7 +48,7 @@ const ButtonTheme = {
   },
   hover: {
     primary: twc`hover:bg-[#AE6AF5] hover:border-[#AE6AF5]`,
-    secondary: twc`hover:shadow-lg`,
+    secondary: twc`hover:bg-accentGrey`,
     tertiary: twc`hover:border-layout-accent hover:bg-surface-low-brand-focus hover:text-text-buttons-tertiary-focus`,
     tertiaryOnDark: twc`hover:bg-transparent-low-dark hover:text-text-buttons-tertiary-focus-dark`,
     link: twc`hover:border-text-link-focus hover:text-text-link-focus`,

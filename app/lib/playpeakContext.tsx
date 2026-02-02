@@ -1,8 +1,16 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react';
 
+const STORAGE_PREFIX = 'playpeak-';
+
 export type DrawerType = 'search' | 'menu' | 'profile' | 'wishlist' | 'cart' | 'filter' | null;
 
 interface PlaypeakContextValue {
+  // Settings (persisted in localStorage)
+  getSetting: <T>(key: string) => T | null;
+  setSetting: <T>(key: string, value: T) => void;
+  collectionGrid: 4 | 6;
+  setCollectionGrid: (cols: 4 | 6) => void;
+
   // Dark mode
   darkMode: boolean;
   toggleDarkMode: () => void;
@@ -38,10 +46,43 @@ interface PlaypeakProviderProps {
 }
 
 export function PlaypeakProvider({ children, initialDarkMode = false }: PlaypeakProviderProps) {
-  const [darkMode, setDarkModeState] = useState<boolean>(() => {
-    // Check localStorage on initial load
+  const getSetting = useCallback(<T,>(key: string): T | null => {
+    if (typeof window === 'undefined') return null;
+    const raw = localStorage.getItem(STORAGE_PREFIX + key);
+    if (raw == null) return null;
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return raw as T;
+    }
+  }, []);
+
+  const setSetting = useCallback(<T,>(key: string, value: T): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+  }, []);
+
+  const [collectionGrid, setCollectionGridState] = useState<4 | 6>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('playpeak-dark-mode');
+      const v = localStorage.getItem(STORAGE_PREFIX + 'collection-grid');
+      if (v !== null) {
+        const n = parseInt(v, 10);
+        if (n === 4 || n === 6) return n;
+      }
+    }
+    return 6;
+  });
+
+  const setCollectionGrid = useCallback((cols: 4 | 6) => {
+    setCollectionGridState(cols);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_PREFIX + 'collection-grid', String(cols));
+    }
+  }, []);
+
+  const [darkMode, setDarkModeState] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(STORAGE_PREFIX + 'dark-mode');
       return stored ? stored === 'true' : initialDarkMode;
     }
     return initialDarkMode;
@@ -52,7 +93,7 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
   // Sync dark mode with localStorage and document class
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('playpeak-dark-mode', darkMode.toString());
+      localStorage.setItem(STORAGE_PREFIX + 'dark-mode', darkMode.toString());
       if (darkMode) {
         document.documentElement.classList.add('dark');
       } else {
@@ -135,6 +176,10 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
 
   const value = useMemo(
     () => ({
+      getSetting,
+      setSetting,
+      collectionGrid,
+      setCollectionGrid,
       darkMode,
       toggleDarkMode,
       setDarkMode,
@@ -154,6 +199,10 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
       closeFilter,
     }),
     [
+      getSetting,
+      setSetting,
+      collectionGrid,
+      setCollectionGrid,
       darkMode,
       toggleDarkMode,
       setDarkMode,

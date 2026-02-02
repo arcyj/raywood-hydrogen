@@ -12,3 +12,5 @@ export { ChevronLeft } from './ChevronLeft';
 export { ChevronRight } from './ChevronRight';
 export { Search } from './Search';
 export { Home } from './Home';
+export { SmallGrid } from './SmallGrid'
+export { LargeGrid } from './LargeGrid'
