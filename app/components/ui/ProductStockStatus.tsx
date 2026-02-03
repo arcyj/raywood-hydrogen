@@ -54,7 +54,7 @@ export const ProductStockStatus: FC<ProductStockStatusProps> = ({
         className={`inline-block h-8 w-8 shrink-0 rounded-full ${circleClass}`}
         aria-hidden
       />
-      <span className="text-medium-semi text-text-dark">{label}</span>
+      <span className="text-medium-semi text-gray">{label}</span>
     </div>
   );
 };

@@ -27,7 +27,7 @@ const IconButtonTheme = {
   state: {
     secondary: {
       'DEFAULT': twc`bg-lightGrey`,
-      active: twc`bg-[#e7b8f6]`
+      active: twc`bg-[#FA5053] text-white`
     },
   },
   theme: {

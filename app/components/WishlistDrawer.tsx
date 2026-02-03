@@ -12,7 +12,7 @@ export function WishlistDrawer() {
     <Drawer
       onClose={closeWishlist}
       visible={isOpen}
-      position="top"
+      position="right"
       className='bg-transparent overflow-hidden'
     >
       <div className="bg-white max-tablet:m-12 h-full max-w-[370px] tablet:max-w-[550px] mx-auto rounded-lg">

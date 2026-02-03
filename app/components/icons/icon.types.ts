@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react';
 
-export type IIconProps = SVGProps<SVGSVGElement> & { size?: 16 | 20 | 24 | 32 };
+export type IIconProps = SVGProps<SVGSVGElement> & { size?: 16 | 20 | 24 | 32 | 64 | 96 | 128 };
 
 // Twitter remains while text key contains 'twitter'
 export type ISocialIcon = 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'twitter' | 'youtube';

@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import type { FC } from 'react';
 import { Home, ChevronRight } from '~/components/icons';
+import { twClasses } from '~/helpers/twMerge';
 
 export interface BreadcrumbItem {
   title: string;
@@ -14,6 +15,7 @@ export interface BreadcrumbProps {
   parentCollection?: BreadcrumbItem | null;
   /** When set, last segment is product title and collection becomes a link */
   product?: { title: string } | null;
+  className?: string;
 }
 
 const SEPARATOR = (
@@ -24,6 +26,7 @@ export const Breadcrumb: FC<BreadcrumbProps> = ({
   collection,
   parentCollection,
   product,
+  className
 }) => {
   const hasProduct = Boolean(product?.title);
   const items: Array<{ title: string; href?: string }> = [
@@ -45,7 +48,7 @@ export const Breadcrumb: FC<BreadcrumbProps> = ({
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex items-center overflow-x-auto py-8 min-h-[44px] touch-manipulation [-webkit-overflow-scrolling:touch]"
+      className={twClasses([`flex items-center overflow-x-auto py-8 min-h-[44px] touch-manipulation [-webkit-overflow-scrolling:touch]`], {}, className)}
     >
       <ol className="flex items-center gap-0 text-black flex-nowrap min-w-0">
         {items.map((item, index) => (

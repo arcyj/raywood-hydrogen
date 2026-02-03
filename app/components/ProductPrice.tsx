@@ -8,10 +8,12 @@ export function ProductPrice({
   price,
   compareAtPrice,
   size = 'large',
+  className,
 }: {
   price?: MoneyV2;
   compareAtPrice?: MoneyV2 | null;
   size?: Size;
+  className?: string;
 }) {
 
   const initial = 'font-semibold';
@@ -22,7 +24,7 @@ export function ProductPrice({
   }, );
 
   return (
-    <div className="product-price">
+    <div className={`product-price ${className}`}>
       {compareAtPrice ? (
         <div className="product-price-on-sale">
           {price ? <Money data={price} /> : null}

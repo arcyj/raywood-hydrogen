@@ -111,11 +111,11 @@ export function AddToWishlistButton({
       type="button"
       onClick={handleButtonClick}
       className={`wishlist-button ${className}`}
+      variant='secondary'
     >
       <Heart
         size={16}
-        className={`mr-8 ${inWishlist ? 'fill-current' : ''}`}
-        style={{ color: inWishlist ? '#ef4444' : 'currentColor' }}
+        className={`mr-8 ${inWishlist ? 'fill-primary' : ''}`}
       />
       {inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
     </Button>

@@ -1,4 +1,4 @@
-import {redirect, useLoaderData, Await, useAsyncValue} from 'react-router';
+import {redirect, useLoaderData, Await, useAsyncValue, Link} from 'react-router';
 import {Suspense, useState} from 'react';
 import type {Route} from './+types/products.$handle';
 import type {ProductFragment} from 'storefrontapi.generated';
@@ -9,6 +9,7 @@ import {
   getProductOptions,
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
+  Image,
 } from '@shopify/hydrogen';
 import { AddToWishlistButton } from '~/components/AddToWishlistButton';
 import {ProductPrice} from '~/components/ProductPrice';
@@ -24,6 +25,10 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import { Counter } from '~/components/ui/Counter';
 import { ProductStockStatus } from '~/components/ui/ProductStockStatus';
 import { ProductPageSkeleton } from '~/components/ProductPageSkeleton';
+import { ShippingPictogram } from '~/components/icons/ShippingPictogram';
+import { ReturnPictogram } from '~/components/icons/ReturnPictogram';
+import { GuaranteePictogram } from '~/components/icons/GuaranteePictogram';
+import { BenefitCard } from '~/components/ui/BenefitCard';
 
 export const meta: Route.MetaFunction = ({data}: {data?: {product?: {title?: string; handle?: string}}}) => {
   return [
@@ -240,117 +245,176 @@ function ProductContent({
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
         product={{title: product.title}}
+        className="max-tablet:mt-44 max-tablet:mb-4"
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-64 min-w-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 tablet:gap-64 min-w-0">
         <div className="min-w-0 product-gallery-slide-in">
           <ProductGallery media={media.nodes} />
         </div>
         <div className="product-main">
-          <span className="text-small text-gray">{vendor}</span>
-          <h1 className="text-h1 mt-4 mb-12">{title}</h1>
-          <ProductStockStatus
-            availableForSale={!!selectedVariant?.availableForSale}
-            quantity={(selectedVariant as {quantityAvailable?: number | null})?.quantityAvailable ?? undefined}
-            className="mb-12"
-          />
-          <div className="flex items-end justify-between mb-24">
-            <div>
+          <div className="flex items-center justify-between mb-8">
+            <span className="text-medium-semi text-gray">{vendor}</span>
+            <ProductStockStatus
+              availableForSale={!!selectedVariant?.availableForSale}
+              quantity={
+                (selectedVariant as {quantityAvailable?: number | null})
+                  ?.quantityAvailable ?? undefined
+              }
+            />
+          </div>
+          <h1 className="text-h1 mt-4 mb-8">{title}</h1>
+          <div className="flex items-center mb-12">
+            <div className="flex flex-wrap gap-8">
+              <ProductDetailItem
+                label="Expansion"
+                value={
+                  typeof expansionData?.title === 'string'
+                    ? expansionData.title
+                    : ''
+                }
+              />
+              <ProductDetailItem
+                value={
+                  (typeof languageData?.value === 'string'
+                    ? languageData.value
+                    : undefined) ??
+                  (typeof languageData?.name === 'string'
+                    ? languageData.name
+                    : '') ??
+                  ''
+                }
+                icon={
+                  typeof languageData?.icon === 'object' &&
+                  languageData?.icon?.url
+                    ? languageData.icon
+                    : undefined
+                }
+              />
+              <ProductDetailItem
+                label="EAN"
+                value={selectedVariant?.barcode ?? ''}
+              />
+              <ProductDetailItem
+                label="Suitable Age"
+                value={(ageMetafield?.value as string) ?? ''}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col max-w-[450px] my-24">
+            <div className="flex items-end mb-24 justify-between">
               <Counter
-                label={<span className="text-small mb-4">Amount</span>}
+                label={<span className="text-small mb-4">Quantity</span>}
                 count={productCount}
                 countChange={(val) => handleCountChange(val)}
                 maxCount={10}
                 minCount={1}
                 className="flex flex-col items-start justify-center"
               />
+              <ProductPrice
+                price={selectedVariant?.price}
+                compareAtPrice={selectedVariant?.compareAtPrice}
+              />
             </div>
-            <ProductPrice
-              price={selectedVariant?.price}
-              compareAtPrice={selectedVariant?.compareAtPrice}
-            />
+            <div className="flex gap-12">
+              <ProductForm
+                productOptions={productOptions}
+                selectedVariant={selectedVariant}
+                quantity={productCount}
+                className="flex-1"
+              />
+              <AddToWishlistButton
+                variant="icon"
+                product={selectedVariant}
+                productData={{
+                  id: product.id,
+                  vendor: product.vendor,
+                  featuredImage: (() => {
+                    const firstMedia = media.nodes?.[0];
+                    if (
+                      firstMedia &&
+                      'image' in firstMedia &&
+                      firstMedia.image
+                    ) {
+                      return {
+                        url: firstMedia.image.url,
+                        altText: firstMedia.image.altText,
+                      };
+                    }
+                    return null;
+                  })(),
+                }}
+              />
+            </div>
           </div>
-          <div className="flex gap-12">
-            <ProductForm
-              productOptions={productOptions}
-              selectedVariant={selectedVariant}
-              quantity={productCount}
-              className="flex-1"
+
+          {descriptionHtml.length > 0 ? (
+            <div
+              className="mt-44 text-regular"
+              dangerouslySetInnerHTML={{__html: descriptionHtml}}
             />
-            <AddToWishlistButton
-              variant="icon"
-              product={selectedVariant}
-              productData={{
-                id: product.id,
-                vendor: product.vendor,
-                featuredImage: (() => {
-                  const firstMedia = media.nodes?.[0];
-                  if (firstMedia && 'image' in firstMedia && firstMedia.image) {
-                    return {
-                      url: firstMedia.image.url,
-                      altText: firstMedia.image.altText,
-                    };
-                  }
-                  return null;
-                })(),
-              }}
-            />
-          </div>
-          <Accordion className="mt-32">
-            <Accordion.Item value="specification">
+          ) : null}
+          {/* <Accordion className="mt-32">
+            <Accordion.Item value="shipping">
               <Accordion.Trigger>
-                <p className="text-large">Specification</p>
+                <p className="text-large">Shipping Options</p>
               </Accordion.Trigger>
-              <Accordion.Content data-state="open" className='pb-12'>
-                <div className="mt-12 grid tablet:grid-cols-2">
-                  <ProductDetailItem
-                    label="Expansion"
-                    value={
-                      typeof expansionData?.title === 'string' ? expansionData.title : ''
-                    }
-                  />
-                  <ProductDetailItem label="EAN" value={selectedVariant?.barcode ?? ''} />
-                  <ProductDetailItem
-                    label="Recommended Age"
-                    value={(ageMetafield?.value as string) ?? ''}
-                  />
-                  <ProductDetailItem
-                    label="Language"
-                    value={
-                      (typeof languageData?.value === 'string' ? languageData.value : undefined) ??
-                      (typeof languageData?.name === 'string' ? languageData.name : '') ??
-                      ''
-                    }
-                    icon={
-                      typeof languageData?.icon === 'object' && languageData?.icon?.url
-                        ? languageData.icon
-                        : undefined
-                    }
-                  />
-                </div>
+              <Accordion.Content data-state="open" className="pb-12">
+                <ShippingOptions />
               </Accordion.Content>
             </Accordion.Item>
-            {descriptionHtml.length > 0 ?
-              <Accordion.Item value="description">
-                <Accordion.Trigger>
-                  <p className="text-large">Description</p>
-                </Accordion.Trigger>
-                <Accordion.Content data-state="open" className='pb-12'>
-                  <div
-                    className="mt-24 text-regular"
-                    dangerouslySetInnerHTML={{__html: descriptionHtml}}
-                  />
-                </Accordion.Content>
-              </Accordion.Item>
-            : null}
-             <Accordion.Item value="shipping">
-                <Accordion.Trigger>
-                  <p className="text-large">Shipping Options</p>
-                </Accordion.Trigger>
-                <Accordion.Content data-state="open" className='pb-12'>
-                  <ShippingOptions />
-                </Accordion.Content>
-              </Accordion.Item>
-          </Accordion>
+          </Accordion> */}
+          <div className="grid grid-cols-2 tablet:grid-cols-3 items-center gap-24 mt-44">
+            <BenefitCard
+              label={
+                <>
+                  <span>Fast shipping</span>
+                  <Link prefetch="intent" to="/policies/shipping-policy">
+                    <h4 className="text-medium-semi text-primary">Learn more</h4>
+                  </Link>
+                </>
+              }
+              Icon={ShippingPictogram}
+            />
+            <BenefitCard label={
+                <>
+                  <span>14 day returns</span>
+                  <Link prefetch="intent" to="/policies/refund-policy">
+                    <h4 className="text-medium-semi text-primary">Read policy</h4>
+                  </Link>
+                </>
+              }
+              Icon={ReturnPictogram} />
+            <BenefitCard
+              label={
+                <>
+                  <span>Guaranteed factory seal</span>
+                  <Link prefetch="intent" to="/pages/about-us">
+                    <h4 className="text-medium-semi text-primary">Learn more</h4>
+                  </Link>
+                </>
+              }
+              Icon={GuaranteePictogram}
+              className='max-tablet:col-span-2'
+            />
+          </div>
+          <div className="mt-24 rounded-lg py-12 flex items-center justify-center">
+            <Image
+              src="/images/badge_cardmarket.jpg"
+              alt="Cardmarket verified"
+              className="mix-blend-darken"
+              sizes="110px"
+              height="110px"
+              width="110px"
+            />
+            <div className="ml-12">
+              <p className="text-medium-semi">
+                We are a proud member of verified Cardmarket sellers since 2025
+              </p>
+              <Link prefetch="intent" to="/pages/about-us">
+                <h4 className="text-medium-semi text-primary">More on Us</h4>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 

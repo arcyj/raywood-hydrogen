@@ -4,7 +4,7 @@ import type { FC, JSX } from 'react';
 import { IconButton } from './IconButton';
 
 const CounterStyle = {
-  initial: 'flex items-center justify-between w-full',
+  initial: 'flex items-center justify-between',
 };
 
 interface ICounterProps {
