@@ -35,7 +35,7 @@ export function CartMain({layout, cart: originalCart, onClose}: CartMainProps) {
       <CartEmpty hidden={linesCount} layout={layout} onClose={onClose} />
       <div className="cart-details pb-[120px]">
         <div aria-labelledby="cart-lines">
-          <ul>
+          <ul className='flex flex-col gap-8'>
             {(cart?.lines?.nodes ?? []).map((line) => (
               <ProductLineItem key={line.id} line={line} layout={layout} onClose={onClose} />
             ))}

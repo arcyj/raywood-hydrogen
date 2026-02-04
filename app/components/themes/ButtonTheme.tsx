@@ -38,7 +38,7 @@ const ButtonTheme = {
     linkTextActive: twc`border-text-layout-accent text-text-layout-accent`,
   },
   variants: {
-    primary: twc`border-2 border-[#943BF2] bg-[#943BF2] text-white`,
+    primary: twc`border-2 border-[#943BF2] bg-linear-to-b from-primary via-primary to-[#943BF2] via-[#8f5cf5] bg-[length:100%_180%] bg-[position:50%_0%] text-white`,
     secondary: twc`border-0 bg-lightGrey`,
     tertiary: twc`border border-solid border-buttons-tertiary bg-transparent-full text-text-buttons-tertiary`,
     tertiaryOnDark: twc`border border-solid border-buttons-tertiary-dark bg-transparent-full text-text-buttons-tertiary-dark`,
@@ -47,7 +47,7 @@ const ButtonTheme = {
     menuLink: twc`text-link flex items-center px-8 rounded-lg py-8 active:bg-accentGrey active:inset-shadow-sm`,
   },
   hover: {
-    primary: twc`hover:bg-[#AE6AF5] hover:border-[#AE6AF5]`,
+    primary: twc`hover:bg-[position:50%_40%] transition-[background-position] duration-300 ease-out`,
     secondary: twc`hover:bg-accentGrey`,
     tertiary: twc`hover:border-layout-accent hover:bg-surface-low-brand-focus hover:text-text-buttons-tertiary-focus`,
     tertiaryOnDark: twc`hover:bg-transparent-low-dark hover:text-text-buttons-tertiary-focus-dark`,

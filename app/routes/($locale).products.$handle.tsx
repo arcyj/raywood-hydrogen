@@ -311,22 +311,15 @@ function ProductContent({
               <div className="flex items-center justify-between mb-8">
                 <span className="text-medium-semi text-gray">{vendor}</span>
               </div>
-              <h1 className="text-h1 mt-4 mb-8">{title}</h1>
+              <h1 className="text-h2 mt-4 mb-8">{title}</h1>
               <div className="flex flex-col my-24">
-                <div className="flex items-end justify-between mb-24">
+                <div className="flex items-end gap-24 mb-12 justify-between">
                   <div className='flex gap-24 items-end'>
                     <ProductPrice
                       price={selectedVariant?.price}
                       compareAtPrice={selectedVariant?.compareAtPrice}
                     />
-                    <Counter
-                      label={<span className="text-small mb-4">Quantity</span>}
-                      count={productCount}
-                      countChange={(val) => handleCountChange(val)}
-                      maxCount={10}
-                      minCount={1}
-                      className="flex flex-col items-start justify-center ml-24"
-                    />
+
                   </div>
                   <ProductStockStatus
                   availableForSale={!!selectedVariant?.availableForSale}
@@ -337,7 +330,15 @@ function ProductContent({
                   className='self-end'
                 />
                 </div>
-                <div className="flex gap-12">
+                <div className="flex gap-12 mb-12 items-end">
+                    <Counter
+                      label={<span className="text-small mb-4">Quantity</span>}
+                      count={productCount}
+                      countChange={(val) => handleCountChange(val)}
+                      maxCount={10}
+                      minCount={1}
+                      className="flex flex-col items-start justify-center"
+                    />
                   <ProductForm
                     productOptions={productOptions}
                     selectedVariant={selectedVariant}
