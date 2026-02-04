@@ -202,10 +202,11 @@ export default function Collection() {
   };
 
   return (
-    <div className="collection container mx-auto pt-12">
+    <div className="collection container mx-auto pt-44 tablet:pt-12">
       <Breadcrumb
         collection={{title: collection.title, handle: collection.handle}}
         parentCollection={parentCollection ?? undefined}
+        className='hidden tablet:block'
       />
       <h1 className="text-h1 my-12 tablet:my-24">{collection.title}</h1>
       <ChildCollectionSlider className="mb-24" />

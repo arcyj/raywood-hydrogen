@@ -18,12 +18,12 @@ export function Footer({
     <Suspense>
       <Await resolve={footerPromise}>
         {(footer) => (
-          <footer className="footer pb-44 max-desktop:pb-[80px] bg-midnight">
+          <footer className="footer pb-44 max-tablet:pt-24 max-desktop:pb-[80px] bg-midnight">
             <Image
               src="/images/footer.svg"
               alt="footer peaks"
               sizes="25px"
-              className="w-full relative -top-[40px]"
+              className="w-full relative -top-[40px] hidden tablet:block"
             />
             <div className="container mx-auto grid grid-cols-4">
               {footer?.menu && header.shop.primaryDomain?.url && (

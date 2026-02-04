@@ -15,6 +15,7 @@ function AddToCartButtonInner({
   onSuccess,
   size,
   fetcher,
+  showIcon = true,
 }: {
   analytics?: unknown;
   children: React.ReactNode;
@@ -22,6 +23,7 @@ function AddToCartButtonInner({
   onClick?: () => void;
   onSuccess?: () => void;
   size?: IButtonSize
+  showIcon?: boolean;
   fetcher: FetcherWithComponents<any>;
 }) {
   const previousStateRef = useRef<string>('idle');
@@ -82,7 +84,7 @@ function AddToCartButtonInner({
         onClick={handleClick}
         disabled={disabled ?? fetcher.state !== 'idle'}
         className='w-full'
-        IconBefore={Cart}
+        IconBefore={showIcon ? Cart : undefined}
       >
         {children}
       </Button>
@@ -97,13 +99,15 @@ export function AddToCartButton({
   lines,
   onClick,
   onSuccess,
-  size
+  size,
+  showIcon = true,
 }: {
   analytics?: unknown;
   children: React.ReactNode;
   disabled?: boolean;
   lines: Array<OptimisticCartLineInput>;
   size?: IButtonSize;
+  showIcon?:  boolean;
   onClick?: () => void;
   onSuccess?: () => void;
 }) {
@@ -111,6 +115,7 @@ export function AddToCartButton({
     <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
       {(fetcher: FetcherWithComponents<any>) => (
         <AddToCartButtonInner
+          showIcon={showIcon}
           size={size}
           analytics={analytics}
           disabled={disabled}

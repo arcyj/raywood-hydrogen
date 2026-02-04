@@ -11,6 +11,7 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
   Image,
+  Money,
 } from '@shopify/hydrogen';
 import { AddToWishlistButton } from '~/components/AddToWishlistButton';
 import {ProductPrice} from '~/components/ProductPrice';
@@ -29,9 +30,10 @@ import { ProductPageSkeleton } from '~/components/ProductPageSkeleton';
 import { ShippingPictogram } from '~/components/icons/ShippingPictogram';
 import { ReturnPictogram } from '~/components/icons/ReturnPictogram';
 import { GuaranteePictogram } from '~/components/icons/GuaranteePictogram';
-import { BenefitCard } from '~/components/ui/BenefitCard';
 import { deliveryTime } from '~/helpers/deliveryTime';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
+import { AddToCartButton } from '~/components/AddToCartButton';
+import { Cart } from '~/components/icons';
 
 export const meta: Route.MetaFunction = ({data}: {data?: {product?: {title?: string; handle?: string}}}) => {
   return [
@@ -298,15 +300,22 @@ function ProductContent({
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
         product={{title: product.title}}
-        className="max-tablet:mt-44 max-tablet:mb-4"
+        className="max-tablet:mt-44 max-tablet:mb-4 hidden tablet:block"
       />
-      <div id="product-content" className="grid grid-cols-1 md:grid-cols-12 tablet:gap-64 min-w-0">
+      <div
+        id="product-content"
+        className="grid grid-cols-1 md:grid-cols-12 tablet:gap-64 min-w-0 pt-32 tablet:pt-8"
+      >
         <div className="min-w-0 tablet:col-span-7">
           <ProductGallery media={media.nodes} />
-          {isTablet? <ProductDescription /> : null}
+          {isTablet ? <ProductDescription /> : null}
         </div>
         <div className="product-main col-span-5">
-          <ClientSticky top={80} enabled={isDesktop ? true : false} bottomBoundary="#product-content">
+          <ClientSticky
+            top={80}
+            enabled={isDesktop ? true : false}
+            bottomBoundary="#product-content"
+          >
             <div className="bg-white">
               <div className="flex items-center justify-between mb-8">
                 <span className="text-medium-semi text-gray">{vendor}</span>
@@ -314,39 +323,45 @@ function ProductContent({
               <h1 className="text-h2 mt-4 mb-8">{title}</h1>
               <div className="flex flex-col my-24">
                 <div className="flex items-end gap-24 mb-12 justify-between">
-                  <div className='flex gap-24 items-end'>
+                  <div className="flex gap-24 items-end">
                     <ProductPrice
                       price={selectedVariant?.price}
                       compareAtPrice={selectedVariant?.compareAtPrice}
                     />
-
                   </div>
                   <ProductStockStatus
-                  availableForSale={!!selectedVariant?.availableForSale}
-                  quantity={
-                    (selectedVariant as {quantityAvailable?: number | null})
-                      ?.quantityAvailable ?? undefined
-                  }
-                  className='self-end'
-                />
+                    availableForSale={!!selectedVariant?.availableForSale}
+                    quantity={
+                      (selectedVariant as {quantityAvailable?: number | null})
+                        ?.quantityAvailable ?? undefined
+                    }
+                    className="self-end"
+                  />
                 </div>
                 <div className="flex gap-12 mb-12 items-end">
-                    <Counter
-                      label={<span className="text-small mb-4">Quantity</span>}
-                      count={productCount}
-                      countChange={(val) => handleCountChange(val)}
-                      maxCount={10}
-                      minCount={1}
-                      className="flex flex-col items-start justify-center"
-                    />
-                  <ProductForm
-                    productOptions={productOptions}
-                    selectedVariant={selectedVariant}
-                    quantity={productCount}
-                    className="flex-1"
-                  />
+                  {isTablet ? (
+                    <>
+                      <Counter
+                        label={
+                          <span className="text-small mb-4">Quantity</span>
+                        }
+                        count={productCount}
+                        countChange={(val) => handleCountChange(val)}
+                        maxCount={10}
+                        minCount={1}
+                        className="flex flex-col items-start justify-center"
+                      />
+                      <ProductForm
+                        productOptions={productOptions}
+                        selectedVariant={selectedVariant}
+                        quantity={productCount}
+                        className={`flex-1 ${!isTablet ? 'sticky bottom-[80px] w-full' : null}`}
+                      />
+                    </>
+                  ) : null}
                   <AddToWishlistButton
-                    variant="icon"
+                    variant={isTablet ? 'icon' : 'button'}
+                    className={`${!isTablet ? 'w-full' : null}`}
                     product={selectedVariant}
                     productData={{
                       id: product.id,
@@ -384,7 +399,10 @@ function ProductContent({
                       </span>
                     </span>
                   </Accordion.Trigger>
-                  <Accordion.Content data-state="open" className="pb-24 px-12 pt-12">
+                  <Accordion.Content
+                    data-state="open"
+                    className="pb-24 px-12 pt-12"
+                  >
                     <ShippingOptions />
                   </Accordion.Content>
                 </Accordion.Item>
@@ -393,12 +411,21 @@ function ProductContent({
                     <span className="flex items-center">
                       <ReturnPictogram size={44} className="mr-12" />
                       <span>
-                        <p className="text-medium-semi">14-Day Return & Cancellation Right</p>
+                        <p className="text-medium-semi">
+                          14-Day Return & Cancellation Right
+                        </p>
                       </span>
                     </span>
                   </Accordion.Trigger>
-                  <Accordion.Content data-state="open" className="pb-24 px-12 pt-12">
-                    <p className="text-regular">If you are a consumer in the European Union, you have the right to cancel your order within 14 days of receiving your goods, without giving any reason.</p>
+                  <Accordion.Content
+                    data-state="open"
+                    className="pb-24 px-12 pt-12"
+                  >
+                    <p className="text-regular">
+                      If you are a consumer in the European Union, you have the
+                      right to cancel your order within 14 days of receiving
+                      your goods, without giving any reason.
+                    </p>
                   </Accordion.Content>
                 </Accordion.Item>
                 <Accordion.Item value="payment">
@@ -412,7 +439,10 @@ function ProductContent({
                       </span>
                     </span>
                   </Accordion.Trigger>
-                  <Accordion.Content data-state="open" className="pb-24 px-12 pt-12">
+                  <Accordion.Content
+                    data-state="open"
+                    className="pb-24 px-12 pt-12"
+                  >
                     <></>
                   </Accordion.Content>
                 </Accordion.Item>
@@ -424,6 +454,32 @@ function ProductContent({
       </div>
 
       <RelatedProducts products={relatedProductsPromise} />
+      {!isTablet && selectedVariant?.availableForSale ? (
+        <div className="sticky bottom-[80px]">
+          <AddToCartButton
+            showIcon={false}
+            disabled={!selectedVariant || !selectedVariant.availableForSale}
+            onClick={() => {
+              open('cart');
+            }}
+            lines={
+              selectedVariant
+                ? [
+                    {
+                      merchandiseId: selectedVariant.id,
+                      quantity: 1,
+                      selectedVariant,
+                    },
+                  ]
+                : []
+            }
+          >
+            <span className='w-full flex justify-between items-center'>
+              <span className="flex"><Cart size={20} className='mr-4' /> Add to cart</span> <Money data={selectedVariant.price} />
+            </span>
+          </AddToCartButton>
+        </div>
+      ) : null}
       <Analytics.ProductView
         data={{
           products: [

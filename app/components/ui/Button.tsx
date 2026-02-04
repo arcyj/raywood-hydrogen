@@ -69,7 +69,7 @@ export const Button: FC<IButtonProps> = ({
       tabIndex={disabled || loading ? -1 : 0}
     >
       <div
-        className="flex items-center justify-center"
+        className="flex items-center justify-center w-full"
         style={{visibility: loading ? 'hidden' : 'visible'}}
       >
         {IconBefore && (

@@ -31,7 +31,6 @@ body {
 body > main {
   padding: 8px 8px;
   background-color: #fff;
-  border-radius: 12px;
 }
 
 @media (max-width: 768px) {
