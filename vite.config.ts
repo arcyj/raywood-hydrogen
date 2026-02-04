@@ -30,10 +30,21 @@ export default defineConfig({
        * Include 'example-dep' in the array below.
        * @see https://vitejs.dev/config/dep-optimization-options
        */
-      include: ['set-cookie-parser', 'cookie', 'react-router', '@headlessui/react', 'radix-ui', '@radix-ui/react-icons'],
+      include: [
+        'prop-types',
+        'set-cookie-parser',
+        'cookie',
+        'react-router',
+        '@headlessui/react',
+        'radix-ui',
+        '@radix-ui/react-icons',
+      ],
     },
   },
   server: {
-    allowedHosts: ['.tryhydrogen.dev', 'karisa-feigned-commonsensibly.ngrok-free.dev'],
+    allowedHosts: [
+      '.tryhydrogen.dev',
+      'karisa-feigned-commonsensibly.ngrok-free.dev',
+    ],
   },
 });

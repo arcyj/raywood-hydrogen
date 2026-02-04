@@ -2,6 +2,7 @@ import {redirect, useLoaderData, Await, useAsyncValue, Link} from 'react-router'
 import {Suspense, useState} from 'react';
 import type {Route} from './+types/products.$handle';
 import type {ProductFragment} from 'storefrontapi.generated';
+import { ClientSticky } from '~/components/ClientSticky';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -29,6 +30,8 @@ import { ShippingPictogram } from '~/components/icons/ShippingPictogram';
 import { ReturnPictogram } from '~/components/icons/ReturnPictogram';
 import { GuaranteePictogram } from '~/components/icons/GuaranteePictogram';
 import { BenefitCard } from '~/components/ui/BenefitCard';
+import { deliveryTime } from '~/helpers/deliveryTime';
+import { useBreakpoints } from '~/hooks/useBreakpoints';
 
 export const meta: Route.MetaFunction = ({data}: {data?: {product?: {title?: string; handle?: string}}}) => {
   return [
@@ -174,7 +177,7 @@ function loadRelatedProducts(
       );
       return {
         products: {
-          nodes: filtered.slice(0, 4), // Limit to 4 products
+          nodes: filtered.slice(0, 6), // Limit to 4 products
         },
       };
     })
@@ -205,6 +208,8 @@ function ProductContent({
 }: {
   relatedProductsPromise: Promise<{products: {nodes: Array<any>}} | null>;
 }) {
+  const isDesktop = useBreakpoints().isDesktop;
+  const isTablet = useBreakpoints().isTablet;
   const fullData = useAsyncValue() as FullProductPayload;
   const {product, breadcrumbCollection, breadcrumbParentCollection} = fullData;
   const [productCount, setProductCount] = useState(1);
@@ -239,6 +244,54 @@ function ProductContent({
     setProductCount(val);
   };
 
+  const ProductDescription = () => {
+    return (
+      <>
+        <p className="text-h2 mt-44 mb-12">Product Description</p>
+        <div className="flex flex-wrap gap-8">
+          <ProductDetailItem
+            label="Expansion"
+            value={
+              typeof expansionData?.title === 'string'
+                ? expansionData.title
+                : ''
+            }
+          />
+          <ProductDetailItem
+            value={
+              (typeof languageData?.value === 'string'
+                ? languageData.value
+                : undefined) ??
+              (typeof languageData?.name === 'string'
+                ? languageData.name
+                : '') ??
+              ''
+            }
+            icon={
+              typeof languageData?.icon === 'object' && languageData?.icon?.url
+                ? languageData.icon
+                : undefined
+            }
+          />
+          <ProductDetailItem
+            label="EAN"
+            value={selectedVariant?.barcode ?? ''}
+          />
+          <ProductDetailItem
+            label="Suitable Age"
+            value={(ageMetafield?.value as string) ?? ''}
+          />
+        </div>
+        {descriptionHtml.length > 0 ? (
+          <div
+            className="mt-24 text-regular"
+            dangerouslySetInnerHTML={{__html: descriptionHtml}}
+          />
+        ) : null}
+      </>
+    );
+  }
+
   return (
     <>
       <Breadcrumb
@@ -247,174 +300,125 @@ function ProductContent({
         product={{title: product.title}}
         className="max-tablet:mt-44 max-tablet:mb-4"
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 tablet:gap-64 min-w-0">
-        <div className="min-w-0 product-gallery-slide-in">
+      <div id="product-content" className="grid grid-cols-1 md:grid-cols-12 tablet:gap-64 min-w-0">
+        <div className="min-w-0 tablet:col-span-7">
           <ProductGallery media={media.nodes} />
+          {isTablet? <ProductDescription /> : null}
         </div>
-        <div className="product-main">
-          <div className="flex items-center justify-between mb-8">
-            <span className="text-medium-semi text-gray">{vendor}</span>
-            <ProductStockStatus
-              availableForSale={!!selectedVariant?.availableForSale}
-              quantity={
-                (selectedVariant as {quantityAvailable?: number | null})
-                  ?.quantityAvailable ?? undefined
-              }
-            />
-          </div>
-          <h1 className="text-h1 mt-4 mb-8">{title}</h1>
-          <div className="flex items-center mb-12">
-            <div className="flex flex-wrap gap-8">
-              <ProductDetailItem
-                label="Expansion"
-                value={
-                  typeof expansionData?.title === 'string'
-                    ? expansionData.title
-                    : ''
-                }
-              />
-              <ProductDetailItem
-                value={
-                  (typeof languageData?.value === 'string'
-                    ? languageData.value
-                    : undefined) ??
-                  (typeof languageData?.name === 'string'
-                    ? languageData.name
-                    : '') ??
-                  ''
-                }
-                icon={
-                  typeof languageData?.icon === 'object' &&
-                  languageData?.icon?.url
-                    ? languageData.icon
-                    : undefined
-                }
-              />
-              <ProductDetailItem
-                label="EAN"
-                value={selectedVariant?.barcode ?? ''}
-              />
-              <ProductDetailItem
-                label="Suitable Age"
-                value={(ageMetafield?.value as string) ?? ''}
-              />
+        <div className="product-main col-span-5">
+          <ClientSticky top={80} enabled={isDesktop ? true : false} bottomBoundary="#product-content">
+            <div className="bg-white">
+              <div className="flex items-center justify-between mb-8">
+                <span className="text-medium-semi text-gray">{vendor}</span>
+              </div>
+              <h1 className="text-h1 mt-4 mb-8">{title}</h1>
+              <div className="flex flex-col my-24">
+                <div className="flex items-end justify-between mb-24">
+                  <div className='flex gap-24 items-end'>
+                    <ProductPrice
+                      price={selectedVariant?.price}
+                      compareAtPrice={selectedVariant?.compareAtPrice}
+                    />
+                    <Counter
+                      label={<span className="text-small mb-4">Quantity</span>}
+                      count={productCount}
+                      countChange={(val) => handleCountChange(val)}
+                      maxCount={10}
+                      minCount={1}
+                      className="flex flex-col items-start justify-center ml-24"
+                    />
+                  </div>
+                  <ProductStockStatus
+                  availableForSale={!!selectedVariant?.availableForSale}
+                  quantity={
+                    (selectedVariant as {quantityAvailable?: number | null})
+                      ?.quantityAvailable ?? undefined
+                  }
+                  className='self-end'
+                />
+                </div>
+                <div className="flex gap-12">
+                  <ProductForm
+                    productOptions={productOptions}
+                    selectedVariant={selectedVariant}
+                    quantity={productCount}
+                    className="flex-1"
+                  />
+                  <AddToWishlistButton
+                    variant="icon"
+                    product={selectedVariant}
+                    productData={{
+                      id: product.id,
+                      vendor: product.vendor,
+                      featuredImage: (() => {
+                        const firstMedia = media.nodes?.[0];
+                        if (
+                          firstMedia &&
+                          'image' in firstMedia &&
+                          firstMedia.image
+                        ) {
+                          return {
+                            url: firstMedia.image.url,
+                            altText: firstMedia.image.altText,
+                          };
+                        }
+                        return null;
+                      })(),
+                    }}
+                  />
+                </div>
+              </div>
+              <Accordion className="mt-32" defaultOpenAll={false}>
+                <Accordion.Item value="delivery">
+                  <Accordion.Trigger>
+                    <span className="flex items-center">
+                      <ShippingPictogram size={44} className="mr-12" />
+                      <span>
+                        <p className="text-medium-semi">
+                          Delivery {deliveryTime()}
+                        </p>
+                        <p className="text-medium">
+                          Courier or parcel locker delivery
+                        </p>
+                      </span>
+                    </span>
+                  </Accordion.Trigger>
+                  <Accordion.Content data-state="open" className="pb-24 px-12 pt-12">
+                    <ShippingOptions />
+                  </Accordion.Content>
+                </Accordion.Item>
+                <Accordion.Item value="returns">
+                  <Accordion.Trigger>
+                    <span className="flex items-center">
+                      <ReturnPictogram size={44} className="mr-12" />
+                      <span>
+                        <p className="text-medium-semi">14-Day Return & Cancellation Right</p>
+                      </span>
+                    </span>
+                  </Accordion.Trigger>
+                  <Accordion.Content data-state="open" className="pb-24 px-12 pt-12">
+                    <p className="text-regular">If you are a consumer in the European Union, you have the right to cancel your order within 14 days of receiving your goods, without giving any reason.</p>
+                  </Accordion.Content>
+                </Accordion.Item>
+                <Accordion.Item value="payment">
+                  <Accordion.Trigger>
+                    <span className="flex items-center">
+                      <GuaranteePictogram size={44} className="mr-12" />
+                      <span>
+                        <p className="text-medium-semi">
+                          Secure payment powered by Shopify
+                        </p>
+                      </span>
+                    </span>
+                  </Accordion.Trigger>
+                  <Accordion.Content data-state="open" className="pb-24 px-12 pt-12">
+                    <></>
+                  </Accordion.Content>
+                </Accordion.Item>
+              </Accordion>
+              {!isTablet ? <ProductDescription /> : null}
             </div>
-          </div>
-          <div className="flex flex-col max-w-[450px] my-24">
-            <div className="flex items-end mb-24 justify-between">
-              <Counter
-                label={<span className="text-small mb-4">Quantity</span>}
-                count={productCount}
-                countChange={(val) => handleCountChange(val)}
-                maxCount={10}
-                minCount={1}
-                className="flex flex-col items-start justify-center"
-              />
-              <ProductPrice
-                price={selectedVariant?.price}
-                compareAtPrice={selectedVariant?.compareAtPrice}
-              />
-            </div>
-            <div className="flex gap-12">
-              <ProductForm
-                productOptions={productOptions}
-                selectedVariant={selectedVariant}
-                quantity={productCount}
-                className="flex-1"
-              />
-              <AddToWishlistButton
-                variant="icon"
-                product={selectedVariant}
-                productData={{
-                  id: product.id,
-                  vendor: product.vendor,
-                  featuredImage: (() => {
-                    const firstMedia = media.nodes?.[0];
-                    if (
-                      firstMedia &&
-                      'image' in firstMedia &&
-                      firstMedia.image
-                    ) {
-                      return {
-                        url: firstMedia.image.url,
-                        altText: firstMedia.image.altText,
-                      };
-                    }
-                    return null;
-                  })(),
-                }}
-              />
-            </div>
-          </div>
-
-          {descriptionHtml.length > 0 ? (
-            <div
-              className="mt-44 text-regular"
-              dangerouslySetInnerHTML={{__html: descriptionHtml}}
-            />
-          ) : null}
-          {/* <Accordion className="mt-32">
-            <Accordion.Item value="shipping">
-              <Accordion.Trigger>
-                <p className="text-large">Shipping Options</p>
-              </Accordion.Trigger>
-              <Accordion.Content data-state="open" className="pb-12">
-                <ShippingOptions />
-              </Accordion.Content>
-            </Accordion.Item>
-          </Accordion> */}
-          <div className="grid grid-cols-2 tablet:grid-cols-3 items-center gap-24 mt-44">
-            <BenefitCard
-              label={
-                <>
-                  <span>Fast shipping</span>
-                  <Link prefetch="intent" to="/policies/shipping-policy">
-                    <h4 className="text-medium-semi text-primary">Learn more</h4>
-                  </Link>
-                </>
-              }
-              Icon={ShippingPictogram}
-            />
-            <BenefitCard label={
-                <>
-                  <span>14 day returns</span>
-                  <Link prefetch="intent" to="/policies/refund-policy">
-                    <h4 className="text-medium-semi text-primary">Read policy</h4>
-                  </Link>
-                </>
-              }
-              Icon={ReturnPictogram} />
-            <BenefitCard
-              label={
-                <>
-                  <span>Guaranteed factory seal</span>
-                  <Link prefetch="intent" to="/pages/about-us">
-                    <h4 className="text-medium-semi text-primary">Learn more</h4>
-                  </Link>
-                </>
-              }
-              Icon={GuaranteePictogram}
-              className='max-tablet:col-span-2'
-            />
-          </div>
-          <div className="mt-24 rounded-lg py-12 flex items-center justify-center">
-            <Image
-              src="/images/badge_cardmarket.jpg"
-              alt="Cardmarket verified"
-              className="mix-blend-darken"
-              sizes="110px"
-              height="110px"
-              width="110px"
-            />
-            <div className="ml-12">
-              <p className="text-medium-semi">
-                We are a proud member of verified Cardmarket sellers since 2025
-              </p>
-              <Link prefetch="intent" to="/pages/about-us">
-                <h4 className="text-medium-semi text-primary">More on Us</h4>
-              </Link>
-            </div>
-          </div>
+          </ClientSticky>
         </div>
       </div>
 
@@ -454,7 +458,7 @@ function RelatedProducts({
               return null;
             }
             return (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-16">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-16">
                 {response.products.nodes.map((product) => (
                   <ProductItem key={product.id} product={product} />
                 ))}

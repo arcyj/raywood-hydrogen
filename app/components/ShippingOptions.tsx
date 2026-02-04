@@ -4,7 +4,7 @@ import { Image } from '@shopify/hydrogen';
 export const ShippingOptions: FC = () => {
   return (
     <>
-      <div className='bg-lightGrey rounded-lg p-24 max-w-[750px] mt-32'>
+      <div className='max-w-[750px]'>
         <div className=''>
           <p className='text-medium-semi mb-12'>Baltic region (Estonia, Latvia, Lithuania)</p>
           <div className='flex items-center justify-between gap-16 mb-16 mt-8 w-full'>

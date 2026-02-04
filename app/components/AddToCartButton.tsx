@@ -5,6 +5,7 @@ import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen';
 import type { IButtonSize } from './themes/ButtonTheme';
 import { usePlaypeak } from '~/lib/playpeakContext';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
+import { Cart } from './icons';
 
 function AddToCartButtonInner({
   analytics,
@@ -81,6 +82,7 @@ function AddToCartButtonInner({
         onClick={handleClick}
         disabled={disabled ?? fetcher.state !== 'idle'}
         className='w-full'
+        IconBefore={Cart}
       >
         {children}
       </Button>

@@ -66,7 +66,7 @@ const AccordionTrigger: FC<IAccordionTriggerProps> = ({
   children,
   className,
 }) => {
-  const classes = twClasses(['border-b-2 border-solid border-lightGrey w-full text-left pb-8 mt-16 mb-8 flex items-center justify-between'], {} , className)
+  const classes = twClasses(['border-b-2 border-solid border-lightGrey w-full text-left pb-8 mt-16 flex items-center justify-between'], {} , className)
   return (
     <RadixAccordion.Trigger className={classes}>
       {children}

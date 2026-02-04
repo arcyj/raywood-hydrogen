@@ -14,19 +14,25 @@ import { IconButton } from './ui/IconButton';
 interface INavArrowProps {
   onClick?(): void;
   disabled?: boolean;
+  className?: string;
+  Icon: React.ComponentType<{ size?: number; className?: string }>;
+  iconClassName?: string;
 }
 
 const NextArrow = forwardRef<HTMLButtonElement, INavArrowProps>(
-  ({ onClick, disabled }, ref) => {
+  ({ onClick, disabled, className, Icon, iconClassName }, ref) => {
+    const IconWithClass = iconClassName
+      ? (p: { size?: number; className?: string }) => <Icon {...p} className={[p.className, iconClassName].filter(Boolean).join(' ')} />
+      : Icon;
     return (
       <IconButton
         ref={ref}
         type="button"
         onClick={onClick}
         disabled={disabled}
-        className="absolute top-1/2 right-0 -translate-y-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden"
+        className={className ?? 'absolute top-1/2 right-0 -translate-y-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
         aria-label="Next slide"
-        Icon={ChevronRight}
+        Icon={IconWithClass as Parameters<typeof IconButton>[0]['Icon']}
       />
     );
   },
@@ -35,16 +41,19 @@ const NextArrow = forwardRef<HTMLButtonElement, INavArrowProps>(
 NextArrow.displayName = 'NextArrow';
 
 const PrevArrow = forwardRef<HTMLButtonElement, INavArrowProps>(
-  ({ onClick, disabled }, ref) => {
+  ({ onClick, disabled, className, Icon, iconClassName }, ref) => {
+    const IconWithClass = iconClassName
+      ? (p: { size?: number; className?: string }) => <Icon {...p} className={[p.className, iconClassName].filter(Boolean).join(' ')} />
+      : Icon;
     return (
       <IconButton
         ref={ref}
         type="button"
         onClick={onClick}
         disabled={disabled}
-        className="absolute top-1/2 left-0 -translate-y-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden"
+        className={className ?? 'absolute top-1/2 left-0 -translate-y-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
         aria-label="Previous slide"
-        Icon={ChevronLeft}
+        Icon={IconWithClass as Parameters<typeof IconButton>[0]['Icon']}
       />
     );
   },
@@ -67,6 +76,9 @@ interface SwiperSettings extends Omit<SwiperOptions, 'modules' | 'navigation' | 
   afterChange?: (currentSlide: number) => void;
   adaptiveHeight?: boolean;
   ref?: React.Ref<SwiperType>;
+  /** Pass Swiper modules (e.g. Thumbs) and options when using thumbs or other modules */
+  modules?: SwiperOptions['modules'];
+  thumbs?: SwiperOptions['thumbs'];
 }
 
 const defaults: Partial<SwiperSettings> = {
@@ -199,6 +211,16 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
     return classes.join(' ');
   }, [className, props.display, props.withoutScale]);
 
+  const isVertical = carouselProps.direction === 'vertical';
+  const prevArrowClassName = isVertical
+    ? 'absolute top-0 left-1/2 -translate-x-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'
+    : undefined;
+  const nextArrowClassName = isVertical
+    ? 'absolute bottom-0 left-1/2 -translate-x-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'
+    : undefined;
+  const prevIconClassName = isVertical ? 'rotate-90' : undefined;
+  const nextIconClassName = isVertical ? '-rotate-90' : undefined;
+
   return (
     <div className={wrapperClassName}>
       {carouselProps.arrows !== false && (
@@ -207,16 +229,23 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
             ref={navigationPrevRef}
             onClick={() => swiperRef.current?.slidePrev()}
             disabled={swiperRef.current?.isBeginning}
+            className={prevArrowClassName}
+            Icon={ChevronLeft as INavArrowProps['Icon']}
+            iconClassName={prevIconClassName}
           />
           <NextArrow
             ref={navigationNextRef}
             onClick={() => swiperRef.current?.slideNext()}
             disabled={swiperRef.current?.isEnd}
+            className={nextArrowClassName}
+            Icon={ChevronRight as INavArrowProps['Icon']}
+            iconClassName={nextIconClassName}
           />
         </>
       )}
       <Swiper
         {...swiperOptions}
+        className='h-full'
         onSwiper={(swiper) => {
           swiperRef.current = swiper;
           // Handle ref if provided

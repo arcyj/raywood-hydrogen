@@ -22,7 +22,7 @@ const getBreakpoints = (width: number): IBreakpoints => ({
   isMobileSmall: width < Breakpoints.SMALL_MOBILE,
   isMobile: width <= Breakpoints.TABLET,
   isTabletSmall: width < Breakpoints.SMALL_TABLET,
-  isTablet: width > Breakpoints.TABLET && width < Breakpoints.DESKTOP,
+  isTablet: width > Breakpoints.TABLET,
   isTabletLarge: width < Breakpoints.LARGE_TABLET,
   isDesktop: width >= Breakpoints.DESKTOP,
 });

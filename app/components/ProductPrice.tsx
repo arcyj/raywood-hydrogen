@@ -20,7 +20,7 @@ export function ProductPrice({
 
   const textClasses = twClasses([initial], {
     'text-[16px] desktop:text-[18px]': size === 'small',
-    'text-[24px] desktop:text-[26px]': size === 'large',
+    'text-[24px] desktop:text-[30px] desktop:leading-[30px]': size === 'large',
   }, );
 
   return (

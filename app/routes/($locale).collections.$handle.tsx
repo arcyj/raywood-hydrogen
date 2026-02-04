@@ -284,7 +284,7 @@ export default function Collection() {
             connection={collection.products}
             resourcesClassName={`products-grid auto-rows-[minmax(0,1fr)] ${collectionGrid === 4 ? 'products-grid--cols-4' : ''}`}
             skeletonComponent={ProductItemSkeleton}
-            skeletonCount={12}
+            skeletonCount={1}
             nextPageUrl={nextPageUrl}
           >
             {({node: product, index}) => (
