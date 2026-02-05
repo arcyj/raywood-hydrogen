@@ -25,12 +25,12 @@ export default function Policies() {
   const {policies} = useLoaderData<typeof loader>();
 
   return (
-    <div className="policies">
-      <h1>Policies</h1>
-      <div>
+    <div className="policies container-narrow mx-auto max-tablet:pt-24">
+      <h1 className="text-h1 text-center mb-24 mt-44">Policies</h1>
+      <div className="flex justify-center flex-wrap">
         {policies.map((policy) => (
-          <fieldset key={policy.id}>
-            <Link to={`/policies/${policy.handle}`}>{policy.title}</Link>
+          <fieldset key={policy.id} >
+            <Link to={`/policies/${policy.handle}`} className="text-regular-semi bg-lightGrey py-24 px-12 rounded hover:bg-accentGrey ">{policy.title}</Link>
           </fieldset>
         ))}
       </div>
@@ -38,7 +38,7 @@ export default function Policies() {
   );
 }
 
-const POLICIES_QUERY = `#graphql
+export const POLICIES_QUERY = `#graphql
   fragment PolicyItem on ShopPolicy {
     id
     title

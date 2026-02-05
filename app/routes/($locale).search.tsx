@@ -336,6 +336,7 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
 ` as const;
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/predictiveSearch
+// searchableFields: TITLE, VARIANTS_SKU, VARIANTS_BARCODE, PRODUCT_TYPE, VARIANTS_TITLE, VENDOR, TAG, BODY
 const PREDICTIVE_SEARCH_QUERY = `#graphql
   query PredictiveSearch(
     $country: CountryCode
@@ -344,12 +345,14 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
     $limitScope: PredictiveSearchLimitScope!
     $term: String!
     $types: [PredictiveSearchType!]
+    $searchableFields: [SearchableField!]
   ) @inContext(country: $country, language: $language) {
     predictiveSearch(
       limit: $limit,
       limitScope: $limitScope,
       query: $term,
       types: $types,
+      searchableFields: $searchableFields,
     ) {
       articles {
         ...PredictiveArticle
@@ -393,17 +396,29 @@ async function predictiveSearch({
 
   if (!term) return {type, term, result: getEmptyPredictiveSearchResult()};
 
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
+  // Predictively search articles, collections, pages, products, and queries (suggestions).
+  // searchableFields: product title, variant SKU/barcode, vendor, product type, tags, body, etc.
+  const searchableFields = [
+    'TITLE',
+    'VARIANTS_SKU',
+    'VARIANTS_BARCODE',
+    'PRODUCT_TYPE',
+    'VARIANTS_TITLE',
+    'VENDOR',
+    'TAG',
+    'BODY',
+  ] as const;
+
   const {
     predictiveSearch: items,
     errors,
   }: PredictiveSearchQuery & {errors?: Array<{message: string}>} =
     await storefront.query(PREDICTIVE_SEARCH_QUERY, {
       variables: {
-        // customize search options as needed
         limit,
         limitScope: 'EACH',
         term,
+        searchableFields: [...searchableFields],
       },
     });
 

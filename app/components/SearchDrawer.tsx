@@ -21,10 +21,10 @@ export function SearchDrawer() {
       onClose={closeSearchDrawer}
       visible={isOpen}
       position="top"
-      className='bg-transparent overflow-hidden'
+      className='bg-transparent overflow-hidden m-0! max-w-[370px] tablet:max-w-[550px]'
     >
-      <div className="predictive-search bg-white m-12 min-h-[300px] max-h-[calc(100vh-150px)] max-w-[370px] tablet:max-w-[550px] mx-auto rounded-lg">
-        <SearchFormPredictive>
+      <div className="predictive-search bg-white m-12 h-full rounded-lg min-h-[300px] max-h-[calc(100vh-150px)]">
+        <SearchFormPredictive>  
           {({fetchResults, goToSearch, inputRef, value}) => (
             <div>
               <Input

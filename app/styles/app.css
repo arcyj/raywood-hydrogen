@@ -830,3 +830,34 @@ button.reset:hover:not(:has(> *)) {
 .swiper-pagination-bullet-active {
   background-color: rgb(0, 0, 0);
 }
+
+/*
+* --------------------------------------------------
+* Styling for text pages from admin
+* --------------------------------------------------
+*/
+.page-content h1{
+  font: 700 25px/28px 'Gilroy', sans-serif;
+  padding-bottom: 12px;
+  padding-top: 24px;
+}
+
+.page-content h2{
+  font: 700 23px/28px 'Gilroy', sans-serif;
+  padding-bottom: 12px;
+  padding-top: 24px;
+}
+
+.page-content h3{
+  font: 700 21px/26px 'Gilroy', sans-serif;
+  padding-bottom: 12px;
+  padding-top: 24px;
+}
+.page-content p{
+  font: 500 16px/26px 'Gilroy', sans-serif;
+}
+
+.page-content a{
+  color: #6610F2;
+  font: 600 16px/26px 'Gilroy', sans-serif;
+}

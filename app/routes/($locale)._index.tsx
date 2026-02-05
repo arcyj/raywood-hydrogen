@@ -109,7 +109,7 @@ export default function Homepage() {
               overlayFromColor="#301c54"
               overlayToColor="#301c54"
               buttonText="Shop now"
-              buttonUrl={`collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139873485111"%7D`}
+              buttonUrl={`/products/one-piece-tcg-op-14-the-azure-seas-seven-booster-display-eng?Title=Default+Title`}
             />
             <Banner
               heading="Phantasmal flames"
@@ -119,7 +119,7 @@ export default function Homepage() {
               overlayFromColor="#170631"
               overlayToColor="#170631"
               buttonText="Shop now"
-              buttonUrl={`collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139873485111"%7D`}
+              buttonUrl={`/collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139873485111"%7D`}
             />
             <Banner
               heading="Forge Your Deck. Shape the Elements."
@@ -128,7 +128,7 @@ export default function Homepage() {
               logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/mtg-avatar-logo.webp?v=1763998641"
               textColor="dark"
               buttonText="View All Products"
-              buttonUrl={`collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139873485111"%7D`}
+              buttonUrl={`/collections/magic-the-gathering?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F141094093111"%7D`}
             />
             <Banner
               heading="Unleash Legendary Power"
@@ -136,7 +136,7 @@ export default function Homepage() {
               backgroundImage="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/MegaEvolutionBanner-pattern.jpg?v=1762860429"
               logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/me01-logo-2x.png?v=1762859891"
               buttonText="Explore now"
-              buttonUrl={`collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139873485111"%7D`}
+              buttonUrl={`/collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139488493879"%7D`}
             />
           </Slider>
           <div className="col-span-3 md:col-span-1">
@@ -148,7 +148,7 @@ export default function Homepage() {
               overlayToColor="#d21258"
               overlayDirection="180deg"
               buttonText="Shop now"
-              buttonUrl={`collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139873485111"%7D`}
+              buttonUrl={`/collections/blind-boxes`}
             />
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function Homepage() {
             overlayFromColor="#200531"
             overlayToColor="#200531"
             buttonText="Shop now"
-            buttonUrl={`collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139873485111"%7D`}
+            buttonUrl={`/collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F94150394167"%7D`}
           />
         </section>
         {/* <RecommendedProducts products={data.recommendedProducts} /> */}

@@ -338,13 +338,13 @@ function ProductContent({
                     className="self-end"
                   />
                 </div>
-                <div className="flex gap-12 mb-12 items-end">
+                <div className="flex gap-12 mb-12 items-center">
                   {isTablet ? (
                     <>
                       <Counter
-                        label={
-                          <span className="text-small mb-4">Quantity</span>
-                        }
+                        // label={
+                        //   <span className="text-small mb-4">Quantity</span>
+                        // }
                         count={productCount}
                         countChange={(val) => handleCountChange(val)}
                         maxCount={10}

@@ -18,25 +18,34 @@ export function Footer({
     <Suspense>
       <Await resolve={footerPromise}>
         {(footer) => (
-          <footer className="footer pb-44 max-tablet:pt-24 max-desktop:pb-[80px] bg-midnight">
+          <footer className="footer pb-12 max-mediumDesktop:px-12 max-mediumDesktop:pt-44 max-desktop:pb-[80px] bg-midnight">
             <Image
               src="/images/footer.svg"
               alt="footer peaks"
               sizes="25px"
-              className="w-full relative -top-[40px] hidden tablet:block"
+              className="w-full relative -top-[40px] hidden mediumDesktop:block"
             />
-            <div className="container mx-auto grid grid-cols-4">
+            <div className="container mx-auto grid grid-cols-2 tablet:grid-cols-2 desktop:grid-cols-4 gap-24">
               {footer?.menu && header.shop.primaryDomain?.url && (
                 <FooterMenu
                   menu={footer.menu}
                   primaryDomainUrl={header.shop.primaryDomain.url}
                   publicStoreDomain={publicStoreDomain}
+                  title="Info"
                 />
               )}
-              <div className='flex flex-col'>
+              {footer?.menuBrands && header.shop.primaryDomain?.url && (
+                <FooterMenu
+                  menu={footer.menuBrands}
+                  primaryDomainUrl={header.shop.primaryDomain.url}
+                  publicStoreDomain={publicStoreDomain}
+                  title="Brands"
+                />
+              )}
+              <div className="flex flex-col">
                 <p className="text-h4 text-white mb-12">Resources</p>
                 <a
-                  href="#"
+                  href="https://www.facebook.com/profile.php?id=61550358300608"
                   rel="noopener noreferrer"
                   target="_blank"
                   className="text-white opacity-80 hover:opacity-100 py-8"
@@ -44,14 +53,14 @@ export function Footer({
                   Facebook
                 </a>
                 <a
-                  href="#"
+                  href="https://www.instagram.com/playpeakeu/"
                   rel="noopener noreferrer"
                   target="_blank"
                   className="text-white opacity-80 hover:opacity-100 py-8"
                 >
                   Instagram
                 </a>
-                 <NavLink
+                <NavLink
                   end
                   prefetch="intent"
                   style={activeLinkStyle}
@@ -61,6 +70,20 @@ export function Footer({
                   Blog
                 </NavLink>
               </div>
+              <div className='text-center flex flex-col items-center justify-center'>
+                <Image
+                  src="./images/badge_cardmarket.jpg"
+                  alt="Logo"
+                  width={110}
+                  height="100%"
+                />
+                <p className="text-white text-medium-semi pt-16 max-w-[180px]">Playpeak is a certified seller on Cardmarket</p>
+              </div>
+            </div>
+            <div className="w-full mt-24 border-[#3b2844] border-t pt-12">
+              <p className="text-small text-accentGrey text-center">
+                © 2026, PlayPeak
+              </p>
             </div>
           </footer>
         )}
@@ -73,14 +96,16 @@ function FooterMenu({
   menu,
   primaryDomainUrl,
   publicStoreDomain,
+  title = 'Info',
 }: {
   menu: FooterQuery['menu'];
   primaryDomainUrl: FooterProps['header']['shop']['primaryDomain']['url'];
   publicStoreDomain: string;
+  title?: string;
 }) {
   return (
     <nav className="" role="navigation">
-      <p className='text-h4 text-white mb-12'>Info</p>
+      <p className='text-h4 text-white mb-12'>{title}</p>
       <div className='flex flex-col'>
         {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
           if (!item.url) return null;

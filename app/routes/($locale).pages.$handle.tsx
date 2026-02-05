@@ -58,11 +58,11 @@ export default function Page() {
   const {page} = useLoaderData<typeof loader>();
 
   return (
-    <div className="page container mx-auto">
+    <div className="page container-narrow mx-auto max-tablet:pt-24 tablet:pb-44">
       <header>
-        <h1 className="text-h1 text-center mb-24">{page.title}</h1>
+        <h1 className="text-h1 text-center mb-24 mt-44">{page.title}</h1>
       </header>
-      <main dangerouslySetInnerHTML={{__html: page.body}} />
+      <main className='page-content' dangerouslySetInnerHTML={{__html: page.body}} />
     </div>
   );
 }

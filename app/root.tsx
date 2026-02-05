@@ -134,7 +134,8 @@ function loadDeferredData({context}: Route.LoaderArgs) {
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
-        footerMenuHandle: 'footer', // Adjust to your footer menu handle
+        footerMenuHandle: 'footer',
+        footerBrandsMenuHandle: 'footer-brands',
       },
     })
     .catch((error: Error) => {

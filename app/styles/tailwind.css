@@ -99,6 +99,11 @@
     font: 600 15px/15px 'Gilroy', sans-serif;
   }
 
+  .container-narrow{
+    max-width: 900px;
+    margin: auto;
+  }
+
   /* Mobile overrides */
   @media (max-width: 768px) {
     .text-h1 {

@@ -13,7 +13,7 @@ export const FormControlTheme = {
   },
   border: {
     base: twc`rounded bg-lightGrey border-2 border-lightGrey transition-all duration-100 ease-linear`,
-    initial: twc`border-layout-high focus-within:border-layout-focus focus-within:ring-1 focus-within:ring-text-layout-focus hover:tablet:border-layout-accent`,
+    initial: twc`border-layout-high focus-within:border-lightGrey focus-within:ring-1 focus-within:ring-lightGrey hover:tablet:border-layout-accent`,
     keyboardFocus: twc`border-layout-high focus-within:glow-focus`,
     active: twc`border-layout-focus ring-1 ring-text-layout-focus`,
     error: twc`border-layout-danger`,
