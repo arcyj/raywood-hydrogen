@@ -113,22 +113,22 @@ function PageLayoutContent({
         />
       )}
       <main>{children}</main>
-      {header && !isDesktop && (
-        <Navbar
-          header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
-          publicStoreDomain={publicStoreDomain}
-          activeMenu={activeMenu}
-          onMenuToggle={handleMenuToggle}
-          onClose={handleClose}
-        />
-      )}
       <Footer
         footer={footer}
         header={header}
         publicStoreDomain={publicStoreDomain}
-      />
+        />
+        {header && !isDesktop && (
+          <Navbar
+            header={header}
+            cart={cart}
+            isLoggedIn={isLoggedIn}
+            publicStoreDomain={publicStoreDomain}
+            activeMenu={activeMenu}
+            onMenuToggle={handleMenuToggle}
+            onClose={handleClose}
+          />
+        )}
     </Aside.Provider>
   );
 }

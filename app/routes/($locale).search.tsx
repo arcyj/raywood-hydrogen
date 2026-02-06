@@ -1,4 +1,5 @@
 import {useLoaderData} from 'react-router';
+import { useState, useEffect } from 'react';
 import type {Route} from './+types/search';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {SearchForm} from '~/components/SearchForm';
@@ -12,6 +13,9 @@ import type {
   RegularSearchQuery,
   PredictiveSearchQuery,
 } from 'storefrontapi.generated';
+import { Input } from '~/components/ui/Input';
+import { Button } from '~/components/ui/Button';
+import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: `Hydrogen | Search`}];
@@ -38,24 +42,36 @@ export async function loader({request, context}: Route.LoaderArgs) {
  */
 export default function SearchPage() {
   const {type, term, result, error} = useLoaderData<typeof loader>();
+  const [searchTerm, setSearchterm] = useState(term);
+
+  // Keep input in sync with URL/loader so it isn't cleared after form submit (Enter)
+  useEffect(() => {
+    setSearchterm(term);
+  }, [term]);
+
   if (type === 'predictive') return null;
 
   return (
-    <div className="search">
-      <h1>Search</h1>
+    <div className="search container mx-auto max-tablet:pt-24 tablet:pb-44">
+      <h1 className="text-h1 text-center mb-24 mt-44">
+        Search results for &quot;{term}&quot;
+      </h1>
       <SearchForm>
         {({inputRef}) => (
-          <>
-            <input
-              defaultValue={term}
+          <div className="max-w-[550px] mx-auto flex gap-8">
+            <Input
+              value={searchTerm}
+              handleChange={(value) =>
+                setSearchterm(value)
+              }
               name="q"
-              placeholder="Search…"
+              className='w-full'
+              placeholder="Search"
               ref={inputRef}
-              type="search"
+              type="text"
             />
-            &nbsp;
-            <button type="submit">Search</button>
-          </>
+            <Button type="submit" size="medium" variant="secondary" IconBefore={MagnifyingGlassIcon}>Search</Button>
+          </div>
         )}
       </SearchForm>
       {error && <p style={{color: 'red'}}>{error}</p>}
@@ -96,6 +112,7 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
       caseInsensitiveMatch: true
     ) {
       id
+      availableForSale
       image {
         url
         altText
@@ -222,7 +239,7 @@ async function regularSearch({
 >): Promise<RegularSearchReturn> {
   const {storefront} = context;
   const url = new URL(request.url);
-  const variables = getPaginationVariables(request, {pageBy: 8});
+  const variables = getPaginationVariables(request, {pageBy: 12});
   const term = String(url.searchParams.get('q') || '');
 
   // Search articles, pages, and products for the `q` term

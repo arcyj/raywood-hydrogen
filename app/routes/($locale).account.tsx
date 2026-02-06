@@ -46,7 +46,7 @@ export default function AccountLayout() {
 
   return (
     <div className="account max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">{heading}</h1>
+      <h1 className="text-h1 font-bold mb-8 mb-24 mt-44">{heading}</h1>
       <AccountMenu />
       <div className="mt-8">
         <Outlet context={{customer}} />

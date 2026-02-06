@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Accordion } from "radix-ui";
+import { Image } from "@shopify/hydrogen";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { NavLink } from 'react-router';
 import { twc, twClasses } from '~/helpers/twMerge';
@@ -7,6 +8,8 @@ import { processUrl } from '~/helpers/processUrl';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type { FC } from 'react';
 import { useDrawer } from './Drawer';
+import { getMenuIconUrl } from '~/helpers/getMenuIconUrl';
+import { ChevronRight } from '../icons';
 
 
 interface IDropDownMenuProps {
@@ -97,13 +100,25 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
   if (!item || !url) return null;
 
   const hasSubItems = item.items && item.items.length > 0;
+  const iconUrl = getMenuIconUrl(item);
 
   return (
     <Accordion.Item value={item.id}>
       <Accordion.Header>
-        <Accordion.Trigger className="flex w-full border-b-2 border-lightGrey items-center justify-between py-16 text-left text-body-regular font-semibold leading-none text-text-layout-powerful hover:bg-gray-100">
+        <Accordion.Trigger className="flex w-full border-b-2 border-lightGrey items-center justify-between py-16 text-left text-body-regular font-semibold leading-none text-text-layout-powerful hover:bg-gray-100  active:bg-lightGrey active:inset-shadow-b-sm">
           {hasSubItems ? (
-            item.title
+            <span>
+              {iconUrl && (
+                <Image
+                  src={iconUrl}
+                  alt={item.title}
+                  width={18}
+                  height={18}
+                  className="inline-block mr-8"
+                />
+              )}
+              {item.title}
+            </span>
           ) : (
             <NavLink
               to={url}
@@ -116,6 +131,15 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
                 onClose();
               }}
             >
+              {iconUrl && (
+                <Image
+                  src={iconUrl}
+                  alt={item.title}
+                  width={18}
+                  height={18}
+                  className="inline-block mr-8"
+                />
+              )}
               {item.title}
             </NavLink>
           )}
@@ -135,10 +159,11 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
                   end
                   prefetch="intent"
                   style={activeLinkStyle}
-                  className="hover:text-text-layout-powerful transition-colors mb-4 py-8 px-8 bg-lightGrey rounded-md"
+                  className="text-medium-semi transition-colors mb-4 py-12 px-8 bg-lightGrey rounded-md flex justify-between items-center  active:bg-accentGrey active:inset-shadow-sm"
                   onClick={onClose}
                 >
                   {subItem.title}
+                  <ChevronRight size={20}/>
                 </NavLink>
               );
             })}

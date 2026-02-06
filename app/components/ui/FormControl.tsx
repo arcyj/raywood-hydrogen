@@ -119,6 +119,7 @@ const FormControlActions: FC<IFormControlActionsProps> = ({
       <div className="flex items-center justify-end">
         {hasValue && !disabled && clearHandler ? (
           <button
+            type="button"
             onClick={() => clearHandler && clearHandler()}
             onMouseDown={(e) => {
               e.preventDefault();

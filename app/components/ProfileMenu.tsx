@@ -1,7 +1,11 @@
 import { Suspense } from 'react';
 import { NavLink, Form, Await } from 'react-router';
 import { useDrawer } from './ui/Drawer';
+import { ChevronRight } from './icons';
 import type { FC } from 'react';
+import { twc } from '~/helpers/twMerge';
+import { Button } from './ui/Button';
+import { ButtonLink } from './ui/Link';
 
 interface ProfileMenuProps {
   isLoggedIn: Promise<boolean>;
@@ -23,6 +27,7 @@ export const ProfileMenu: FC<ProfileMenuProps> = ({ isLoggedIn }) => {
     };
   }
 
+  const navLinkStyle = twc`ext-medium-semi transition-colors mb-4 py-12 px-8 bg-lightGrey rounded-md flex justify-between items-center  active:bg-accentGrey active:inset-shadow-sm`
   return (
     <div className="profile-menu p-16">
       <h2 className="text-2xl font-bold mb-16">Account</h2>
@@ -30,26 +35,29 @@ export const ProfileMenu: FC<ProfileMenuProps> = ({ isLoggedIn }) => {
         <NavLink
           to="/account/orders"
           style={isActiveStyle}
-          className="px-16 py-12 text-body-regular font-medium hover:bg-gray-100 rounded-md transition-colors"
+          className={navLinkStyle}
           onClick={onClose}
         >
-          Orders
+          <span>Orders</span>
+          <ChevronRight size={20} />
         </NavLink>
         <NavLink
           to="/account/profile"
           style={isActiveStyle}
-          className="px-16 py-12 text-body-regular font-medium hover:bg-gray-100 rounded-md transition-colors"
+          className={navLinkStyle}
           onClick={onClose}
         >
-          Profile
+          <span>Profile</span>
+          <ChevronRight size={20} />
         </NavLink>
         <NavLink
           to="/account/addresses"
           style={isActiveStyle}
-          className="px-16 py-12 text-body-regular font-medium hover:bg-gray-100 rounded-md transition-colors"
+          className={navLinkStyle}
           onClick={onClose}
         >
-          Addresses
+          <span>Addresses</span>
+          <ChevronRight size={20} />
         </NavLink>
         <div className="border-t border-gray-200 mt-12 pt-12">
           <Suspense fallback={<div className="px-16 py-12">Loading...</div>}>
@@ -61,22 +69,23 @@ export const ProfileMenu: FC<ProfileMenuProps> = ({ isLoggedIn }) => {
                     action="/account/logout"
                     onSubmit={onClose}
                   >
-                    <button
+                    <Button
                       type="submit"
-                      className="w-full text-left px-16 py-12 text-body-regular font-medium hover:bg-gray-100 rounded-md transition-colors"
+                      variant='secondary'
+                      className='w-full'
                     >
                       Sign Out
-                    </button>
+                    </Button>
                   </Form>
                 ) : (
-                  <NavLink
-                    to="/account/login"
-                    style={isActiveStyle}
-                    className="px-16 py-12 text-body-regular font-medium hover:bg-gray-100 rounded-md transition-colors block"
+                  <ButtonLink
+                    href="/account/login"
+                    className="w-full"
                     onClick={onClose}
+                    variant="primary"
                   >
                     Sign In
-                  </NavLink>
+                  </ButtonLink>
                 )
               }
             </Await>

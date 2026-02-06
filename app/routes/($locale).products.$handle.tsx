@@ -455,7 +455,7 @@ function ProductContent({
 
       <RelatedProducts products={relatedProductsPromise} />
       {!isTablet && selectedVariant?.availableForSale ? (
-        <div className="sticky bottom-[80px]">
+        <div className="sticky bottom-[66px]">
           <AddToCartButton
             showIcon={false}
             disabled={!selectedVariant || !selectedVariant.availableForSale}

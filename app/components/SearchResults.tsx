@@ -1,5 +1,7 @@
 import {Link} from 'react-router';
-import {Image, Money, Pagination} from '@shopify/hydrogen';
+import {Pagination} from '@shopify/hydrogen';
+import {ProductItem} from '~/components/ProductItem';
+import { Button } from './ui/Button';
 import {urlWithTrackingParams, type RegularSearchReturn} from '~/lib/search';
 
 type SearchItems = RegularSearchReturn['result']['items'];
@@ -40,7 +42,7 @@ function SearchResultsArticles({
 
   return (
     <div className="search-result">
-      <h2>Articles</h2>
+      <h2 className='text-h2 mb-24 mt-44'>Articles</h2>
       <div>
         {articles?.nodes?.map((article) => {
           const articleUrl = urlWithTrackingParams({
@@ -50,8 +52,8 @@ function SearchResultsArticles({
           });
 
           return (
-            <div className="search-results-item" key={article.id}>
-              <Link prefetch="intent" to={articleUrl}>
+            <div className="search-results-item text-regular-semi" key={article.id}>
+              <Link prefetch="intent" to={articleUrl} className='hover:text-primary'>
                 {article.title}
               </Link>
             </div>
@@ -70,7 +72,7 @@ function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
 
   return (
     <div className="search-result">
-      <h2>Pages</h2>
+      <h2 className='text-h2 mb-24 mt-44'>Pages</h2>
       <div>
         {pages?.nodes?.map((page) => {
           const pageUrl = urlWithTrackingParams({
@@ -80,8 +82,8 @@ function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
           });
 
           return (
-            <div className="search-results-item" key={page.id}>
-              <Link prefetch="intent" to={pageUrl}>
+            <div className="search-results-item text-regular-semi" key={page.id}>
+              <Link prefetch="intent" to={pageUrl} className='hover:text-primary'>
                 {page.title}
               </Link>
             </div>
@@ -103,48 +105,30 @@ function SearchResultsProducts({
 
   return (
     <div className="search-result">
-      <h2>Products</h2>
+      <h2 className='text-h2 mb-24 mt-44'>Products</h2>
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
-          const ItemsMarkup = nodes.map((product) => {
-            const productUrl = urlWithTrackingParams({
-              baseUrl: `/products/${product.handle}`,
-              trackingParams: product.trackingParameters,
-              term,
-            });
-
-            const price = product?.selectedOrFirstAvailableVariant?.price;
-            const image = product?.selectedOrFirstAvailableVariant?.image;
-
-            return (
-              <div className="search-results-item" key={product.id}>
-                <Link prefetch="intent" to={productUrl}>
-                  {image && (
-                    <Image data={image} alt={product.title} width={50} />
-                  )}
-                  <div>
-                    <p>{product.title}</p>
-                    <small>{price && <Money data={price} />}</small>
-                  </div>
-                </Link>
-              </div>
-            );
-          });
+          const ItemsMarkup = nodes.map((product) => (
+            <ProductItem
+              key={product.id}
+              product={product}
+              loading={undefined}
+            />
+          ));
 
           return (
             <div>
-              <div>
+              <div className='mb-12 w-full text-center'>
                 <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                  {isLoading ? 'Loading...' : <Button variant="secondary" className='max-w-[450px]'>↑ Load previous</Button>}
                 </PreviousLink>
               </div>
-              <div>
+              <div className='products-grid auto-rows-[minmax(0,1fr)]'>
                 {ItemsMarkup}
-                <br />
               </div>
-              <div>
+              <div className='w-full text-center'>
                 <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more 2 ↓</span>}
+                  {isLoading ? 'Loading...' : <Button variant="secondary" className='max-w-[450px]'>Load more ↓</Button>}
                 </NextLink>
               </div>
             </div>

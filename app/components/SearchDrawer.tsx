@@ -24,7 +24,7 @@ export function SearchDrawer() {
       className='bg-transparent overflow-hidden m-0! max-w-[370px] tablet:max-w-[550px]'
     >
       <div className="predictive-search bg-white m-12 h-full rounded-lg min-h-[300px] max-h-[calc(100vh-150px)]">
-        <SearchFormPredictive>  
+        <SearchFormPredictive>
           {({fetchResults, goToSearch, inputRef, value}) => (
             <div>
               <Input
