@@ -1,10 +1,14 @@
+import { useEffect } from "react";
 import { Image } from "@shopify/hydrogen";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate, NavLink } from "react-router";
 import { twClasses } from "~/helpers/twMerge";
 import { ChevronLeftIcon, MagnifyingGlassIcon, MixerHorizontalIcon } from "@radix-ui/react-icons";
 import { useAside } from "./Aside";
 import { usePlaypeak } from "~/lib/playpeakContext";
 import { Button } from "./ui/Button";
+
+const BACK_PREV_KEY = 'pp-back-prev';
+const BACK_CURR_KEY = 'pp-back-curr';
 
 export function TopBar() {
   const location = useLocation();
@@ -12,16 +16,38 @@ export function TopBar() {
   const { open } = useAside();
   const { openSearchDrawer, closeSearchDrawer, isDrawerOpen, closeFilter, openFilter } = usePlaypeak();
 
-  const initial = 'fixed top-0 left-0 border-t-4 border-[#1D1229]/69 flex w-full justify-between px-4 pb-8 z-20 bg-[#1D1229]';
+  const initial = 'fixed top-0 left-0 border-t-4 border-[#35204d] flex w-full justify-between px-4 pb-8 z-20';
 
   const classes = twClasses([initial], {}, );
+
+  // Track previous in-app path so Back works correctly (history.length is unreliable in SPAs)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const path = location.pathname + location.search;
+    const prev = sessionStorage.getItem(BACK_CURR_KEY);
+    if (prev !== null && prev !== path) {
+      sessionStorage.setItem(BACK_PREV_KEY, prev);
+    }
+    sessionStorage.setItem(BACK_CURR_KEY, path);
+  }, [location.pathname, location.search]);
 
   // Determine which buttons to show based on current route
   const isProductPage = location.pathname.includes('/products/');
   const isCollectionPage = location.pathname.includes('/collections/') && !location.pathname.includes('/collections/all');
 
   const handleBack = () => {
-    navigate(-1);
+    if (typeof window === 'undefined') {
+      navigate('/');
+      return;
+    }
+    const prevPath = sessionStorage.getItem(BACK_PREV_KEY);
+    const currPath = location.pathname + location.search;
+    // If we have a previous in-app path (and it's not current), go there; else homepage
+    if (prevPath && prevPath !== currPath) {
+      navigate(prevPath);
+    } else {
+      navigate('/');
+    }
   };
 
   const handleFilter = () => {
@@ -57,7 +83,6 @@ export function TopBar() {
         )}
         {isCollectionPage && (
           <>
-
             <Button
               onClick={handleFilter}
               variant="action"
@@ -71,20 +96,32 @@ export function TopBar() {
           </>
         )}
       </div>
-      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-[#1D1229]/69 inline-block rounded-b-xl px-8 pb-4 h-auto">
-        <Image src="./images/LogoPlaypeak.svg" alt="Logo" width={55} height={0} />
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-[#35204d] inline-block rounded-b-xl px-8 pb-4 h-auto">
+        <div className="relative">
+          <div className="inverted-radius-left bg-[#35204d] w-[40px] h-[42px] absolute -left-[20px] -top-[30px]"></div>
+          <NavLink prefetch="intent" to="/" viewTransition end>
+            <Image
+              src="./images/LogoPlaypeak.svg"
+              alt="Logo"
+              width={65}
+              height={0}
+              className="p-4"
+            />
+          </NavLink>
+          <div className="inverted-radius-right bg-[#35204d] w-[40px] h-[42px] absolute -right-[20px] -top-[30px]"></div>
+        </div>
       </div>
       <div className="mt-4 ml-auto">
-          <Button
-            onClick={handleSearchToggle}
-            variant="action"
-            size="extra-small"
-            className=""
-            aria-label="search"
-            IconBefore={MagnifyingGlassIcon}
-          >
-            Search
-          </Button>
+        <Button
+          onClick={handleSearchToggle}
+          variant="action"
+          size="extra-small"
+          className=""
+          aria-label="search"
+          IconBefore={MagnifyingGlassIcon}
+        >
+          Search
+        </Button>
       </div>
     </div>
   );

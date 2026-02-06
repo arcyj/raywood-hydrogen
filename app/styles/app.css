@@ -861,3 +861,24 @@ button.reset:hover:not(:has(> *)) {
   color: #6610F2;
   font: 600 16px/26px 'Gilroy', sans-serif;
 }
+
+/*
+* --------------------------------------------------
+* Inverted border
+* --------------------------------------------------
+*/
+
+.inverted-radius-right{
+    --r: 12px;
+  mask:
+    radial-gradient(var(--r) at bottom right,transparent 98%, black) bottom right;
+  mask-size: 55% 39%;
+  mask-repeat: no-repeat;
+}
+.inverted-radius-left{
+    --r: 12px;
+  mask:
+    radial-gradient(var(--r) at bottom left, transparent 98%, black) bottom left;
+  mask-size: 55% 39%;
+  mask-repeat: no-repeat;
+}

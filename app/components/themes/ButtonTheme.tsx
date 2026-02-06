@@ -93,7 +93,7 @@ const ButtonTheme = {
     disabled: twc`cursor-not-allowed`,
   },
   sizes: {
-    'extra-small': twc`text-extra-small h-28 px-8`,
+    'extra-small': twc`text-extra-small h-32 px-12`,
     small: twc`text-label-m h-40 px-16`,
     medium: twc`text-label-m h-48 px-16`,
     large: twc`text-label-l h-56 px-16`,
