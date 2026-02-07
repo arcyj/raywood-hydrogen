@@ -26,9 +26,9 @@ export function ProductPrice({
   return (
     <div className={`product-price ${className}`}>
       {compareAtPrice ? (
-        <div className="product-price-on-sale">
-          {price ? <Money data={price} /> : null}
-          <s>
+        <div className='flex items-end'>
+          {price ? <span className={`${textClasses} text-danger mr-8`}><Money data={price} /></span> : null}
+          <s className='text-[18px] font-semibold'>
             <Money data={compareAtPrice} />
           </s>
         </div>

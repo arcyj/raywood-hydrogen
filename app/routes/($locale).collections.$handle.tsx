@@ -19,6 +19,9 @@ import { Breadcrumb } from '~/components/sections/Breadcrumb';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { ToggleGroup } from '~/components/ui/ToggleGroup';
 
+// Hooks
+import { useBreakpoints } from '~/hooks/useBreakpoints';
+
 // Helpers
 import {parseAsCurrency} from '~/helpers/parseAsCurrency';
 import { getSortValuesFromParam } from '~/helpers/getSortValuesFromParam';
@@ -186,6 +189,9 @@ export default function Collection() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
+    const breakpoints = useBreakpoints();
+    const { isTablet } = breakpoints;
+
   const nextPageUrl = React.useMemo(() => {
     const sp = new URLSearchParams(location.search);
     sp.set('page', String((productsPage ?? 1) + 1));
@@ -206,7 +212,7 @@ export default function Collection() {
       <Breadcrumb
         collection={{title: collection.title, handle: collection.handle}}
         parentCollection={parentCollection ?? undefined}
-        className='hidden tablet:block'
+        className="hidden tablet:block"
       />
       <h1 className="text-h1 my-12 tablet:my-24">{collection.title}</h1>
       <ChildCollectionSlider className="mb-24" />
@@ -261,21 +267,23 @@ export default function Collection() {
           </div>
           <div className="flex items-center gap-8 flex-wrap">
             <SortByFilter />
-            <ToggleGroup
-              value={String(collectionGrid)}
-              onValueChange={(v) => {
-                const n = v ? parseInt(v, 10) : NaN;
-                if (n === 4 || n === 6) setCollectionGrid(n);
-              }}
-              ariaLabel="Products per row"
-            >
-              <ToggleGroup.Item value="4">
-                <SmallGrid size={20} />
-              </ToggleGroup.Item>
-              <ToggleGroup.Item value="6">
-                <LargeGrid size={20} />
-              </ToggleGroup.Item>
-            </ToggleGroup>
+            {isTablet ? (
+              <ToggleGroup
+                value={String(collectionGrid)}
+                onValueChange={(v) => {
+                  const n = v ? parseInt(v, 10) : NaN;
+                  if (n === 4 || n === 6) setCollectionGrid(n);
+                }}
+                ariaLabel="Products per row"
+              >
+                <ToggleGroup.Item value="4">
+                  <SmallGrid size={20} />
+                </ToggleGroup.Item>
+                <ToggleGroup.Item value="6">
+                  <LargeGrid size={20} />
+                </ToggleGroup.Item>
+              </ToggleGroup>
+            ) : null}
           </div>
         </div>
       </div>

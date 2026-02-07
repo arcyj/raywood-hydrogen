@@ -18,6 +18,14 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import resetStyles from '~/styles/reset.css?url';
 import {PageLayout} from './components/PageLayout';
+import { googleTag, googleTagNoScript } from './helpers/google';
+import { GtmRouteTracker } from './components/GtmRouteTracker';
+
+declare global {
+  interface Window {
+    gtag: (...args: unknown[]) => void;
+  }
+}
 
 export type RootLoader = typeof loader;
 
@@ -62,6 +70,10 @@ export function links() {
     {
       rel: 'preconnect',
       href: 'https://shop.app',
+    },
+    {
+      rel: 'preconnect',
+      href: 'https://www.googletagmanager.com',
     },
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
   ];
@@ -157,14 +169,22 @@ export function Layout({children}: {children?: React.ReactNode}) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1"
+        />
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <Meta />
         <Links />
+        <script
+          id="google-tag-script"
+          dangerouslySetInnerHTML={{ __html: googleTag() }}
+        />
       </head>
       <body>
+        <noscript dangerouslySetInnerHTML={{ __html: googleTagNoScript() }} />
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
@@ -177,7 +197,12 @@ export default function App() {
   const data = useRouteLoaderData<RootLoader>('root');
 
   if (!data) {
-    return <Outlet />;
+    return (
+      <>
+        <GtmRouteTracker />
+        <Outlet />
+      </>
+    );
   }
 
   return (
@@ -186,6 +211,7 @@ export default function App() {
       shop={data.shop}
       consent={data.consent}
     >
+      <GtmRouteTracker />
       <PageLayout {...data}>
         <Outlet />
       </PageLayout>

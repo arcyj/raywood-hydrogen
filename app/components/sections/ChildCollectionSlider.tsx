@@ -1,6 +1,7 @@
 import {redirect, useLoaderData, Link} from 'react-router';
 import type { CollectionQuery } from 'storefrontapi.generated';
 import { Slider } from '~/components/Slider';
+import { useBreakpoints } from '~/hooks/useBreakpoints';
 import type { FC } from 'react';
 
 interface IChildCollectionSlider {
@@ -8,17 +9,25 @@ interface IChildCollectionSlider {
 }
 
 export const ChildCollectionSlider: FC<IChildCollectionSlider> = ({className}) => {
+  const breakpoints = useBreakpoints();
+  const { isMobile } = breakpoints;
+
   const {childCollections} = useLoaderData<
       CollectionQuery & {
         childCollections: Array<{ id: string; handle: string; title: string; image:{url: string} }>;
       }
     >();
-  return(
+  return (
     <>
       {childCollections && childCollections.length > 0 && (
         <div className={className}>
           <Slider
-            settings={{slidesToShow: 'auto', spaceBetween:8, dots: false}}
+            settings={{
+              slidesToShow: 'auto',
+              spaceBetween: 8,
+              dots: false,
+              arrows: isMobile ? false : true,
+            }}
           >
             {childCollections.map((childCollection) => (
               <Link
@@ -48,5 +57,5 @@ export const ChildCollectionSlider: FC<IChildCollectionSlider> = ({className}) =
         </div>
       )}
     </>
-  )
+  );
 }
