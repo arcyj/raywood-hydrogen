@@ -84,13 +84,6 @@ export const WishlistMenu: FC = () => {
           <p className="text-body-regular text-text-layout-secondary mb-16">
             Your wishlist is empty
           </p>
-          <Link
-            to="/collections"
-            onClick={onClose}
-            className="px-16 py-12 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
-          >
-            Continue Shopping
-          </Link>
         </div>
       ) : (
         <div className="flex flex-col gap-12">

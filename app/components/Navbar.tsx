@@ -1,4 +1,3 @@
-import {createContext, useContext} from 'react';
 import { Drawer } from './ui/Drawer';
 import { NavMenuItem } from './ui/NavMenuItem';
 import { DropDownMenu } from './ui/DropdownMenu';
@@ -64,7 +63,7 @@ export function Navbar({
       >
         {renderMenuContent()}
       </Drawer>
-      <nav className="fixed bottom-0 w-full rounded-t-md z-[9999] bg-transparent">
+      <nav className="fixed inset-x-0 bottom-0 w-full rounded-t-md z-[9999] bg-transparent pb-[env(safe-area-inset-bottom)]">
         <div className="grid grid-cols-4 p-4 gap-4 bg-lightGrey shadow-large">
           <NavMenuItem
             onClick={() => onMenuToggle('menu')}
