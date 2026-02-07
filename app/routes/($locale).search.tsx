@@ -16,9 +16,16 @@ import type {
 import { Input } from '~/components/ui/Input';
 import { Button } from '~/components/ui/Button';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
-export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Search`}];
+export const meta: Route.MetaFunction = ({matches, location}) => {
+  const url = getAbsoluteUrl(matches ?? [], location);
+  return getSeoMeta({
+    title: 'Search | Playpeak',
+    description: 'Search for trading cards and collectibles.',
+    url,
+    type: 'website',
+  });
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {

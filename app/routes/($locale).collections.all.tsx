@@ -5,9 +5,16 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ProductItem} from '~/components/ProductItem';
 import {ProductItemSkeleton} from '~/components/ProductItemSkeleton';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
+import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
-export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Products`}];
+export const meta: Route.MetaFunction = ({matches, location}) => {
+  const url = getAbsoluteUrl(matches ?? [], location);
+  return getSeoMeta({
+    title: 'All Products | Playpeak',
+    description: 'Browse all trading card games and collectibles.',
+    url,
+    type: 'website',
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {

@@ -2,9 +2,19 @@ import {useLoaderData} from 'react-router';
 import type {Route} from './+types/blogs.$blogHandle.$articleHandle';
 import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.article.title ?? ''} article`}];
+export const meta: Route.MetaFunction = ({data, matches, location}) => {
+  const article = data?.article;
+  const title = article?.seo?.title ?? article?.title ? `${article.title} | Playpeak` : 'Playpeak';
+  const url = getAbsoluteUrl(matches ?? [], location);
+  return getSeoMeta({
+    title,
+    description: article?.seo?.description ?? undefined,
+    imageUrl: article?.image?.url ?? undefined,
+    url,
+    type: 'article',
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {

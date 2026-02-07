@@ -23,7 +23,6 @@ export function DesktopTopBar({
       </div>
       <div>
         <p className="text-medium-semi text-white">
-          Free shipping on orders over 150€
         </p>
       </div>
       <div>

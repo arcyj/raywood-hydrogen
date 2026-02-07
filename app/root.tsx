@@ -11,7 +11,6 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import type {Route} from './+types/root';
-import favicon from '~/assets/favicon.svg';
 import {redirect} from 'react-router';
 import {FOOTER_QUERY, HEADER_QUERY, LOCALIZATION_QUERY} from '~/lib/fragments';
 import {
@@ -80,7 +79,13 @@ export function links() {
       rel: 'preconnect',
       href: 'https://www.googletagmanager.com',
     },
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    { rel: 'icon', type: 'image/x-icon', href: '/images/favicon.ico' },
+    { rel: 'icon', type: 'image/svg+xml', href: '/images/favicon.svg' },
+    { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/images/favicon-32x32.png' },
+    { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/images/favicon-16x16.png' },
+    { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/images/favicon-96x96.png' },
+    { rel: 'apple-touch-icon', sizes: '180x180', href: '/images/apple-touch-icon.png' },
+    { rel: 'manifest', href: '/site.webmanifest' },
   ];
 }
 
@@ -198,6 +203,8 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={appStyles}></link>
+        <meta name="apple-mobile-web-app-title" content="Playpeak" />
+        <meta name="google-site-verification" content="eemZ-QHeaOHL0Gyk9T5Rmq9B3mE7EGWODW2N1ggDBD4" />
         <Meta />
         <Links />
         <script

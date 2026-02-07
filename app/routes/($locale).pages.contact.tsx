@@ -4,9 +4,16 @@ import {Input} from '~/components/ui/Input';
 import {Button} from '~/components/ui/Button';
 import {CONTACT_FORM_MUTATION} from '~/graphql/ContactFormMutation';
 import type {Route} from './+types/pages.contact';
+import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
-export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Contact Us`}];
+export const meta: Route.MetaFunction = ({matches, location}) => {
+  const url = getAbsoluteUrl(matches ?? [], location);
+  return getSeoMeta({
+    title: 'Contact Us | Playpeak',
+    description: 'Get in touch with Playpeak.',
+    url,
+    type: 'website',
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {

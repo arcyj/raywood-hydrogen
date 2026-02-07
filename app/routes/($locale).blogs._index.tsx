@@ -3,11 +3,18 @@ import type {Route} from './+types/blogs._index';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import type {BlogsQuery} from 'storefrontapi.generated';
+import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0];
 
-export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Blogs`}];
+export const meta: Route.MetaFunction = ({matches, location}) => {
+  const url = getAbsoluteUrl(matches ?? [], location);
+  return getSeoMeta({
+    title: 'Blog | Playpeak',
+    description: 'News and articles from Playpeak.',
+    url,
+    type: 'website',
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {

@@ -34,15 +34,19 @@ import { deliveryTime } from '~/helpers/deliveryTime';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { AddToCartButton } from '~/components/AddToCartButton';
 import { Cart } from '~/components/icons';
+import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
-export const meta: Route.MetaFunction = ({data}: {data?: {product?: {title?: string; handle?: string}}}) => {
-  return [
-    {title: `Hydrogen | ${data?.product?.title ?? ''}`},
-    {
-      rel: 'canonical',
-      href: `/products/${data?.product?.handle ?? ''}`,
-    },
-  ];
+export const meta: Route.MetaFunction = ({data, matches, location}) => {
+  const product = data?.product;
+  const title = product?.title ? `${product.title} | Playpeak` : 'Playpeak';
+  const url = getAbsoluteUrl(matches ?? [], location);
+  return getSeoMeta({
+    title,
+    description: product?.description ?? undefined,
+    imageUrl: product?.featuredImage?.url ?? undefined,
+    url,
+    type: 'product',
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -66,10 +70,15 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     throw new Error('Expected product handle to be defined');
   }
 
-  const result = await storefront.query<{product: {id: string; title: string; handle: string} | null}>(
-    MINIMAL_PRODUCT_QUERY,
-    {variables: {handle}},
-  );
+  const result = await storefront.query<{
+    product: {
+      id: string;
+      title: string;
+      handle: string;
+      description?: string | null;
+      featuredImage?: { url: string } | null;
+    } | null;
+  }>(MINIMAL_PRODUCT_QUERY, {variables: {handle}});
   const product = result?.product;
 
   if (!product?.id) {
@@ -692,6 +701,10 @@ const MINIMAL_PRODUCT_QUERY = `#graphql
       id
       title
       handle
+      description
+      featuredImage {
+        url
+      }
     }
   }
 ` as const;

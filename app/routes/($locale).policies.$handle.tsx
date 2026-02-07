@@ -3,14 +3,17 @@ import type {Route} from './+types/policies.$handle';
 import {type Shop} from '@shopify/hydrogen/storefront-api-types';
 import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
 import { POLICIES_QUERY } from './($locale).policies._index';
+import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
 type SelectedPolicies = keyof Pick<
   Shop,
   'privacyPolicy' | 'shippingPolicy' | 'termsOfService' | 'refundPolicy'
 >;
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.policy.title ?? ''}`}];
+export const meta: Route.MetaFunction = ({data, matches, location}) => {
+  const title = data?.policy?.title ? `${data.policy.title} | Playpeak` : 'Policies | Playpeak';
+  const url = getAbsoluteUrl(matches ?? [], location);
+  return getSeoMeta({ title, url, type: 'website' });
 };
 
 export async function loader({params, context}: Route.LoaderArgs) {

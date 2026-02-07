@@ -12,9 +12,16 @@ import { Banner } from '~/components/sections/Banner';
 import { ButtonLink } from '~/components/ui/Link';
 import { CollectionCards } from '~/components/sections/CollectionCards';
 import {fetchCollectionsByHandles} from '~/lib/queries/collections';
+import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
-export const meta: Route.MetaFunction = () => {
-  return [{title: 'Hydrogen | Home'}];
+export const meta: Route.MetaFunction = ({matches, location}) => {
+  const url = getAbsoluteUrl(matches ?? [], location);
+  return getSeoMeta({
+    title: 'Playpeak | TCG & Collectibles',
+    description: 'Shop trading card games and collectibles. Pokemon TCG, Magic: The Gathering, Lorcana and more.',
+    url,
+    type: 'website',
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {

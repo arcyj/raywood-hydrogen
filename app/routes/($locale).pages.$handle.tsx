@@ -1,9 +1,18 @@
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.page.title ?? ''}`}];
+export const meta: Route.MetaFunction = ({data, matches, location}) => {
+  const page = data?.page;
+  const title = page?.seo?.title ?? page?.title ? `${page.title} | Playpeak` : 'Playpeak';
+  const url = getAbsoluteUrl(matches ?? [], location);
+  return getSeoMeta({
+    title,
+    description: page?.seo?.description ?? undefined,
+    url,
+    type: 'website',
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {
