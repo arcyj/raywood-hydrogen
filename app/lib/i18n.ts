@@ -58,6 +58,37 @@ export function buildLocaleOptionsFromApi(
 /** Matches locale path segment e.g. /en-ca, /fr-fr */
 const LOCALE_PATH_PATTERN = /^\/[a-z]{2}-[a-z]{2}$/;
 
+/** Country codes that should not trigger geo-based locale (unknown/Tor) */
+const SKIP_GEO_COUNTRIES = new Set(['XX', 'T1']);
+
+/**
+ * Detects user country from request (Cloudflare CF-IPCountry / request.cf, or Vercel header).
+ * Returns ISO 3166-1 Alpha-2 country code (e.g. "CA") or null.
+ */
+export function getDetectedCountryCode(request: Request): string | null {
+  const cf = (request as Request & { cf?: { country?: string } }).cf;
+  const fromCf = cf?.country?.toUpperCase();
+  if (fromCf && !SKIP_GEO_COUNTRIES.has(fromCf)) return fromCf;
+
+  const fromHeader =
+    request.headers.get('CF-IPCountry')?.toUpperCase() ??
+    request.headers.get('x-vercel-ip-country')?.toUpperCase();
+  if (fromHeader && !SKIP_GEO_COUNTRIES.has(fromHeader)) return fromHeader;
+
+  return null;
+}
+
+/**
+ * Returns the locale option that matches the given country code, or null.
+ */
+export function getLocaleOptionForCountry(
+  countryCode: string,
+  options: LocaleOption[],
+): LocaleOption | null {
+  const code = countryCode.toUpperCase();
+  return options.find((opt) => opt.country.toUpperCase() === code) ?? null;
+}
+
 export function getLocaleFromRequest(request: Request): I18nLocale {
   const url = new URL(request.url);
   let firstPathPart = `/${url.pathname.substring(1).split("/")[0].toLowerCase()}`;

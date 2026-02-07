@@ -12,8 +12,13 @@ import {
 } from 'react-router';
 import type {Route} from './+types/root';
 import favicon from '~/assets/favicon.svg';
+import {redirect} from 'react-router';
 import {FOOTER_QUERY, HEADER_QUERY, LOCALIZATION_QUERY} from '~/lib/fragments';
-import {buildLocaleOptionsFromApi} from '~/lib/i18n';
+import {
+  buildLocaleOptionsFromApi,
+  getDetectedCountryCode,
+  getLocaleOptionForCountry,
+} from '~/lib/i18n';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import resetStyles from '~/styles/reset.css?url';
@@ -87,6 +92,23 @@ export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
 
   const {storefront, env} = args.context;
+  const currentPathPrefix = (storefront.i18n as { pathPrefix?: string }).pathPrefix ?? '';
+
+  // When URL has no locale, redirect to locale matching user's country (geo)
+  if (!currentPathPrefix) {
+    const detected = getDetectedCountryCode(args.request);
+    if (detected) {
+      const localeForCountry = getLocaleOptionForCountry(
+        detected,
+        criticalData.availableLocales,
+      );
+      if (localeForCountry?.pathPrefix) {
+        const url = new URL(args.request.url);
+        const pathname = url.pathname === '/' ? '/' : url.pathname;
+        throw redirect(localeForCountry.pathPrefix + pathname + url.search);
+      }
+    }
+  }
 
   return {
     ...deferredData,
