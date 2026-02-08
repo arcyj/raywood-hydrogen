@@ -339,6 +339,12 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     title
     vendor
     availableForSale
+    selectedOrFirstAvailableVariant {
+      compareAtPrice {
+        amount
+        currencyCode
+      }
+    }
     featuredImage {
       id
       altText

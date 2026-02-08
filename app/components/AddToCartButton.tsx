@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { Button } from './ui/Button';
-import {type FetcherWithComponents} from 'react-router';
-import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen';
+import { useFetcher, useRevalidator, type FetcherWithComponents } from 'react-router';
+import { CartForm, type OptimisticCartLineInput } from '@shopify/hydrogen';
 import type { IButtonSize } from './themes/ButtonTheme';
 import { usePlaypeak } from '~/lib/playpeakContext';
+import { useCartRoute } from '~/lib/cartRoute';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { Cart } from './icons';
 
@@ -28,6 +29,7 @@ function AddToCartButtonInner({
 }) {
   const previousStateRef = useRef<string>('idle');
   const hasCalledSuccessRef = useRef<boolean>(false);
+  const { revalidate } = useRevalidator();
 
   const {openCart} = usePlaypeak();
 
@@ -39,20 +41,22 @@ function AddToCartButtonInner({
     ? window.innerWidth <= 768
     : isMobile;
 
-  // Call onSuccess when fetcher completes successfully
+  // Call onSuccess and revalidate when fetcher completes successfully so cart drawer updates
   useEffect(() => {
     const wasNotIdle = previousStateRef.current !== 'idle';
     const isNowIdle = fetcher.state === 'idle';
 
     const hasData = fetcher.data && !fetcher.data.errors;
 
-    // If we transitioned from a non-idle state to idle with successful data, call onSuccess
+    // If we transitioned from a non-idle state to idle with successful data, call onSuccess and revalidate root
     if (wasNotIdle && isNowIdle && hasData && !hasCalledSuccessRef.current) {
       hasCalledSuccessRef.current = true;
 
       if (onSuccess) {
         onSuccess();
       }
+      // Force root loader to re-run so deferred cart promise updates and drawer shows new item
+      revalidate();
     }
 
     previousStateRef.current = fetcher.state;
@@ -61,7 +65,7 @@ function AddToCartButtonInner({
     if (fetcher.state === 'submitting' || fetcher.state === 'loading') {
       hasCalledSuccessRef.current = false;
     }
-  }, [fetcher.state, fetcher.data, onSuccess, isMobileDevice]);
+  }, [fetcher.state, fetcher.data, onSuccess, isMobileDevice, revalidate]);
 
   const handleClick = () => {
     openCart();
@@ -111,21 +115,41 @@ export function AddToCartButton({
   onClick?: () => void;
   onSuccess?: () => void;
 }) {
+  const cartRoute = useCartRoute();
+  const fetcher = useFetcher<{ cart?: unknown; errors?: unknown[] }>();
+
+  // Submit programmatically so the request always uses the correct action URL and payload
+  const formRef = useRef<HTMLFormElement>(null);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (disabled || fetcher.state !== 'idle') return;
+    const form = formRef.current;
+    if (!form) return;
+    const formData = new FormData(form);
+    fetcher.submit(formData, { method: 'post', action: cartRoute });
+  };
+
   return (
-    <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
-      {(fetcher: FetcherWithComponents<any>) => (
-        <AddToCartButtonInner
-          showIcon={showIcon}
-          size={size}
-          analytics={analytics}
-          disabled={disabled}
-          onClick={onClick}
-          onSuccess={onSuccess}
-          fetcher={fetcher}
-        >
-          {children}
-        </AddToCartButtonInner>
-      )}
-    </CartForm>
+    <form ref={formRef} onSubmit={handleSubmit}>
+      <input
+        type="hidden"
+        name={CartForm.INPUT_NAME}
+        value={JSON.stringify({
+          action: CartForm.ACTIONS.LinesAdd,
+          inputs: { lines },
+        })}
+      />
+      <AddToCartButtonInner
+        showIcon={showIcon}
+        size={size}
+        analytics={analytics}
+        disabled={disabled}
+        onClick={onClick}
+        onSuccess={onSuccess}
+        fetcher={fetcher}
+      >
+        {children}
+      </AddToCartButtonInner>
+    </form>
   );
 }

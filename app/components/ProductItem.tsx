@@ -27,6 +27,8 @@ export function ProductItem({
   const variant = 'selectedOrFirstAvailableVariant' in product ? product.selectedOrFirstAvailableVariant : undefined;
   const image = variant?.image ?? ('featuredImage' in product ? product.featuredImage : undefined);
   const price = variant?.price ?? ('priceRange' in product ? product.priceRange?.minVariantPrice : undefined);
+  const compareAtPrice = 'selectedOrFirstAvailableVariant' in product ? product.selectedOrFirstAvailableVariant?.compareAtPrice : undefined;
+  console.log("compareAtPrice", price, compareAtPrice)
   const availableForSale =
     (variant as { availableForSale?: boolean } | undefined)?.availableForSale ??
     ('availableForSale' in product ? product.availableForSale : true);
@@ -62,11 +64,18 @@ export function ProductItem({
         </span>
         <h4 className="text-h4 pt-4 line-clamp-2 overflow-hidden text-ellipsis mb-8">{product.title}</h4>
         <div className="flex justify-between items-center">
-          {price && (
-            <span className="text-[18px] desktop:text-[22px] leading-[26px] font-bold">
-              <Money data={price} />
-            </span>
-          )}
+          <div className='flex items-end'>
+            {price && (
+              <span className={`text-[18px] desktop:text-[22px] leading-[26px] font-bold ${compareAtPrice ? 'text-danger mr-4' : null}`}>
+                <Money data={price} />
+              </span>
+            )}
+            {compareAtPrice && (
+              <s className="text-[13px] desktop:text-[15px] leading-[22px] font-semibold text-gray">
+                <Money data={compareAtPrice} />
+              </s>
+            )}
+          </div>
           {!availableForSale ? <ProductStockStatus availableForSale={availableForSale} /> : null}
         </div>
       </div>
