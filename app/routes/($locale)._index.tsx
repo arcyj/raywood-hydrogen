@@ -245,7 +245,7 @@ function CollectionProducts({
                   <ButtonLink
                     href={`/collections/${collection.handle}`}
                     variant='tertiary'
-                    className=""
+                    className="!hidden tablet:!flex"
                   >
                     View All
                   </ButtonLink>

@@ -3,6 +3,7 @@ import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Image, type OptimisticCartLine, Money} from '@shopify/hydrogen';
 import { TrashIcon } from '@radix-ui/react-icons';
 import {useVariantUrl} from '~/lib/variants';
+import {useCartRoute} from '~/lib/cartRoute';
 import {Link} from 'react-router';
 import {ProductPrice} from './ProductPrice';
 import {useContext, useState, useRef, useEffect} from 'react';
@@ -97,6 +98,7 @@ function CartLineItemView({
     <li key={id} className="flex bg-lightGrey rounded-md px-4 py-8 ">
       {image && (
           <Image
+            sizes='100'
             alt={title}
             aspectRatio="1/1"
             data={image}
@@ -159,14 +161,20 @@ function ProductView({
   const aside = AsideContext ? useContext(AsideContext) : null;
   const close = onClose || aside?.close;
 
-  // Debug: Log variant ID to verify it's being passed correctly
-  if (process.env.NODE_ENV === 'development') {
-    console.log('ProductLineItem - variantId:', variantId, 'availableForSale:', variantAvailableForSale, 'product:', product.title);
-    // Verify variant ID format - should be GID format like "gid://shopify/ProductVariant/123456"
-    if (variantId && !variantId.startsWith('gid://shopify/ProductVariant/')) {
-      console.warn('⚠️ Variant ID may be in wrong format. Expected GID format, got:', variantId);
-    }
-  }
+  // Build selectedVariant for optimistic cart: useOptimisticCart needs the full variant object
+  // (with product and image) so the cart can show the line immediately before the server responds.
+  const selectedVariantForCart = variantId
+    ? {
+        id: variantId,
+        title: product.title,
+        product: {
+          id: product.id,
+          title: product.title,
+          handle: product.handle,
+        },
+        image: image ?? null,
+      }
+    : null;
 
   return (
     <li className="product-line flex bg-lightGrey rounded-md px-4 py-8">
@@ -185,6 +193,7 @@ function ProductView({
             loading="lazy"
             width={100}
             className="p-4 mr-4 mix-blend-darken"
+            sizes="100"
           />
         </Link>
       )}
@@ -203,7 +212,7 @@ function ProductView({
         </Link>
         {price && <ProductPrice price={price} size="small" />}
         <div className="mt-auto flex gap-8 items-center flex-wrap">
-          {variantId ? (
+          {variantId && selectedVariantForCart ? (
             <AddToCartButton
               size='small'
               disabled={variantAvailableForSale === false}
@@ -211,10 +220,10 @@ function ProductView({
                 {
                   merchandiseId: variantId,
                   quantity: 1,
+                  selectedVariant: selectedVariantForCart,
                 },
               ]}
               onSuccess={() => {
-                // Log success for debugging
                 if (process.env.NODE_ENV === 'development') {
                   console.log('✅ Product added to cart from wishlist:', product.title, variantId);
                 }
@@ -327,10 +336,11 @@ function CartLineRemoveButton({
   lineIds: string[];
   disabled: boolean;
 }) {
+  const cartRoute = useCartRoute();
   return (
     <CartForm
       fetcherKey={getRemoveKey(lineIds)}
-      route="/cart"
+      route={cartRoute}
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
@@ -373,11 +383,12 @@ function CartLineUpdateButton({
   lines: CartLineUpdateInput[];
 }) {
   const lineIds = lines.map((line) => line.id);
+  const cartRoute = useCartRoute();
 
   return (
     <CartForm
       fetcherKey={getUpdateKey(lineIds)}
-      route="/cart"
+      route={cartRoute}
       action={CartForm.ACTIONS.LinesUpdate}
       inputs={{lines}}
     >
