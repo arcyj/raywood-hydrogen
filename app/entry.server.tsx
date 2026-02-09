@@ -19,19 +19,24 @@ export default async function handleRequest(
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+   /* @description Add Google Tag Manager domains to Content Security Policy */
     scriptSrc: [
-      'https://www.googletagmanager.com',
-      'https://www.google-analytics.com',
-    ],
-    connectSrc: [
-      'https://www.googletagmanager.com',
-      'https://www.google-analytics.com',
+      "'self'",
+      'https://cdn.shopify.com',
+      'https://*.googletagmanager.com',
     ],
     imgSrc: [
-      'https://www.googletagmanager.com',
-      'https://www.google-analytics.com',
+      "'self'",
+      'https://cdn.shopify.com',
+      'https://*.google-analytics.com',
+      'https://*.googletagmanager.com',
     ],
-    frameSrc: ['https://www.googletagmanager.com'],
+    connectSrc: [
+      "'self'",
+      'https://*.google-analytics.com',
+      'https://*.analytics.google.com',
+      'https://*.googletagmanager.com',
+    ],
   });
 
   const body = await renderToReadableStream(

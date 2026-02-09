@@ -1,4 +1,4 @@
-import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
+import {Analytics, getShopAnalytics, useNonce, Script} from '@shopify/hydrogen';
 import {
   Outlet,
   useRouteError,
@@ -22,8 +22,7 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import resetStyles from '~/styles/reset.css?url';
 import {PageLayout} from './components/PageLayout';
-import { googleTag, googleTagNoScript } from './helpers/google';
-import { GtmRouteTracker } from './components/GtmRouteTracker';
+import { GoogleTagManager } from './helpers/GoogleTagManager';
 
 declare global {
   interface Window {
@@ -204,17 +203,37 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <meta name="apple-mobile-web-app-title" content="Playpeak" />
-        <meta name="google-site-verification" content="eemZ-QHeaOHL0Gyk9T5Rmq9B3mE7EGWODW2N1ggDBD4" />
+        <meta
+          name="google-site-verification"
+          content="eemZ-QHeaOHL0Gyk9T5Rmq9B3mE7EGWODW2N1ggDBD4"
+        />
         <Meta />
         <Links />
-        <script
-          id="google-tag-script"
+        {/* @description Add Google Tag Manager script to head */}
+        <Script
           nonce={nonce}
-          dangerouslySetInnerHTML={{ __html: googleTag() }}
-        />
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-N58NQWWC');`,
+          }}
+        ></Script>
       </head>
       <body>
-        <noscript dangerouslySetInnerHTML={{ __html: googleTagNoScript() }} />
+        <noscript>
+          <iframe
+            title="Google Tag Manager"
+            src="https://www.googletagmanager.com/ns.html?id=GTM-N58NQWWC"
+            height="0"
+            width="0"
+            style={{
+              display: 'none',
+              visibility: 'hidden',
+            }}
+          ></iframe>
+        </noscript>
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
@@ -229,7 +248,7 @@ export default function App() {
   if (!data) {
     return (
       <>
-        <GtmRouteTracker />
+        <GoogleTagManager />
         <Outlet />
       </>
     );
@@ -241,7 +260,7 @@ export default function App() {
       shop={data.shop}
       consent={data.consent}
     >
-      <GtmRouteTracker />
+      <GoogleTagManager />
       <PageLayout {...data}>
         <Outlet />
       </PageLayout>
