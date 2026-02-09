@@ -209,6 +209,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <Links />
         <script
           id="google-tag-script"
+          nonce={nonce}
           dangerouslySetInnerHTML={{ __html: googleTag() }}
         />
       </head>
