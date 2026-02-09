@@ -10,11 +10,13 @@ import {MagnifyingGlassIcon} from '@radix-ui/react-icons';
 import {Drawer} from './ui/Drawer';
 import {usePlaypeak} from '~/lib/playpeakContext';
 import { Button } from './ui/Button';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 export function SearchDrawer() {
   const queriesDatalistId = useId();
   const { isDrawerOpen, closeSearchDrawer } = usePlaypeak();
   const isOpen = isDrawerOpen('search');
+  const withLocale = useLocalizedPath();
 
   return (
     <Drawer
@@ -87,7 +89,7 @@ export function SearchDrawer() {
                 {term.current && total ? (
                   <Link
                     onClick={closeSearch}
-                    to={`${SEARCH_ENDPOINT}?q=${term.current}`}
+                    to={withLocale(`${SEARCH_ENDPOINT}?q=${term.current}`)}
                   >
                     <Button className="w-full">
                       View all results for <q>{term.current}</q>

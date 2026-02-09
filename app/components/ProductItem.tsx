@@ -9,6 +9,7 @@ import type {
 import {useVariantUrl} from '~/lib/variants';
 import { twClasses } from '~/helpers/twMerge';
 import { ProductStockStatus } from './ui/ProductStockStatus';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type ProductItemProduct =
   | CollectionItemFragment
@@ -24,6 +25,7 @@ export function ProductItem({
   loading?: 'eager' | 'lazy';
 }) {
   const variantUrl = useVariantUrl(product.handle);
+  const withLocale = useLocalizedPath();
   const variant = 'selectedOrFirstAvailableVariant' in product ? product.selectedOrFirstAvailableVariant : undefined;
   const image = variant?.image ?? ('featuredImage' in product ? product.featuredImage : undefined);
   const price = variant?.price ?? ('priceRange' in product ? product.priceRange?.minVariantPrice : undefined);
@@ -42,7 +44,7 @@ export function ProductItem({
       className={productClasses}
       key={product.id}
       prefetch="intent"
-      to={variantUrl}
+      to={withLocale(variantUrl)}
       viewTransition
     >
       <div>

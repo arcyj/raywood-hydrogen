@@ -8,6 +8,7 @@ import {
 import type {Route} from './+types/account';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 import {Button} from '~/components/ui/Button';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 export function shouldRevalidate() {
   return true;
@@ -56,10 +57,11 @@ export default function AccountLayout() {
 }
 
 function AccountMenu() {
+  const withLocale = useLocalizedPath();
   return (
     <nav role="navigation" className="flex items-center gap-4 pb-6 border-b border-gray-200">
       <NavLink
-        to="/account/orders"
+        to={withLocale('/account/orders')}
         className={({isActive, isPending}) =>
           `text-base font-medium transition-colors ${
             isPending
@@ -74,7 +76,7 @@ function AccountMenu() {
       </NavLink>
       <span className="text-gray-300">|</span>
       <NavLink
-        to="/account/profile"
+        to={withLocale('/account/profile')}
         className={({isActive, isPending}) =>
           `text-base font-medium transition-colors ${
             isPending
@@ -89,7 +91,7 @@ function AccountMenu() {
       </NavLink>
       <span className="text-gray-300">|</span>
       <NavLink
-        to="/account/addresses"
+        to={withLocale('/account/addresses')}
         className={({isActive, isPending}) =>
           `text-base font-medium transition-colors ${
             isPending
@@ -109,8 +111,9 @@ function AccountMenu() {
 }
 
 function Logout() {
+  const withLocale = useLocalizedPath();
   return (
-    <Form method="POST" action="/account/logout">
+    <Form method="POST" action={withLocale('/account/logout')}>
       <Button type="submit" variant="tertiary" size="medium">
         Sign out
       </Button>

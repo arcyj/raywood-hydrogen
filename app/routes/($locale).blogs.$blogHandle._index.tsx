@@ -5,6 +5,7 @@ import type {ArticleItemFragment} from 'storefrontapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
   const blog = data?.blog;
@@ -98,6 +99,7 @@ function ArticleItem({
   article: ArticleItemFragment;
   loading?: HTMLImageElement['loading'];
 }) {
+  const withLocale = useLocalizedPath();
   const publishedAt = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
@@ -105,7 +107,7 @@ function ArticleItem({
   }).format(new Date(article.publishedAt!));
   return (
     <div className="blog-article" key={article.id}>
-      <Link to={`/blogs/${article.blog.handle}/${article.handle}`}>
+      <Link to={withLocale(`/blogs/${article.blog.handle}/${article.handle}`)}>
         {article.image && (
           <div className="blog-article-image">
             <Image

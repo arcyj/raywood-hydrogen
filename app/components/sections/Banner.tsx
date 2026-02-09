@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { Image } from '@shopify/hydrogen';
 import { Link } from "react-router";
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 interface IBannerProps {
   heading: string;
   text?: string;
@@ -26,6 +27,7 @@ export const Banner: FC<IBannerProps> = ({
   buttonText,
   buttonUrl
 }) => {
+  const withLocale = useLocalizedPath();
   return(
     <div
       className="tablet:rounded tablet:min-h-[475px] bg-black relative h-full overflow-hidden bg-no-repeat bg-cover"
@@ -52,7 +54,7 @@ export const Banner: FC<IBannerProps> = ({
                 {text}
               </p>
               <Link
-                to={buttonUrl}
+                to={withLocale(buttonUrl)}
                 className="inline-block text-nowrap text-center rounded-md font-semibold transition duration-300 max-tablet:w-full flex items-center justify-center gap-8 bg-yellow-400 text-black hover:bg-yellow-500 text-text-button-large px-24 py-16 tablet:max-w-[320px] max-tablet:w-full tablet:mx-auto">
                 <span>{buttonText}</span>
               </Link>

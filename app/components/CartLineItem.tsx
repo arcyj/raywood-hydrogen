@@ -7,6 +7,7 @@ import {ProductPrice} from './ProductPrice';
 import {useContext} from 'react';
 import {AsideContext} from './Aside';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 
@@ -26,6 +27,7 @@ export function CartLineItem({
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
+  const withLocale = useLocalizedPath();
 
   // Safely get close function - prefer onClose prop, fallback to Aside context
   const aside = AsideContext ? useContext(AsideContext) : null;
@@ -47,7 +49,7 @@ export function CartLineItem({
       <div>
         <Link
           prefetch="intent"
-          to={lineItemUrl}
+          to={withLocale(lineItemUrl)}
           onClick={() => {
             if (layout === 'aside' && close) {
               close();

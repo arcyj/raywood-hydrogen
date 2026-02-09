@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import type { FC } from 'react';
 import { Home, ChevronRight } from '~/components/icons';
 import { twClasses } from '~/helpers/twMerge';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 export interface BreadcrumbItem {
   title: string;
@@ -28,6 +29,7 @@ export const Breadcrumb: FC<BreadcrumbProps> = ({
   product,
   className
 }) => {
+  const withLocale = useLocalizedPath();
   const hasProduct = Boolean(product?.title);
   const items: Array<{ title: string; href?: string }> = [
     { title: 'Home', href: '/' },
@@ -59,7 +61,7 @@ export const Breadcrumb: FC<BreadcrumbProps> = ({
               {index > 0 && SEPARATOR}
               {item.href ? (
                 <Link
-                  to={item.href}
+                  to={withLocale(item.href)}
                   className="text-secondary-text hover:text-primary transition-colors truncate inline-block max-w-[120px] sm:max-w-[200px] md:max-w-none py-1 -my-1 px-0.5 -mx-0.5 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-accentGrey"
                 >
                   {index === 0 ? (

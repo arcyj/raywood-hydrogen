@@ -6,6 +6,7 @@ import type { FC } from 'react';
 import { twc } from '~/helpers/twMerge';
 import { Button } from './ui/Button';
 import { ButtonLink } from './ui/Link';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 interface ProfileMenuProps {
   isLoggedIn: Promise<boolean>;
@@ -13,6 +14,7 @@ interface ProfileMenuProps {
 
 export const ProfileMenu: FC<ProfileMenuProps> = ({ isLoggedIn }) => {
   const { onClose } = useDrawer();
+  const withLocale = useLocalizedPath();
 
   function isActiveStyle({
     isActive,
@@ -33,7 +35,7 @@ export const ProfileMenu: FC<ProfileMenuProps> = ({ isLoggedIn }) => {
       <h2 className="text-2xl font-bold mb-16">Account</h2>
       <nav className="flex flex-col gap-12">
         <NavLink
-          to="/account/orders"
+          to={withLocale('/account/orders')}
           style={isActiveStyle}
           className={navLinkStyle}
           onClick={onClose}
@@ -42,7 +44,7 @@ export const ProfileMenu: FC<ProfileMenuProps> = ({ isLoggedIn }) => {
           <ChevronRight size={20} />
         </NavLink>
         <NavLink
-          to="/account/profile"
+          to={withLocale('/account/profile')}
           style={isActiveStyle}
           className={navLinkStyle}
           onClick={onClose}
@@ -51,7 +53,7 @@ export const ProfileMenu: FC<ProfileMenuProps> = ({ isLoggedIn }) => {
           <ChevronRight size={20} />
         </NavLink>
         <NavLink
-          to="/account/addresses"
+          to={withLocale('/account/addresses')}
           style={isActiveStyle}
           className={navLinkStyle}
           onClick={onClose}
@@ -66,7 +68,7 @@ export const ProfileMenu: FC<ProfileMenuProps> = ({ isLoggedIn }) => {
                 loggedIn ? (
                   <Form
                     method="POST"
-                    action="/account/logout"
+                    action={withLocale('/account/logout')}
                     onSubmit={onClose}
                   >
                     <Button

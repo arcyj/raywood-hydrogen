@@ -4,6 +4,7 @@ import {type Shop} from '@shopify/hydrogen/storefront-api-types';
 import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
 import { POLICIES_QUERY } from './($locale).policies._index';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type SelectedPolicies = keyof Pick<
   Shop,
@@ -66,13 +67,14 @@ export async function loader({params, context}: Route.LoaderArgs) {
 export default function Policy() {
   const {policy, policies} = useLoaderData<typeof loader>();
   const currentHandle = policy.handle;
+  const withLocale = useLocalizedPath();
   return (
     <div className="policy container-narrow pt-24 pb-80 max-tablet:pt-44">
       <nav className="flex justify-center pb-24 flex-wrap">
         {policies.map((policy) => (
           <fieldset key={policy.id}>
             <Link
-              to={`/policies/${policy.handle}`}
+              to={withLocale(`/policies/${policy.handle}`)}
               className={`text-medium-semi hover:text-primary ${policy.handle === currentHandle ? 'text-primary underline': null}`}
             >
               {policy.title}

@@ -3,6 +3,7 @@ import {Pagination} from '@shopify/hydrogen';
 import {ProductItem} from '~/components/ProductItem';
 import { Button } from './ui/Button';
 import {urlWithTrackingParams, type RegularSearchReturn} from '~/lib/search';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type SearchItems = RegularSearchReturn['result']['items'];
 type PartialSearchResult<ItemType extends keyof SearchItems> = Pick<
@@ -36,6 +37,7 @@ function SearchResultsArticles({
   term,
   articles,
 }: PartialSearchResult<'articles'>) {
+  const withLocale = useLocalizedPath();
   if (!articles?.nodes.length) {
     return null;
   }
@@ -53,7 +55,7 @@ function SearchResultsArticles({
 
           return (
             <div className="search-results-item text-regular-semi" key={article.id}>
-              <Link prefetch="intent" to={articleUrl} className='hover:text-primary'>
+              <Link prefetch="intent" to={withLocale(articleUrl)} className='hover:text-primary'>
                 {article.title}
               </Link>
             </div>
@@ -66,6 +68,7 @@ function SearchResultsArticles({
 }
 
 function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
+  const withLocale = useLocalizedPath();
   if (!pages?.nodes.length) {
     return null;
   }
@@ -83,7 +86,7 @@ function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
 
           return (
             <div className="search-results-item text-regular-semi" key={page.id}>
-              <Link prefetch="intent" to={pageUrl} className='hover:text-primary'>
+              <Link prefetch="intent" to={withLocale(pageUrl)} className='hover:text-primary'>
                 {page.title}
               </Link>
             </div>

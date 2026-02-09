@@ -4,6 +4,7 @@ import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import type {BlogsQuery} from 'storefrontapi.generated';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0];
 
@@ -59,6 +60,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export default function Blogs() {
   const {blogs} = useLoaderData<typeof loader>();
+  const withLocale = useLocalizedPath();
 
   return (
     <div className="blogs">
@@ -70,7 +72,7 @@ export default function Blogs() {
               className="blog"
               key={blog.handle}
               prefetch="intent"
-              to={`/blogs/${blog.handle}`}
+              to={withLocale(`/blogs/${blog.handle}`)}
             >
               <h2>{blog.title}</h2>
             </Link>

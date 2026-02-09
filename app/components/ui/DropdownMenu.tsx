@@ -4,12 +4,12 @@ import { Image } from "@shopify/hydrogen";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { NavLink } from 'react-router';
 import { twc, twClasses } from '~/helpers/twMerge';
-import { processUrl } from '~/helpers/processUrl';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type { FC } from 'react';
 import { useDrawer } from './Drawer';
 import { getMenuIconUrl } from '~/helpers/getMenuIconUrl';
 import { ChevronRight } from '../icons';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 
 interface IDropDownMenuProps {
@@ -96,6 +96,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
   primaryDomainUrl,
 }) => {
   const { onClose } = useDrawer();
+  const withLocale = useLocalizedPath();
 
   if (!item || !url) return null;
 
@@ -121,7 +122,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
             </span>
           ) : (
             <NavLink
-              to={url}
+              to={withLocale(url)}
               className="w-full"
               end
               prefetch="intent"
@@ -155,7 +156,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
               return (
                 <NavLink
                   key={subItem.id}
-                  to={subUrl}
+                  to={withLocale(subUrl)}
                   end
                   prefetch="intent"
                   style={activeLinkStyle}

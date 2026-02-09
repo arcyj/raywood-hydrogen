@@ -13,6 +13,7 @@ import { ButtonLink } from '~/components/ui/Link';
 import { CollectionCards } from '~/components/sections/CollectionCards';
 import {fetchCollectionsByHandles} from '~/lib/queries/collections';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 export const meta: Route.MetaFunction = ({matches, location}) => {
   const url = getAbsoluteUrl(matches ?? [], location);
@@ -200,11 +201,12 @@ function FeaturedCollection({
   collection: FeaturedCollectionFragment;
 }) {
   if (!collection) return null;
+  const withLocale = useLocalizedPath();
   const image = collection?.image;
   return (
     <Link
       className="featured-collection"
-      to={`/collections/${collection.handle}`}
+      to={withLocale(`/collections/${collection.handle}`)}
     >
       {image && (
         <div className="featured-collection-image">
