@@ -347,7 +347,7 @@ function ProductContent({
                     className="self-end"
                   />
                 </div>
-                <div className="flex gap-12 mb-12 items-center">
+                <div className="tablet:flex gap-12 mb-12 items-center">
                   {isTablet ? (
                     <>
                       <Counter
@@ -364,7 +364,7 @@ function ProductContent({
                         productOptions={productOptions}
                         selectedVariant={selectedVariant}
                         quantity={productCount}
-                        className={`flex-1 ${!isTablet ? 'sticky bottom-[80px] w-full' : null}`}
+                        className={`flex-1`}
                       />
                     </>
                   ) : null}
@@ -391,6 +391,16 @@ function ProductContent({
                       })(),
                     }}
                   />
+                    {!isTablet ? (
+                    <>
+                      <ProductForm
+                        productOptions={productOptions}
+                        selectedVariant={selectedVariant}
+                        quantity={productCount}
+                        className={`flex-1 mt-8`}
+                      />
+                    </>
+                  ) : null}
                 </div>
               </div>
               <Accordion className="mt-32" defaultOpenAll={false}>
@@ -463,7 +473,7 @@ function ProductContent({
       </div>
 
       <RelatedProducts products={relatedProductsPromise} />
-      {!isTablet && selectedVariant?.availableForSale ? (
+      {/* {!isTablet && selectedVariant?.availableForSale ? (
         <div className="sticky bottom-[66px]">
           <AddToCartButton
             showIcon={false}
@@ -488,7 +498,7 @@ function ProductContent({
             </span>
           </AddToCartButton>
         </div>
-      ) : null}
+      ) : null} */}
       <Analytics.ProductView
         data={{
           products: [
