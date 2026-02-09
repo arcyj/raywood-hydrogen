@@ -8,6 +8,7 @@ import {
 } from '~/lib/search';
 import {useAside} from './Aside';
 import {usePlaypeak} from '~/lib/playpeakContext';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type PredictiveSearchItems = PredictiveSearchReturn['result']['items'];
 
@@ -95,6 +96,7 @@ function SearchResultsPredictiveArticles({
   articles,
   closeSearch,
 }: PartialPredictiveSearchResult<'articles'>) {
+  const withLocale = useLocalizedPath();
   if (!articles.length) return null;
 
   return (
@@ -110,7 +112,7 @@ function SearchResultsPredictiveArticles({
 
           return (
             <li className="predictive-search-result-item" key={article.id}>
-              <Link onClick={closeSearch} to={articleUrl}>
+              <Link onClick={closeSearch} to={withLocale(articleUrl)}>
                 {article.image?.url && (
                   <Image
                     alt={article.image.altText ?? ''}
@@ -136,6 +138,7 @@ function SearchResultsPredictiveCollections({
   collections,
   closeSearch,
 }: PartialPredictiveSearchResult<'collections'>) {
+  const withLocale = useLocalizedPath();
   if (!collections.length) return null;
 
   return (
@@ -151,7 +154,7 @@ function SearchResultsPredictiveCollections({
 
           return (
             <li className="predictive-search-result-item" key={collection.id}>
-              <Link onClick={closeSearch} to={collectionUrl}>
+              <Link onClick={closeSearch} to={withLocale(collectionUrl)}>
                 {collection.image?.url && (
                   <Image
                     alt={collection.image.altText ?? ''}
@@ -177,6 +180,7 @@ function SearchResultsPredictivePages({
   pages,
   closeSearch,
 }: PartialPredictiveSearchResult<'pages'>) {
+  const withLocale = useLocalizedPath();
   if (!pages.length) return null;
 
   return (
@@ -192,7 +196,7 @@ function SearchResultsPredictivePages({
 
           return (
             <li className="predictive-search-result-item" key={page.id}>
-              <Link onClick={closeSearch} to={pageUrl}>
+              <Link onClick={closeSearch} to={withLocale(pageUrl)}>
                 <div>
                   <span>{page.title}</span>
                 </div>
@@ -210,6 +214,7 @@ function SearchResultsPredictiveProducts({
   products,
   closeSearch,
 }: PartialPredictiveSearchResult<'products'>) {
+  const withLocale = useLocalizedPath();
   if (!products.length) return null;
 
   return (
@@ -227,7 +232,7 @@ function SearchResultsPredictiveProducts({
           const image = product?.selectedOrFirstAvailableVariant?.image;
           return (
             <li className="predictive-search-result-item" key={product.id}>
-              <Link to={productUrl} onClick={closeSearch}>
+              <Link to={withLocale(productUrl)} onClick={closeSearch}>
                 {image && (
                   <Image
                     alt={image.altText ?? ''}

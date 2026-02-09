@@ -3,6 +3,7 @@ import type { CollectionQuery } from 'storefrontapi.generated';
 import { Slider } from '~/components/Slider';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
 import type { FC } from 'react';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 interface IChildCollectionSlider {
   className?: string;
@@ -11,6 +12,7 @@ interface IChildCollectionSlider {
 export const ChildCollectionSlider: FC<IChildCollectionSlider> = ({className}) => {
   const breakpoints = useBreakpoints();
   const { isMobile } = breakpoints;
+  const withLocale = useLocalizedPath();
 
   const {childCollections} = useLoaderData<
       CollectionQuery & {
@@ -32,7 +34,7 @@ export const ChildCollectionSlider: FC<IChildCollectionSlider> = ({className}) =
             {childCollections.map((childCollection) => (
               <Link
                 key={childCollection.id}
-                to={`/collections/${childCollection.handle}`}
+                to={withLocale(`/collections/${childCollection.handle}`)}
                 className="group"
               >
                 <div className="border-accentGrey border-[1.5px] py-8 px-24 rounded flex items-center hover:bg-lightGrey hover:shadow-lg active:bg-accentGrey active:inset-shadow-sm transition-all duration-200 ease-in-out">

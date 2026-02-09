@@ -1,6 +1,7 @@
 import {Link} from 'react-router';
 import {Image} from '@shopify/hydrogen';
 import type {FC} from 'react';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 export type CollectionCardData = {
   id: string;
@@ -44,9 +45,10 @@ export const CollectionCards: FC<ICollectionCardsProps> = ({
 };
 
 function CollectionCard({collection}: {collection: CollectionCardData}) {
+  const withLocale = useLocalizedPath();
   return (
     <Link
-      to={`/collections/${collection.handle}`}
+      to={withLocale(`/collections/${collection.handle}`)}
       className="block bg-lightGrey hover:scale-102 transition-all hover:drop-shadow-md rounded overflow-hidden hover:shadow-lg active:bg-accentGrey active:inset-shadow-sm transition-all duration-200 ease-in-out"
       prefetch="intent"
     >

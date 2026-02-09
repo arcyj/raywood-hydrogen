@@ -25,6 +25,7 @@ import type {
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {Input} from '~/components/ui/Input';
 import {Button} from '~/components/ui/Button';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;
@@ -63,13 +64,14 @@ export async function loader({request, context}: Route.LoaderArgs) {
 export default function Orders() {
   const {customer, filters} = useLoaderData<OrdersLoaderData>();
   const {orders} = customer;
+  const withLocale = useLocalizedPath();
 
   return (
     <div className="orders">
       <h2 className="text-2xl font-semibold mb-6">Orders</h2>
       <OrderSearchForm currentFilters={filters} />
       <div className="mt-8">
-        <OrdersTable orders={orders} filters={filters} />
+        <OrdersTable orders={orders} filters={filters} withLocale={withLocale} />
       </div>
     </div>
   );
@@ -78,9 +80,11 @@ export default function Orders() {
 function OrdersTable({
   orders,
   filters,
+  withLocale,
 }: {
   orders: CustomerOrdersFragment['orders'];
   filters: OrderFilterParams;
+  withLocale: (path: string) => string;
 }) {
   const hasFilters = !!(filters.name || filters.confirmationNumber);
 
@@ -88,23 +92,31 @@ function OrdersTable({
     <div className="account-orders" aria-live="polite">
       {orders?.nodes.length ? (
         <PaginatedResourceSection connection={orders}>
-          {({node: order}) => <OrderItem key={order.id} order={order} />}
+          {({node: order}) => (
+            <OrderItem key={order.id} order={order} withLocale={withLocale} />
+          )}
         </PaginatedResourceSection>
       ) : (
-        <EmptyOrders hasFilters={hasFilters} />
+        <EmptyOrders hasFilters={hasFilters} withLocale={withLocale} />
       )}
     </div>
   );
 }
 
-function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
+function EmptyOrders({
+  hasFilters = false,
+  withLocale,
+}: {
+  hasFilters?: boolean;
+  withLocale: (path: string) => string;
+}) {
   return (
     <div className="py-12 text-center">
       {hasFilters ? (
         <div className="space-y-4">
           <p className="text-gray-600">No orders found matching your search.</p>
           <Link
-            to="/account/orders"
+            to={withLocale('/account/orders')}
             className="text-[#943BF2] hover:text-[#AE6AF5] font-medium inline-flex items-center gap-1"
           >
             Clear filters →
@@ -114,7 +126,7 @@ function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
         <div className="space-y-4">
           <p className="text-gray-600">You haven&apos;t placed any orders yet.</p>
           <Link
-            to="/collections"
+            to={withLocale('/collections')}
             className="text-[#943BF2] hover:text-[#AE6AF5] font-medium inline-flex items-center gap-1"
           >
             Start Shopping →
@@ -215,7 +227,13 @@ function OrderSearchForm({
   );
 }
 
-function OrderItem({order}: {order: OrderItemFragment}) {
+function OrderItem({
+  order,
+  withLocale,
+}: {
+  order: OrderItemFragment;
+  withLocale: (path: string) => string;
+}) {
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
   return (
     <div className="border border-gray-200 rounded-lg p-6 mb-4 hover:shadow-md transition-shadow">
@@ -223,7 +241,7 @@ function OrderItem({order}: {order: OrderItemFragment}) {
         <div className="flex-1 space-y-2">
           <div className="flex items-center gap-4">
             <Link
-              to={`/account/orders/${btoa(order.id)}`}
+              to={withLocale(`/account/orders/${btoa(order.id)}`)}
               className="text-lg font-semibold text-[#943BF2] hover:text-[#AE6AF5]"
             >
               #{order.number}
@@ -252,7 +270,7 @@ function OrderItem({order}: {order: OrderItemFragment}) {
           </div>
         </div>
         <Link
-          to={`/account/orders/${btoa(order.id)}`}
+          to={withLocale(`/account/orders/${btoa(order.id)}`)}
           className="text-[#943BF2] hover:text-[#AE6AF5] font-medium inline-flex items-center gap-1 whitespace-nowrap"
         >
           View Order →

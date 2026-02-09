@@ -1,4 +1,5 @@
 import {NavLink} from 'react-router';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 import { buttonClasses } from '../themes/ButtonTheme';
 import type { ILinkButtonCoreProps } from '../themes/ButtonTheme';
 import type { MouseEvent, KeyboardEvent, FC } from 'react';
@@ -29,6 +30,7 @@ export const ButtonLink: FC<IButtonLinkProps> = ({
   onClick,
   children,
 }) => {
+  const withLocale = useLocalizedPath();
 
   const classes = buttonClasses({
     variant,
@@ -43,8 +45,10 @@ export const ButtonLink: FC<IButtonLinkProps> = ({
     onClick && onClick(event);
   };
 
+  const to = withLocale(href);
+
   return (
-    <NavLink to={href} end className={classes} prefetch={prefetch} target={target} data-qa-link={testName} tabIndex={disabled ? -1 : 0}  onClick={handleClicked} viewTransition>
+    <NavLink to={to} end className={classes} prefetch={prefetch} target={target} data-qa-link={testName} tabIndex={disabled ? -1 : 0}  onClick={handleClicked} viewTransition>
       {IconBefore && <IconBefore size={24} className="mr-2" />}
       {children}
       {IconAfter && <IconAfter size={24} className="ml-8" />}

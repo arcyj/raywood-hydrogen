@@ -3,6 +3,7 @@ import {Suspense} from 'react';
 import { twClasses } from "~/helpers/twMerge";
 import { LocaleSwitcher } from '../LocaleSwitcher';
 import {Profile } from '../icons';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 interface DesktopTopBarProps {
   isLoggedIn: Promise<boolean>;
@@ -11,6 +12,7 @@ interface DesktopTopBarProps {
 export function DesktopTopBar({
   isLoggedIn,
 }: DesktopTopBarProps) {
+  const withLocale = useLocalizedPath();
 
   const initial = 'h-48 w-full bg-[#1D1229] px-12 flex items-center justify-between';
 
@@ -26,7 +28,7 @@ export function DesktopTopBar({
         </p>
       </div>
       <div>
-        <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
+        <NavLink prefetch="intent" to={withLocale('/account')} style={activeLinkStyle}>
           <Suspense fallback={<></>}>
             <Await resolve={isLoggedIn} errorElement="Sign in">
               {(isLoggedIn) => (

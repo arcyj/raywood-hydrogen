@@ -17,6 +17,7 @@ import type {
 } from 'storefrontapi.generated';
 import { IconButton } from './ui/IconButton';
 import { AddToCartButton } from './AddToCartButton';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 type Product = ProductItemFragment | CollectionItemFragment | RecommendedProductFragment;
@@ -89,6 +90,7 @@ function CartLineItemView({
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
+  const withLocale = useLocalizedPath();
 
   // Safely get close function - prefer onClose prop, fallback to Aside context
   const aside = AsideContext ? useContext(AsideContext) : null;
@@ -112,7 +114,7 @@ function CartLineItemView({
       <div>
         <Link
           prefetch="intent"
-          to={lineItemUrl}
+          to={withLocale(lineItemUrl)}
           onClick={() => {
             if (layout === 'aside' && close) {
               close();
@@ -156,6 +158,7 @@ function ProductView({
   variantAvailableForSale?: boolean;
 }) {
   const productUrl = useVariantUrl(product.handle);
+  const withLocale = useLocalizedPath();
   const image = 'featuredImage' in product ? product.featuredImage : null;
   const price = 'priceRange' in product ? product.priceRange.minVariantPrice : null;
   const aside = AsideContext ? useContext(AsideContext) : null;
@@ -180,7 +183,7 @@ function ProductView({
     <li className="product-line flex bg-lightGrey rounded-md px-4 py-8">
       {image && (
         <Link
-          to={productUrl}
+          to={withLocale(productUrl)}
           onClick={onClose}
           prefetch="intent"
           className="flex-shrink-0"
@@ -204,7 +207,7 @@ function ProductView({
         )}
         <Link
           prefetch="intent"
-          to={productUrl}
+          to={withLocale(productUrl)}
           onClick={onClose}
           className="hover:underline"
         >

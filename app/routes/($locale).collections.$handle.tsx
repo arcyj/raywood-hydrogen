@@ -28,6 +28,7 @@ import { getSortValuesFromParam } from '~/helpers/getSortValuesFromParam';
 import {FILTER_URL_PREFIX} from '../helpers/const';
 import {getAppliedFilterLink} from '~/helpers/filterInputToParams';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 // Types
 import type { SortParam } from '~/helpers/getSortValuesFromParam';
@@ -198,6 +199,7 @@ export default function Collection() {
   const {collection, parentCollection, appliedFilters, productsPage} = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const withLocale = useLocalizedPath();
 
     const breakpoints = useBreakpoints();
     const { isTablet } = breakpoints;
@@ -287,7 +289,7 @@ export default function Collection() {
                       )}
                       <span>{applied.label}</span>
                       <Link
-                        to={removeUrl}
+                        to={withLocale(removeUrl)}
                         className="inline-flex p-0.5 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-700"
                         aria-label={`Remove ${applied.label}`}
                       >

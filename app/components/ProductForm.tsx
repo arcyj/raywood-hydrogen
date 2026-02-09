@@ -7,6 +7,7 @@ import type {
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import type {ProductFragment} from 'storefrontapi.generated';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 export function ProductForm({
   productOptions,
@@ -21,6 +22,7 @@ export function ProductForm({
 }) {
   const navigate = useNavigate();
   const {open} = useAside();
+  const withLocale = useLocalizedPath();
   return (
     <div className={`product-form ${className ? ` ${className}` : ''}`}>
       {productOptions.map((option) => {
@@ -55,7 +57,7 @@ export function ProductForm({
                       prefetch="intent"
                       preventScrollReset
                       replace
-                      to={`/products/${handle}?${variantUriQuery}`}
+                      to={withLocale(`/products/${handle}?${variantUriQuery}`)}
                       style={{
                         border: selected
                           ? '1px solid black'

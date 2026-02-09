@@ -18,6 +18,7 @@ import { Dropdown } from './ui/Dropdown';
 import { processUrl } from '~/helpers/processUrl';
 import { getMenuIconUrl } from '~/helpers/getMenuIconUrl';
 import { ButtonLink } from './ui/Link';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -34,11 +35,12 @@ export function Header({
   cart,
   publicStoreDomain,
 }: HeaderProps) {
+  const withLocale = useLocalizedPath();
   const {shop, menu} = header;
 
   return (
     <header className="header flex justify-between items-center shadow-md rounded-b-xl">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} viewTransition end>
+      <NavLink prefetch="intent" to={withLocale('/')} style={activeLinkStyle} viewTransition end>
         <Image src="./images/LogoPlaypeak.svg" alt="Logo" width={100} height={0} />
       </NavLink>
       <HeaderMenu
@@ -65,6 +67,7 @@ export function HeaderMenu({
   viewport: Viewport;
   publicStoreDomain: HeaderProps['publicStoreDomain'];
 }) {
+  const withLocale = useLocalizedPath();
   const className = `header-menu-${viewport}`;
   const {close} = useAside();
 
@@ -95,7 +98,7 @@ export function HeaderMenu({
                 onClick={close}
                 prefetch="intent"
                 style={activeLinkStyle}
-                to={url}
+                to={withLocale(url)}
                 viewTransition
               >
                 {iconUrl && (

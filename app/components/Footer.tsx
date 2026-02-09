@@ -2,6 +2,7 @@ import {Suspense} from 'react';
 import { Image } from '@shopify/hydrogen';
 import {Await, NavLink} from 'react-router';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>;
@@ -14,6 +15,7 @@ export function Footer({
   header,
   publicStoreDomain,
 }: FooterProps) {
+  const withLocale = useLocalizedPath();
   return (
     <Suspense>
       <Await resolve={footerPromise}>
@@ -64,7 +66,7 @@ export function Footer({
                   end
                   prefetch="intent"
                   style={activeLinkStyle}
-                  to="/blog"
+                  to={withLocale('/blog')}
                   className="opacity-80 hover:opacity-100 py-8"
                 >
                   Blog
@@ -103,6 +105,7 @@ function FooterMenu({
   publicStoreDomain: string;
   title?: string;
 }) {
+  const withLocale = useLocalizedPath();
   return (
     <nav className="" role="navigation">
       <p className='text-h4 text-white mb-12'>{title}</p>
@@ -127,7 +130,7 @@ function FooterMenu({
               key={item.id}
               prefetch="intent"
               style={activeLinkStyle}
-              to={url}
+              to={withLocale(url)}
               className="opacity-80 hover:opacity-100 py-8"
             >
               {item.title}

@@ -2,6 +2,7 @@ import * as React from 'react';
 import {Link, useNavigation} from 'react-router';
 import {Pagination} from '@shopify/hydrogen';
 import { Button } from './ui/Button';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type ConnectionWithNodes<NodesType> = {
   nodes: NodesType[];
@@ -127,6 +128,7 @@ function PageBasedSection<NodesType>({
   nextPageUrl: string;
   isLoading: boolean;
 }) {
+  const withLocale = useLocalizedPath();
   const nodes = connection.nodes ?? [];
   const hasNextPage = connection.pageInfo?.hasNextPage ?? false;
   const resourcesMarkup = nodes.map((node, index) =>
@@ -172,7 +174,7 @@ function PageBasedSection<NodesType>({
       )}
       {hasNextPage && (
         <div className="text-center">
-          <Link to={nextPageUrl} preventScrollReset replace>
+          <Link to={withLocale(nextPageUrl)} preventScrollReset replace>
             {isLoading ? 'Loading...' : <Button variant="primary" className='w-full max-w-[450px] mx-auto'>Load more ↓</Button>}
           </Link>
         </div>

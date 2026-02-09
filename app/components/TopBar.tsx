@@ -6,6 +6,7 @@ import { ChevronLeftIcon, MagnifyingGlassIcon, MixerHorizontalIcon } from "@radi
 import { useAside } from "./Aside";
 import { usePlaypeak } from "~/lib/playpeakContext";
 import { Button } from "./ui/Button";
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 const BACK_PREV_KEY = 'pp-back-prev';
 const BACK_CURR_KEY = 'pp-back-curr';
@@ -13,6 +14,7 @@ const BACK_CURR_KEY = 'pp-back-curr';
 export function TopBar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const withLocale = useLocalizedPath();
   const { open } = useAside();
   const { openSearchDrawer, closeSearchDrawer, isDrawerOpen, closeFilter, openFilter } = usePlaypeak();
 
@@ -37,7 +39,7 @@ export function TopBar() {
 
   const handleBack = () => {
     if (typeof window === 'undefined') {
-      navigate('/');
+      navigate(withLocale('/'));
       return;
     }
     const prevPath = sessionStorage.getItem(BACK_PREV_KEY);
@@ -46,7 +48,7 @@ export function TopBar() {
     if (prevPath && prevPath !== currPath) {
       navigate(prevPath);
     } else {
-      navigate('/');
+      navigate(withLocale('/'));
     }
   };
 
@@ -99,7 +101,7 @@ export function TopBar() {
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-[#35204d] inline-block rounded-b-xl px-8 pb-4 h-auto">
         <div className="relative">
           <div className="inverted-radius-left bg-[#35204d] w-[40px] h-[42px] absolute -left-[20px] -top-[30px]"></div>
-          <NavLink prefetch="intent" to="/" viewTransition end>
+          <NavLink prefetch="intent" to={withLocale('/')} viewTransition end>
             <Image
               src="./images/LogoPlaypeak.svg"
               alt="Logo"
