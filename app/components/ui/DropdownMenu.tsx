@@ -10,6 +10,7 @@ import { useDrawer } from './Drawer';
 import { getMenuIconUrl } from '~/helpers/getMenuIconUrl';
 import { ChevronRight } from '../icons';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
+import { processUrl } from '~/helpers/processUrl';
 
 
 interface IDropDownMenuProps {
