@@ -218,7 +218,7 @@ export default function Collection() {
   };
 
   return (
-    <div className="collection container mx-auto pt-44 tablet:pt-12">
+    <div className="collection container mx-auto max-tablet:pt-44">
       <Breadcrumb
         collection={{title: collection.title, handle: collection.handle}}
         parentCollection={parentCollection ?? undefined}
@@ -238,9 +238,33 @@ export default function Collection() {
               All filters
             </Button>
           </div>
-          <div className="flex-1">
+
+          <div className="flex items-center gap-8 flex-wrap">
+            <SortByFilter />
+            {isTablet ? (
+              <ToggleGroup
+                value={String(collectionGrid)}
+                onValueChange={(v) => {
+                  const n = v ? parseInt(v, 10) : NaN;
+                  if (n === 4 || n === 6) setCollectionGrid(n);
+                }}
+                ariaLabel="Products per row"
+              >
+                <ToggleGroup.Item value="4">
+                  <SmallGrid size={20} />
+                </ToggleGroup.Item>
+                <ToggleGroup.Item value="6">
+                  <LargeGrid size={20} />
+                </ToggleGroup.Item>
+              </ToggleGroup>
+            ) : null}
+          </div>
+        </div>
+
+      </div>
+        <div className="flex-1 overflow-x-auto mb-24">
             {appliedFilters.length > 0 && (
-              <ul className="flex flex-wrap items-center gap-2 list-none p-0 m-0">
+              <ul className="flex items-center gap-2 list-none p-0 m-0  w-full">
                 {appliedFilters.map((applied, index) => {
                   const removeUrl = getAppliedFilterLink(
                     {filter: applied.filter, label: applied.label},
@@ -275,28 +299,6 @@ export default function Collection() {
               </ul>
             )}
           </div>
-          <div className="flex items-center gap-8 flex-wrap">
-            <SortByFilter />
-            {isTablet ? (
-              <ToggleGroup
-                value={String(collectionGrid)}
-                onValueChange={(v) => {
-                  const n = v ? parseInt(v, 10) : NaN;
-                  if (n === 4 || n === 6) setCollectionGrid(n);
-                }}
-                ariaLabel="Products per row"
-              >
-                <ToggleGroup.Item value="4">
-                  <SmallGrid size={20} />
-                </ToggleGroup.Item>
-                <ToggleGroup.Item value="6">
-                  <LargeGrid size={20} />
-                </ToggleGroup.Item>
-              </ToggleGroup>
-            ) : null}
-          </div>
-        </div>
-      </div>
       <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 min-h-screen mb-64">
         <div className="col-span-4 md:col-span-6 lg:col-span-12 bg-white">
           <PaginatedResourceSection<ProductItemFragment>
