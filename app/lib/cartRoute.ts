@@ -6,6 +6,7 @@ import { useLocation } from 'react-router';
  */
 export function useCartRoute() {
   const { pathname } = useLocation();
-  const localePrefix = pathname.match(/^(\/[a-z]{2}(?:-[a-z]{2})?)/)?.[1] ?? '';
+  const localePrefix =
+    pathname.match(/^(\/[a-z]{2}(?:-[a-z]{2})?)/i)?.[1] ?? '';
   return `${localePrefix}/cart`;
 }
