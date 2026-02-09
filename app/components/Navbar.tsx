@@ -63,7 +63,7 @@ export function Navbar({
       >
         {renderMenuContent()}
       </Drawer>
-      <nav className="fixed inset-x-0 bottom-0 w-full rounded-t-md z-[9999] bg-transparent pb-[env(safe-area-inset-bottom)]">
+      <nav className="fixed inset-x-0 bottom-0 w-full rounded-t-md z-[9999] bg-transparent pb-0">
         <div className="grid grid-cols-4 p-4 gap-4 bg-lightGrey shadow-large">
           <NavMenuItem
             onClick={() => onMenuToggle('menu')}
