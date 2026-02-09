@@ -5,7 +5,6 @@ import { CartForm, type OptimisticCartLineInput } from '@shopify/hydrogen';
 import type { IButtonSize } from './themes/ButtonTheme';
 import { usePlaypeak } from '~/lib/playpeakContext';
 import { useCartRoute } from '~/lib/cartRoute';
-import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { Cart } from './icons';
 
 function AddToCartButtonInner({
@@ -31,15 +30,7 @@ function AddToCartButtonInner({
   const hasCalledSuccessRef = useRef<boolean>(false);
   const { revalidate } = useRevalidator();
 
-  const {openCart} = usePlaypeak();
 
-  const breakpoints = useBreakpoints();
-  const { isMobile, isDesktop } = breakpoints;
-
-  // More reliable mobile check - check window width directly
-  const isMobileDevice = typeof window !== 'undefined'
-    ? window.innerWidth <= 768
-    : isMobile;
 
   // Call onSuccess and revalidate when fetcher completes successfully so cart drawer updates
   useEffect(() => {
@@ -55,9 +46,6 @@ function AddToCartButtonInner({
       if (onSuccess) {
         onSuccess();
       }
-      if (isMobileDevice) {
-        openCart();
-      }
       // Force root loader to re-run so deferred cart promise updates and drawer shows new item
       revalidate();
     }
@@ -68,16 +56,12 @@ function AddToCartButtonInner({
     if (fetcher.state === 'submitting' || fetcher.state === 'loading') {
       hasCalledSuccessRef.current = false;
     }
-  }, [fetcher.state, fetcher.data, onSuccess, isMobileDevice, revalidate]);
+  }, [fetcher.state, fetcher.data, onSuccess, revalidate]);
 
   const handleClick = () => {
-    if (isDesktop) {
-      openCart();
-      if (onClick) {
-        onClick();
-      }
+    if (onClick) {
+      onClick();
     }
-    // On mobile, the cart opens after successful submission (see useEffect above)
   };
 
   return (
@@ -122,6 +106,7 @@ export function AddToCartButton({
 }) {
   const cartRoute = useCartRoute();
   const fetcher = useFetcher<{ cart?: unknown; errors?: unknown[] }>();
+  const { openCart } = usePlaypeak();
 
   // Submit programmatically so the request always uses the correct action URL and payload
   const formRef = useRef<HTMLFormElement>(null);
@@ -132,6 +117,7 @@ export function AddToCartButton({
     if (!form) return;
     const formData = new FormData(form);
     fetcher.submit(formData, { method: 'post', action: cartRoute });
+    openCart();
   };
 
   return (
