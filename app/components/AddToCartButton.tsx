@@ -55,6 +55,9 @@ function AddToCartButtonInner({
       if (onSuccess) {
         onSuccess();
       }
+      if (isMobileDevice) {
+        openCart();
+      }
       // Force root loader to re-run so deferred cart promise updates and drawer shows new item
       revalidate();
     }
@@ -68,11 +71,13 @@ function AddToCartButtonInner({
   }, [fetcher.state, fetcher.data, onSuccess, isMobileDevice, revalidate]);
 
   const handleClick = () => {
-    openCart();
-    if (isDesktop && onClick) {
-      onClick();
+    if (isDesktop) {
+      openCart();
+      if (onClick) {
+        onClick();
+      }
     }
-    // On mobile, the cart will open after successful submission (see useEffect above)
+    // On mobile, the cart opens after successful submission (see useEffect above)
   };
 
   return (

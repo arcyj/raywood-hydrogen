@@ -391,7 +391,7 @@ function ProductContent({
                       })(),
                     }}
                   />
-                    {!isTablet ? (
+                  {!isTablet ? (
                     <>
                       <ProductForm
                         productOptions={productOptions}
@@ -462,7 +462,10 @@ function ProductContent({
                     data-state="open"
                     className="pb-24 px-12 pt-12"
                   >
-                    <></>
+                    <p className="text-regular">
+                      Fast, safe checkout backed by Shopify’s world-class
+                      security.
+                    </p>
                   </Accordion.Content>
                 </Accordion.Item>
               </Accordion>
