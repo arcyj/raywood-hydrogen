@@ -9,9 +9,14 @@ import { ButtonLink } from './ui/Link';
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
   layout: CartLayout;
+  isCartMutating: boolean;
 };
 
-export function CartSummary({cart, layout}: CartSummaryProps) {
+export function CartSummary({cart, layout, isCartMutating}: CartSummaryProps) {
+  const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
+
+  if (!cartHasItems) return null;
+
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside border-t-2 border-lightGrey max-desktop:pb-[80px] px-12 pb-12';
 
@@ -20,25 +25,47 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
       <dl className="cart-subtotal flex justify-between">
         <dt className="text-large-semi ">Total</dt>
         <dd className="text-large-semi">
-          {cart?.cost?.subtotalAmount?.amount ? (
+          {!isCartMutating && cart?.cost?.subtotalAmount?.amount ? (
             <Money data={cart?.cost?.subtotalAmount} />
           ) : (
-            '-'
+            <div className="h-[22px] skeleton-shimmer rounded w-44 mt-4" />
           )}
         </dd>
       </dl>
-      <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+      <CartCheckoutActions
+        cartHasItems={cartHasItems}
+        checkoutUrl={cart?.checkoutUrl}
+        isCartMutating={isCartMutating}
+      />
     </div>
   );
 }
 
-function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
+function CartCheckoutActions({
+  cartHasItems,
+  checkoutUrl,
+  isCartMutating,
+}: {
+  cartHasItems: boolean;
+  checkoutUrl?: string;
+  isCartMutating: boolean;
+}) {
   if (!checkoutUrl) return null;
 
   return (
     <div>
-      <ButtonLink href={checkoutUrl} target="_self" variant='primary' className='w-full'>
-        <p>Continue to Checkout &rarr;</p>
+      <ButtonLink
+        href={checkoutUrl}
+        target="_self"
+        variant="primary"
+        className="w-full"
+        disabled={isCartMutating}
+      >
+        {isCartMutating ? (
+          <p>Updating cart ...</p>
+        ) : (
+          <p>Continue to Checkout &rarr;</p>
+        )}
       </ButtonLink>
       <br />
     </div>

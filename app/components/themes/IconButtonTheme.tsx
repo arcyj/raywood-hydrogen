@@ -21,7 +21,7 @@ const IconButtonTheme = {
   variants: {
     filled: twc`border-transparent-full bg-[#d7dae0] text-text-buttons-secondary`,
     secondary: twc`border-transparent-full`,
-    outlined: twc`border border-solid border-accentGrey bg-white`,
+    outlined: twc`border border-solid border-gray`,
     ghost: twc`border-transparent-full bg-transparent-full text-text-buttons-tertiary`,
   },
   state: {
@@ -35,17 +35,20 @@ const IconButtonTheme = {
     dark: twc`border-buttons-tertiary-dark text-text-buttons-tertiary-dark`,
   },
   hover: {
-    filled: twc`hover:bg-surface-high-secondary-focus`,
-    outlined: twc`hover:bg-lightGrey hover:text-grey`,
+    filled: twc`hover:bg-accentGrey`,
+    secondary: twc`hover:bg-accentGrey`,
+    outlined: twc`hover:bg-accentGray hover:text-grey`,
     ghost: twc`hover:bg-surface-low-brand-focus hover:text-text-layout-accent`,
   },
   mousePress: {
-    filled: twc`active:bg-lightGrey active:inset-shadow-sm`,
+    filled: twc`active:inset-shadow-sm`,
     outlined: twc`active:bg-lightGrey active:inset-shadow-sm`,
+    secondary: twc`active:inset-shadow-sm`,
     ghost: twc`active:bg-foreground-lowest`,
   },
   keyPress: {
     filled: twc`!bg-surface-high-secondary-action`,
+    secondary: twc`!inset-shadow-sm`,
     outlined: twc`!bg-foreground-lowest`,
     ghost: twc`!bg-foreground-lowest`,
   },

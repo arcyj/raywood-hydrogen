@@ -41,8 +41,16 @@ export const ButtonLink: FC<IButtonLinkProps> = ({
     className,
   });
 
-   const handleClicked = (event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => {
-    onClick && onClick(event);
+
+  const handleClicked = (
+    event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>,
+  ) => {
+    if (disabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    onClick?.(event);
   };
 
   const to = withLocale(href);

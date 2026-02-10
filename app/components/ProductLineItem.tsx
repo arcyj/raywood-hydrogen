@@ -31,6 +31,7 @@ type ProductLineItemProps =
       onClose?: () => void;
       showCartControls?: boolean;
       onRemove?: never;
+      isCartMutating?: boolean;
     }
   | {
       // Product mode
@@ -81,6 +82,7 @@ function CartLineItemView({
   layout,
   onClose,
   showCartControls = true,
+  isCartMutating = false,
 }: {
   line: CartLine;
   layout?: CartLayout;
@@ -97,21 +99,21 @@ function CartLineItemView({
   const close = onClose || aside?.close;
 
   return (
-    <li key={id} className="flex bg-lightGrey rounded-md px-4 py-8 ">
+    <li key={id} className="flex bg-lightGrey rounded-md px-4 py-8 w-full">
       {image && (
-          <Image
-            sizes='100'
-            alt={title}
-            aspectRatio="1/1"
-            data={image}
-            height={100}
-            loading="lazy"
-            width={100}
-            className='p-4 mr-4 mix-blend-darken'
-          />
+        <Image
+          sizes="100"
+          alt={title}
+          aspectRatio="1/1"
+          data={image}
+          height={100}
+          loading="lazy"
+          width={100}
+          className="p-4 mr-4 mix-blend-darken"
+        />
       )}
 
-      <div>
+      <div className="w-full">
         <Link
           prefetch="intent"
           to={withLocale(lineItemUrl)}
@@ -121,9 +123,23 @@ function CartLineItemView({
             }
           }}
         >
-          <h4 className="text-h4 pt-4 line-clamp-2 overflow-hidden text-ellipsis">{product.title}</h4>
+          <h4 className="text-h4 pt-4 line-clamp-2 overflow-hidden text-ellipsis">
+            {product.title}
+          </h4>
         </Link>
-        <ProductPrice size='small' price={line?.cost?.totalAmount} />
+        <div className="my-8 flex justify-between items-center flex-wrap">
+          <ProductPrice size="small" price={line?.cost?.amountPerQuantity} />
+
+          <div className="flex gap-4 items-end">
+            <span className="text-medium-semi">total:</span>
+            {isCartMutating ? (
+              <div className="h-[20px] skeleton-shimmer rounded w-44 mt-4" />
+            ) : (
+              <ProductPrice size="small" price={line?.cost?.totalAmount} />
+            )}
+          </div>
+        </div>
+
         {/* {selectedOptions.length > 0 && (
           <ul>
             {selectedOptions.map((option) => (
@@ -213,7 +229,7 @@ function ProductView({
         >
           <h4 className="text-h4 pt-4 line-clamp-2 overflow-hidden text-ellipsis">{product.title}</h4>
         </Link>
-        {price && <ProductPrice price={price} size="small" />}
+        {price ? <ProductPrice price={price} size="small" /> : <div className="h-12 skeleton-shimmer rounded w-24 mt-4" />}
         <div className="mt-auto flex gap-8 items-center flex-wrap">
           {variantId && selectedVariantForCart ? (
             <AddToCartButton
@@ -255,7 +271,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
   const {id: lineId, quantity, isOptimistic} = line;
 
   return (
-    <div className="cart-line-quantity">
+    <div className="cart-line-quantity justify-between">
       <CounterWithCartUpdate
         lineId={lineId}
         quantity={quantity}
@@ -349,10 +365,11 @@ function CartLineRemoveButton({
     >
       {(fetcher) => (
         <IconButton
-          variant="filled"
+          variant="outlined"
           Icon={TrashIcon}
           disabled={disabled || fetcher.state !== 'idle'}
           type="submit"
+          className='hover:text-danger hover:border-danger'
         />
       )}
     </CartForm>

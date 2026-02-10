@@ -67,10 +67,19 @@ export const WishlistMenu: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="wishlist-menu p-16">
-        <p className="text-body-regular text-text-layout-secondary">
-          Loading...
-        </p>
+      <div className="wishlist-menu pt-12">
+        <ul className="predictive-search-result-items">
+          <li className="predictive-search-result-item flex w-full mt-8">
+            <div className="mix-blend-darken mr-8">
+              <div className="skeleton-shimmer rounded aspect-square h-[60px] w-[60px]" />
+            </div>
+            <div className="mt-4 space-y-2 flex-1 w-full">
+              <div className="h-4 skeleton-shimmer rounded w-2/3" />
+              <div className="h-4 skeleton-shimmer rounded w-1/3" />
+              <div className="h-12 skeleton-shimmer rounded w-24 mt-4" />
+            </div>
+          </li>
+        </ul>
       </div>
     );
   }

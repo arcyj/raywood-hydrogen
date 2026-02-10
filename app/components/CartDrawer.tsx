@@ -1,5 +1,4 @@
 import {Await} from 'react-router';
-import {useOptimisticCart} from '@shopify/hydrogen';
 import {Suspense} from 'react';
 import {Drawer} from './ui/Drawer';
 import { IconButton } from './ui/IconButton';
@@ -9,7 +8,6 @@ import type {
   CartApiQueryFragment,
 } from 'storefrontapi.generated';
 import { CartMain } from './CartMain';
-import {CartSummary} from './CartSummary';
 
 export function CartDrawer({cart}: {cart: Promise<CartApiQueryFragment | null>}) {
   const { isDrawerOpen, closeCart } = usePlaypeak();
@@ -22,33 +20,11 @@ export function CartDrawer({cart}: {cart: Promise<CartApiQueryFragment | null>})
         <IconButton
           Icon={Cross1Icon}
           variant="secondary"
-          size="small"
+          size="medium"
           onClick={closeCart}
         />
       </div>
     )
-  }
-
-  const FooterContent = ({ resolvedCart }: { resolvedCart: CartApiQueryFragment | null }) => {
-    const cartSummary = useOptimisticCart(resolvedCart);
-    const cartHasItems = cartSummary?.totalQuantity ? cartSummary.totalQuantity > 0 : false;
-
-    if (!cartHasItems) {
-      return null;
-    }
-
-    return <CartSummary cart={cartSummary} layout='aside' />;
-  };
-
-  const Footer = () => {
-    console.log("footer")
-    return (
-      <Suspense fallback={null}>
-        <Await resolve={cart}>
-          {(resolvedCart) => <FooterContent resolvedCart={resolvedCart} />}
-        </Await>
-      </Suspense>
-    );
   }
 
   return (

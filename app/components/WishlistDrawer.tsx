@@ -15,7 +15,7 @@ export function WishlistDrawer() {
         <IconButton
           Icon={Cross1Icon}
           variant="secondary"
-          size="small"
+          size="medium"
           onClick={closeWishlist}
         />
       </div>

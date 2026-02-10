@@ -30,7 +30,7 @@ export function ProductItem({
   const image = variant?.image ?? ('featuredImage' in product ? product.featuredImage : undefined);
   const price = variant?.price ?? ('priceRange' in product ? product.priceRange?.minVariantPrice : undefined);
   const compareAtPrice = 'selectedOrFirstAvailableVariant' in product ? product.selectedOrFirstAvailableVariant?.compareAtPrice : undefined;
-  console.log("compareAtPrice", price, compareAtPrice)
+  
   const availableForSale =
     (variant as { availableForSale?: boolean } | undefined)?.availableForSale ??
     ('availableForSale' in product ? product.availableForSale : true);
