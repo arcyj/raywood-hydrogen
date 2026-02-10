@@ -67,8 +67,8 @@ export function SearchDrawer() {
     >
       <div
         className="predictive-search bg-white m-12 h-full rounded-lg min-h-[300px] tablet:min-h-[400px] max-h-[calc(100vh-180px)]"
-        onTouchStart={focusInput}
-        onPointerDown={focusInput}
+        // onTouchStart={focusInput}
+        // onPointerDown={focusInput}
       >
         <SearchFormPredictive>
           {({fetchResults, goToSearch, inputRef, value}) => (

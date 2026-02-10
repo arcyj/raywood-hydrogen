@@ -12,8 +12,10 @@ import { Banner } from '~/components/sections/Banner';
 import { ButtonLink } from '~/components/ui/Link';
 import { CollectionCards } from '~/components/sections/CollectionCards';
 import {fetchCollectionsByHandles} from '~/lib/queries/collections';
+import {MagnifyingGlassIcon} from '@radix-ui/react-icons';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
+import { Button } from '~/components/ui/Button';
 
 export const meta: Route.MetaFunction = ({matches, location}) => {
   const url = getAbsoluteUrl(matches ?? [], location);
@@ -104,6 +106,9 @@ export default function Homepage() {
   return (
     <div className="home">
       <div className="container mx-auto">
+        <section className="mb-12 max-tablet:mt-24">
+          <CollectionCards collections={data.collections} />
+        </section>
         <div className="grid grid-cols-3 gap-8 mb-12">
           <Slider
             settings={{slidesToShow: 1, spaceBetween: 8, dots: false}}
@@ -160,9 +165,6 @@ export default function Homepage() {
             />
           </div>
         </div>
-        <section className="mb-12">
-          <CollectionCards collections={data.collections} />
-        </section>
         <section className="mb-12">
           <Banner
             heading="Burst Into Battle!"

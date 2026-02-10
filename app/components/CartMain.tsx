@@ -1,10 +1,11 @@
 import {useOptimisticCart} from '@shopify/hydrogen';
-import {Link} from 'react-router';
 import {useContext} from 'react';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {AsideContext} from './Aside';
 import {ProductLineItem} from '~/components/ProductLineItem';
 import {CartSummary} from './CartSummary';
+import {useFetchers} from 'react-router';
+import { CartForm } from '@shopify/hydrogen';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -28,7 +29,12 @@ export function CartMain({layout, cart: originalCart, onClose}: CartMainProps) {
     cart &&
     Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
   const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
-  const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
+
+  const fetchers = useFetchers();
+  const isCartMutating = fetchers.some((fetcher) => {
+    if (fetcher.state === 'idle') return false;
+    return fetcher.formData?.has(CartForm.INPUT_NAME);
+  });
 
   return (
     <div className={className}>
@@ -37,11 +43,11 @@ export function CartMain({layout, cart: originalCart, onClose}: CartMainProps) {
         <div aria-labelledby="cart-lines">
           <ul className='flex flex-col gap-8'>
             {(cart?.lines?.nodes ?? []).map((line) => (
-              <ProductLineItem key={line.id} line={line} layout={layout} onClose={onClose} />
+              <ProductLineItem key={line.id} line={line} layout={layout} onClose={onClose} isCartMutating={isCartMutating}/>
             ))}
           </ul>
         </div>
-        {cartHasItems && <CartSummary cart={cart} layout={layout} />}
+        <CartSummary cart={cart} layout={layout} isCartMutating={isCartMutating} />
       </div>
     </div>
   );
@@ -57,12 +63,11 @@ function CartEmpty({
 }) {
   // Safely get close function - prefer onClose prop, fallback to Aside context
   const aside = AsideContext ? useContext(AsideContext) : null;
-  const close = onClose || aside?.close;
 
   return (
     <div hidden={hidden}>
       <br />
-      <p>
+      <p className='text-regular-semi text-center px-12 pt-24'>
         Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
         started!
       </p>
