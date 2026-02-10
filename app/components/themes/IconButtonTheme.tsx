@@ -60,7 +60,7 @@ const IconButtonTheme = {
   },
   sizes: {
     small: twc`h-[32px] w-[32px]`,
-    medium: twc`h-[40px] w-[40px]`,
+    medium: twc`h-[48px] w-[48px]`,
     large: twc`text-label-l h-56 px-16`,
   },
 };

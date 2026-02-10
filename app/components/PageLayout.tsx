@@ -16,6 +16,7 @@ import { FilterDrawer } from './FilterDrawer';
 import { WishlistDrawer } from './WishlistDrawer';
 import { CartDrawer } from './CartDrawer';
 import { DesktopTopBar } from './sections/DesktopTopBar';
+import { TopBarActions } from './TopBarActions';
 
 
 interface PageLayoutProps {
@@ -97,13 +98,11 @@ function PageLayoutContent({
       )}
       {!isDesktop && (
         <>
-          <TopBar />
+          {/* <TopBar /> */}
           <SearchDrawer />
         </>
       )}
-       {isDesktop && (
-        <DesktopTopBar isLoggedIn={isLoggedIn} />
-      )}
+      {isDesktop && <DesktopTopBar isLoggedIn={isLoggedIn} />}
       {header && isDesktop && (
         <Header
           header={header}
@@ -112,23 +111,24 @@ function PageLayoutContent({
           publicStoreDomain={publicStoreDomain}
         />
       )}
+      <TopBarActions />
       <main>{children}</main>
       <Footer
         footer={footer}
         header={header}
         publicStoreDomain={publicStoreDomain}
+      />
+      {header && !isDesktop && (
+        <Navbar
+          header={header}
+          cart={cart}
+          isLoggedIn={isLoggedIn}
+          publicStoreDomain={publicStoreDomain}
+          activeMenu={activeMenu}
+          onMenuToggle={handleMenuToggle}
+          onClose={handleClose}
         />
-        {header && !isDesktop && (
-          <Navbar
-            header={header}
-            cart={cart}
-            isLoggedIn={isLoggedIn}
-            publicStoreDomain={publicStoreDomain}
-            activeMenu={activeMenu}
-            onMenuToggle={handleMenuToggle}
-            onClose={handleClose}
-          />
-        )}
+      )}
     </Aside.Provider>
   );
 }

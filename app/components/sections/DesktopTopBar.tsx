@@ -14,7 +14,7 @@ export function DesktopTopBar({
 }: DesktopTopBarProps) {
   const withLocale = useLocalizedPath();
 
-  const initial = 'h-48 w-full bg-[#1D1229] px-12 flex items-center justify-between';
+  const initial = 'h-48 w-full bg-[#1D1229] px-12 hidden tablet:flex items-center justify-between';
 
   const classes = twClasses([initial], {}, );
 

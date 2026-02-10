@@ -1,17 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, Suspense } from 'react';
 import { Accordion } from "radix-ui";
 import { Image } from "@shopify/hydrogen";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
-import { NavLink } from 'react-router';
+import { ChevronDownIcon, ArrowRightIcon } from "@radix-ui/react-icons";
+import { NavLink, Await, Form } from 'react-router';
 import { twc, twClasses } from '~/helpers/twMerge';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type { FC } from 'react';
 import { useDrawer } from './Drawer';
 import { getMenuIconUrl } from '~/helpers/getMenuIconUrl';
-import { ChevronRight } from '../icons';
+import { ChevronRight, Profile } from '../icons';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
 import { processUrl } from '~/helpers/processUrl';
-
+import { ButtonLink } from './Link';
+import { Button } from './Button';
 
 interface IDropDownMenuProps {
   menu: HeaderQuery['menu'];
@@ -32,8 +33,11 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
   menu,
   publicStoreDomain,
   primaryDomainUrl,
+  isLoggedIn,
 }) => {
   const { base } = dropDownMenuItemStyle;
+  const { onClose } = useDrawer();
+  const withLocale = useLocalizedPath();
 
   const classes = useMemo(
     () => twClasses([base['initial']], {}, className),
@@ -61,6 +65,8 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
     return itemUrl;
   };
 
+  const navLinkStyle = twc`text-medium-semi transition-colors mb-4 py-12 px-8 bg-lightGrey rounded-md flex justify-between items-center  active:bg-accentGrey active:inset-shadow-sm`
+
   return (
     <Accordion.Root className={classes} type="single" collapsible>
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
@@ -77,6 +83,77 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
           />
         );
       })}
+      <Accordion.Item value="account">
+        <Accordion.Header>
+          <Accordion.Trigger className="flex w-full border-b-2 border-lightGrey items-center justify-between py-16 text-left text-body-regular font-semibold leading-none text-text-layout-powerful hover:bg-gray-100  active:bg-lightGrey active:inset-shadow-b-sm">
+            <span>
+              <Profile size={20} className="inline-block mr-8" />
+              Account
+            </span>
+            <ChevronDownIcon />
+          </Accordion.Trigger>
+        </Accordion.Header>
+
+        <Accordion.Content className="my-8 text-body-regular text-text-layout-secondary">
+          <NavLink
+            to={withLocale('/account/orders')}
+            className={navLinkStyle}
+            onClick={onClose}
+          >
+            <span>Orders</span>
+            <ChevronRight size={20} />
+          </NavLink>
+          <NavLink
+            to={withLocale('/account/profile')}
+            className={navLinkStyle}
+            onClick={onClose}
+          >
+            <span>Profile</span>
+            <ChevronRight size={20} />
+          </NavLink>
+          <NavLink
+            to={withLocale('/account/addresses')}
+            className={navLinkStyle}
+            onClick={onClose}
+          >
+            <span>Addresses</span>
+            <ChevronRight size={20} />
+          </NavLink>
+          <div className="border-t border-gray-200 mt-12 pt-12">
+            <Suspense fallback={<div className="px-16 py-12">Loading...</div>}>
+              <Await resolve={isLoggedIn}>
+                {(loggedIn) =>
+                  loggedIn ? (
+                    <Form
+                      method="POST"
+                      action={withLocale('/account/logout')}
+                      onSubmit={onClose}
+                    >
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        className="w-full"
+                        size="medium"
+                      >
+                        Sign Out
+                      </Button>
+                    </Form>
+                  ) : (
+                    <ButtonLink
+                      href="/account/login"
+                      className="w-full"
+                      onClick={onClose}
+                      variant="primary"
+                    >
+                      Sign In
+                    </ButtonLink>
+                  )
+                }
+              </Await>
+            </Suspense>
+          </div>
+        </Accordion.Content>
+      </Accordion.Item>
     </Accordion.Root>
   );
 }
@@ -128,6 +205,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
               end
               prefetch="intent"
               style={activeLinkStyle}
+              viewTransition
               onClick={(e) => {
                 e.stopPropagation();
                 onClose();
@@ -163,12 +241,23 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
                   style={activeLinkStyle}
                   className="text-medium-semi transition-colors mb-4 py-12 px-8 bg-lightGrey rounded-md flex justify-between items-center  active:bg-accentGrey active:inset-shadow-sm"
                   onClick={onClose}
+                  viewTransition
                 >
                   {subItem.title}
-                  <ChevronRight size={20}/>
+                  <ChevronRight size={20} />
                 </NavLink>
               );
             })}
+            <ButtonLink
+              IconAfter={ArrowRightIcon}
+              href={withLocale(url)}
+              prefetch="intent"
+              onClick={onClose}
+              size='large'
+              className="text-link rounded-md w-full block px-12 py-12 text-white bg-primary border-solid border-b-2 border-b-primary mt-4"
+            >
+              View all {item.title}
+            </ButtonLink>
           </nav>
         </Accordion.Content>
       )}

@@ -304,7 +304,7 @@ function ProductContent({
   }
 
   return (
-    <>
+    <div className="container overflow-hidden max-w-full">
       <Breadcrumb
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
@@ -313,7 +313,7 @@ function ProductContent({
       />
       <div
         id="product-content"
-        className="grid grid-cols-1 md:grid-cols-12 tablet:gap-64 min-w-0 pt-32 tablet:pt-8"
+        className="grid grid-cols-1 md:grid-cols-12 tablet:gap-64 min-w-0 tablet:pt-8"
       >
         <div className="min-w-0 tablet:col-span-7">
           <ProductGallery media={media.nodes} />
@@ -517,7 +517,7 @@ function ProductContent({
           ],
         }}
       />
-    </>
+    </div>
   );
 }
 
