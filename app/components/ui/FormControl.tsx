@@ -71,7 +71,7 @@ interface IFormControlLabelProps {
 interface IFormControlIconProps {
   disabled: boolean;
   hasValue?: boolean;
-  Icon?: FC<IIconProps>;
+  Icon?: FC<IIconProps> | React.ForwardRefExoticComponent<RadixIconProps & React.RefAttributes<SVGSVGElement>>;
 }
 
 interface IFormControlActionsProps extends PropsWithChildren {

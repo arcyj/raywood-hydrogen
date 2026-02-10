@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { Image } from "@shopify/hydrogen";
 import { useLocation, useNavigate, NavLink } from "react-router";
 import { twClasses } from "~/helpers/twMerge";
-import { ChevronLeftIcon, MagnifyingGlassIcon, MixerHorizontalIcon } from "@radix-ui/react-icons";
-import { useAside } from "./Aside";
+import { ChevronLeftIcon, MixerHorizontalIcon } from "@radix-ui/react-icons";
 import { usePlaypeak } from "~/lib/playpeakContext";
 import { Button } from "./ui/Button";
 import {useLocalizedPath} from '~/hooks/useLocalePath';
@@ -15,8 +14,7 @@ export function TopBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const withLocale = useLocalizedPath();
-  const { open } = useAside();
-  const { openSearchDrawer, closeSearchDrawer, isDrawerOpen, closeFilter, openFilter } = usePlaypeak();
+  const { isDrawerOpen, closeFilter, openFilter } = usePlaypeak();
 
   const initial = 'fixed top-0 left-0 border-t-4 border-[#35204d] flex w-full justify-between px-4 pb-8 z-20';
 
@@ -57,14 +55,6 @@ export function TopBar() {
       closeFilter();
     } else {
       openFilter();
-    }
-  };
-
-    const handleSearchToggle = () => {
-    if (isDrawerOpen('search')) {
-      closeSearchDrawer();
-    } else {
-      openSearchDrawer();
     }
   };
 
@@ -112,18 +102,6 @@ export function TopBar() {
           </NavLink>
           <div className="inverted-radius-right bg-[#35204d] w-[40px] h-[42px] absolute -right-[20px] -top-[30px]"></div>
         </div>
-      </div>
-      <div className="mt-4 ml-auto">
-        <Button
-          onClick={handleSearchToggle}
-          variant="action"
-          size="extra-small"
-          className=""
-          aria-label="search"
-          IconBefore={MagnifyingGlassIcon}
-        >
-          Search
-        </Button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import {Suspense} from 'react';
 import {Await, NavLink, useAsyncValue} from 'react-router';
-import { Image } from "@shopify/hydrogen";
+import {Image} from '@shopify/hydrogen';
 import {
   type CartViewPayload,
   useAnalytics,
@@ -11,13 +11,17 @@ import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {usePlaypeak} from '~/lib/playpeakContext';
 
 import {useAside} from '~/components/Aside';
-import { NavMenuItem } from './ui/NavMenuItem';
-import { Cart, Heart } from './icons';
-import { MagnifyingGlassIcon, ArrowRightIcon, ChevronDownIcon } from "@radix-ui/react-icons";
-import { Dropdown } from './ui/Dropdown';
-import { processUrl } from '~/helpers/processUrl';
-import { getMenuIconUrl } from '~/helpers/getMenuIconUrl';
-import { ButtonLink } from './ui/Link';
+import {NavMenuItem} from './ui/NavMenuItem';
+import {Cart, Heart} from './icons';
+import {
+  MagnifyingGlassIcon,
+  ArrowRightIcon,
+  ChevronDownIcon,
+} from '@radix-ui/react-icons';
+import {Dropdown} from './ui/Dropdown';
+import {processUrl} from '~/helpers/processUrl';
+import {getMenuIconUrl} from '~/helpers/getMenuIconUrl';
+import {ButtonLink} from './ui/Link';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 interface HeaderProps {
@@ -39,9 +43,20 @@ export function Header({
   const {shop, menu} = header;
 
   return (
-    <header className="header flex justify-between items-center shadow-md rounded-b-xl">
-      <NavLink prefetch="intent" to={withLocale('/')} style={activeLinkStyle} viewTransition end>
-        <Image src="./images/LogoPlaypeak.svg" alt="Logo" width={100} height={0} />
+    <header className="header justify-between items-center shadow-md rounded-b-xl hidden tablet:flex ">
+      <NavLink
+        prefetch="intent"
+        to={withLocale('/')}
+        style={activeLinkStyle}
+        viewTransition
+        end
+      >
+        <Image
+          src="./images/LogoPlaypeak.svg"
+          alt="Logo"
+          width={100}
+          height={0}
+        />
       </NavLink>
       <HeaderMenu
         menu={menu}
@@ -72,7 +87,6 @@ export function HeaderMenu({
   const {close} = useAside();
 
   return (
-
     <nav className={className} role="navigation">
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
@@ -111,7 +125,9 @@ export function HeaderMenu({
                   />
                 )}
                 {item.title}
-                {hasSubmenu ? <ChevronDownIcon className='ml-4 h-[20px] w-[20px]' /> : null }
+                {hasSubmenu ? (
+                  <ChevronDownIcon className="ml-4 h-[20px] w-[20px]" />
+                ) : null}
               </NavLink>
             </Dropdown.Button>
             {hasSubmenu ? (
@@ -168,9 +184,9 @@ function SearchToggle() {
   return (
     <NavMenuItem
       onClick={openSearchDrawer}
-      Icon={() => <MagnifyingGlassIcon className='w-[20px] h-[20px]' />}
+      Icon={() => <MagnifyingGlassIcon className="w-[20px] h-[20px]" />}
       label={'Search'}
-      variant='menu'
+      variant="menu"
     />
   );
 }
@@ -182,7 +198,7 @@ function WishlistToggle() {
       onClick={openWishlist}
       Icon={() => <Heart />}
       label={'Wishlist'}
-      variant='menu'
+      variant="menu"
     />
   );
 }
@@ -203,17 +219,17 @@ function CartBadge({count}: {count: number | null}) {
   return (
     <NavMenuItem
       onClick={() => {
-          openCart();
-          publish('cart_viewed', {
-            cart,
-            prevCart,
-            shop,
-            url: window.location.href || '',
-          } as CartViewPayload);
+        openCart();
+        publish('cart_viewed', {
+          cart,
+          prevCart,
+          shop,
+          url: window.location.href || '',
+        } as CartViewPayload);
       }}
       Icon={() => <Cart />}
       label={count === null ? 'Cart' : `Cart ${count}`}
-      variant='menu'
+      variant="menu"
     />
   );
 }

@@ -68,7 +68,6 @@ export const WishlistMenu: FC = () => {
   if (isLoading) {
     return (
       <div className="wishlist-menu p-16">
-        <h2 className="text-2xl font-bold mb-16">Wishlist</h2>
         <p className="text-body-regular text-text-layout-secondary">
           Loading...
         </p>
@@ -77,8 +76,7 @@ export const WishlistMenu: FC = () => {
   }
 
   return (
-    <div className="wishlist-menu p-16">
-      <h2 className="text-2xl font-bold mb-16">Wishlist</h2>
+    <div className="wishlist-menu pt-12">
       {wishlistHandles.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-32">
           <p className="text-body-regular text-text-layout-secondary mb-16">

@@ -32,7 +32,6 @@ export const ProfileMenu: FC<ProfileMenuProps> = ({ isLoggedIn }) => {
   const navLinkStyle = twc`ext-medium-semi transition-colors mb-4 py-12 px-8 bg-lightGrey rounded-md flex justify-between items-center  active:bg-accentGrey active:inset-shadow-sm`
   return (
     <div className="profile-menu p-16">
-      <h2 className="text-2xl font-bold mb-16">Account</h2>
       <nav className="flex flex-col gap-12">
         <NavLink
           to={withLocale('/account/orders')}

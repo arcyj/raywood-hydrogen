@@ -13,17 +13,7 @@ export const CartMenu: FC<CartMenuProps> = ({ cart }) => {
   const { onClose } = useDrawer();
 
   return (
-    <div className="cart-menu p-16">
-      <div className="flex items-center justify-between mb-16">
-        <h2 className="text-2xl font-bold">Cart</h2>
-        <button
-          onClick={onClose}
-          className="text-2xl font-light hover:text-gray-600 transition-colors"
-          aria-label="Close cart"
-        >
-          ×
-        </button>
-      </div>
+    <div className="cart-menu pt-12">
       <Suspense
         fallback={
           <div className="flex items-center justify-center py-32">

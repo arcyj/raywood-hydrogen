@@ -2,8 +2,8 @@ import {Await} from 'react-router';
 import {useOptimisticCart} from '@shopify/hydrogen';
 import {Suspense} from 'react';
 import {Drawer} from './ui/Drawer';
-import { Button } from './ui/Button';
-import { Error } from './icons';
+import { IconButton } from './ui/IconButton';
+import { Cross1Icon } from "@radix-ui/react-icons";
 import {usePlaypeak} from '~/lib/playpeakContext';
 import type {
   CartApiQueryFragment,
@@ -19,9 +19,12 @@ export function CartDrawer({cart}: {cart: Promise<CartApiQueryFragment | null>})
     return(
       <div className='p-12 flex justify-between items-center'>
         <span className='text-h1'>Cart</span>
-        <Button IconBefore={Error} variant='secondary' size="small" onClick={closeCart}>
-          CLOSE
-        </Button>
+        <IconButton
+          Icon={Cross1Icon}
+          variant="secondary"
+          size="small"
+          onClick={closeCart}
+        />
       </div>
     )
   }

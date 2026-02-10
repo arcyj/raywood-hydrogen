@@ -1,16 +1,15 @@
-import { useRef, forwardRef, useImperativeHandle, useState } from 'react';
+import { useRef, forwardRef, useState, useCallback } from 'react';
 import { inputFieldClasses } from '../themes/FormControlTheme';
 
 import { twClasses } from '~/helpers/twMerge';
 import { FormControl } from './FormControl';
 import type { IFormControlProps } from './FormControl';
-import type { ChangeEvent, ForwardedRef } from 'react';
+import type { ChangeEvent, ForwardedRef, MutableRefObject } from 'react';
 
-interface IInputRef {
-  focus: () => void;
-}
-
-export const Input = forwardRef<IInputRef, IFormControlProps<string>>(
+export const Input = forwardRef<
+  HTMLInputElement,
+  IFormControlProps<string> & { autoFocus?: boolean; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; enterKeyHint?: React.HTMLAttributes<HTMLInputElement>['enterKeyHint'] }
+>(
   (
     {
       value,
@@ -26,17 +25,27 @@ export const Input = forwardRef<IInputRef, IFormControlProps<string>>(
       type = 'text',
       list,
       name,
+      autoFocus,
+      inputMode,
+      enterKeyHint,
     },
-    ref: ForwardedRef<IInputRef>,
+    ref: ForwardedRef<HTMLInputElement>,
   ) => {
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null) as MutableRefObject<HTMLInputElement | null>;
     const [isFocused, setIsFocused] = useState(false);
+    const resolvedIcon = Icon as React.FC<any> | undefined;
 
-    useImperativeHandle(ref, () => ({
-      focus: () => {
-        inputRef.current?.focus();
+    const setRefs = useCallback(
+      (node: HTMLInputElement | null) => {
+        inputRef.current = node;
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref) {
+          (ref as MutableRefObject<HTMLInputElement | null>).current = node;
+        }
       },
-    }));
+      [ref],
+    );
 
     const inputClasses = inputFieldClasses({ focused: isFocused, disabled, value: !!value, placeholder });
 
@@ -66,13 +75,13 @@ export const Input = forwardRef<IInputRef, IFormControlProps<string>>(
         onClick={handleContainerClick}
         size={size}
       >
-        <FormControl.Icon hasValue={!!value} disabled={disabled} Icon={Icon} />
+        <FormControl.Icon hasValue={!!value} disabled={disabled} Icon={resolvedIcon} />
         <FormControl.Label hasValue={!!value} placeholder={placeholder} error={error} disabled={disabled}>
           <input
             name={name}
             aria-label={type}
             type={type}
-            ref={inputRef}
+            ref={setRefs}
             disabled={disabled}
             value={value}
             className={inputClasses}
@@ -83,6 +92,9 @@ export const Input = forwardRef<IInputRef, IFormControlProps<string>>(
             aria-errormessage={typeof error === 'string' ? error : undefined}
             autoComplete={type}
             list={list}
+            autoFocus={autoFocus}
+            inputMode={inputMode}
+            enterKeyHint={enterKeyHint}
           />
         </FormControl.Label>
         <FormControl.Actions

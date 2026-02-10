@@ -4,8 +4,11 @@ import { DropDownMenu } from './ui/DropdownMenu';
 import { ProfileMenu } from './ProfileMenu';
 import { WishlistMenu } from './WishlistMenu';
 import { CartMenu } from './CartMenu';
-import { Cart, Heart, Profile, Menu } from './icons';
+import { Cart, Heart, Menu } from './icons';
+import {usePlaypeak} from '~/lib/playpeakContext';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
+import { IconButton } from './ui/IconButton';
+import { MagnifyingGlassIcon, Cross1Icon } from "@radix-ui/react-icons";
 
 type MenuType = 'menu' | 'profile' | 'wishlist' | 'cart' | null;
 
@@ -30,6 +33,8 @@ export function Navbar({
 }: NavbarProps) {
   const {menu} = header;
 
+  const {isDrawerOpen, closeDrawer, openSearchDrawer, closeSearchDrawer, } = usePlaypeak();
+
   const renderMenuContent = () => {
     switch (activeMenu) {
       case 'menu':
@@ -52,14 +57,58 @@ export function Navbar({
     }
   };
 
+  const DrawerHeader = ({
+    title,
+    close,
+  }: {
+    title: string;
+    close?: () => void;
+  }) => {
+    return (
+      <div className="flex justify-between items-center">
+        <span className="text-h1">{title}</span>
+        <IconButton
+          Icon={Cross1Icon}
+          variant="secondary"
+          size="medium"
+          onClick={close ?? onClose}
+        ></IconButton>
+      </div>
+    );
+  };
+
+  const renderDrawerHeader = () => {
+    switch (activeMenu) {
+      case 'menu':
+        return <DrawerHeader title="Menu" close={closeDrawer} />;
+      case 'profile':
+        return <DrawerHeader title="Account" close={closeDrawer} />;
+      case 'wishlist':
+        return <DrawerHeader title="WishList" close={closeDrawer} />;
+      case 'cart':
+        return <DrawerHeader title="Cart" close={closeDrawer} />;
+      default:
+        return null;
+    }
+  };
+
+  const handleSearchToggle = () => {
+    if (isDrawerOpen('search')) {
+      closeSearchDrawer();
+    } else {
+      openSearchDrawer();
+    }
+  };
+
   return (
     <div className="bottom-0 w-full">
       <Drawer
         onClose={onClose}
         visible={activeMenu !== null}
         position="bottom"
-        className='bg-white'
-        panelClassName="bg-white px-12 pt-16 rounded-t-xl"
+        className="bg-white"
+        panelClassName="bg-white px-12 pt-16 rounded-t-xl pb-80"
+        header={renderDrawerHeader()}
       >
         {renderMenuContent()}
       </Drawer>
@@ -72,10 +121,9 @@ export function Navbar({
             active={activeMenu === 'menu'}
           />
           <NavMenuItem
-            onClick={() => onMenuToggle('profile')}
-            Icon={() => <Profile />}
-            active={activeMenu === 'profile'}
-            label={'Account'}
+            onClick={handleSearchToggle}
+            Icon={() => <MagnifyingGlassIcon className='w-[20px] h-[20px]' />}
+            label={'Search'}
           />
           <NavMenuItem
             onClick={() => onMenuToggle('wishlist')}
