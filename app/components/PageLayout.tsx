@@ -109,7 +109,7 @@ function PageLayoutContent({
           <SearchDrawer />
         </>
       )}
-      {isDesktop && <DesktopTopBar isLoggedIn={isLoggedIn} />}
+      <DesktopTopBar isLoggedIn={isLoggedIn} />
       {header && isDesktop && (
         <Header
           header={header}

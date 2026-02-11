@@ -37,8 +37,13 @@ export function buildLocaleOptionsFromApi(
   };
   options.push(defaultOption);
 
+  const defaultCountryCode = DEFAULT_LOCALE.country;
+
   for (const country of data.localization.availableCountries) {
     const countryCode = country.isoCode;
+    // Skip duplicate of default locale (e.g. default is Latvia; don't add Latvia again from API)
+    if (countryCode === defaultCountryCode) continue;
+
     const langCode = (country.defaultLanguage?.isoCode ?? 'EN').toUpperCase() as LanguageCode;
     const pathPrefix = `/${langCode.toLowerCase()}-${countryCode}`;
     const currencyCode = (country.currency?.isoCode ?? 'USD') as CurrencyCode;

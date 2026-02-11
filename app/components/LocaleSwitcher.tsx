@@ -54,7 +54,7 @@ export function LocaleSwitcher() {
   const navigate = useNavigate();
   const pathname = location.pathname;
   const rootData = useRouteLoaderData<RootLoader>('root');
-  const options: LocaleOption[] = rootData?.availableLocales ?? getFallbackLocaleOptions();
+  const options: LocaleOption[] = rootData?.availableLocales ?? [];
   const currentPathPrefix = getCurrentPathPrefix(pathname, options);
   const currentOption =
     options.find((opt: LocaleOption) => opt.pathPrefix === currentPathPrefix) ?? options[0];
@@ -75,13 +75,12 @@ export function LocaleSwitcher() {
         return {
           value: opt,
           label: flag ? `${flag} ${opt.label}` : opt.label,
-        };
+          mobileLabel: flag ? `${flag} ${opt.currency}` : opt.currency, };
       })}
       getOptionKey={(opt) => opt.pathPrefix}
       by={(a, b) => a.pathPrefix === b.pathPrefix}
       placeholder="Country / Currency"
       aria-label="Select country and currency"
-      buttonClassName="min-w-[160px]"
       filterable
     />
   );
