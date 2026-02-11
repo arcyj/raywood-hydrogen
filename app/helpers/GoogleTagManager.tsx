@@ -58,6 +58,8 @@ export function GoogleTagManager() {
   const {ready} = register('Google Tag Manager');
 
   useEffect(() => {
+    window.dataLayer = window.dataLayer || [];
+
     subscribe('product_viewed', () => {
       window.dataLayer.push({event: 'viewed-product'});
     });
@@ -75,6 +77,7 @@ export function GoogleTagManager() {
 
       const {items, value, currency} = getGA4ItemsFromPayload(payload);
       if (items.length) {
+        window.dataLayer.push({ecommerce: null});
         window.dataLayer.push({
           event: 'add_to_cart',
           ecommerce: {
