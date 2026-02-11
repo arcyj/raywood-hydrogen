@@ -49,7 +49,7 @@ export const ProductStockStatus: FC<ProductStockStatusProps> = ({
   const { label, circleClass } = getStatusConfig(status, quantity);
 
   return (
-    <div className={`flex items-center gap-8 ${className}`} role="status" aria-label={label}>
+    <div className={`flex justify-end w-full items-center gap-8 ${className}`} role="status" aria-label={label}>
       <span
         className={`inline-block h-8 w-8 shrink-0 rounded-full ${circleClass}`}
         aria-hidden

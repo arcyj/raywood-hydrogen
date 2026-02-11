@@ -1,14 +1,32 @@
 import { useEffect, useRef } from 'react';
 import { Button } from './ui/Button';
 import { useFetcher, useRevalidator, type FetcherWithComponents } from 'react-router';
-import { CartForm, type OptimisticCartLineInput } from '@shopify/hydrogen';
-import type { IButtonSize } from './themes/ButtonTheme';
+import { CartForm, useAnalytics, type OptimisticCartLineInput } from '@shopify/hydrogen';
+import type { IButtonSize, IButtonVariant } from './themes/ButtonTheme';
 import { usePlaypeak } from '~/lib/playpeakContext';
 import { useCartRoute } from '~/lib/cartRoute';
 import { Cart } from './icons';
 
+type CartLineLike = {
+  id?: string;
+  quantity?: number;
+  merchandise?: {
+    id?: string;
+  };
+};
+
+function getCartLines(cartLike: unknown): CartLineLike[] {
+  if (!cartLike || typeof cartLike !== 'object') return [];
+  const cart = cartLike as {
+    lines?: { nodes?: CartLineLike[] } | CartLineLike[];
+  };
+  if (Array.isArray(cart.lines)) return cart.lines;
+  return cart.lines?.nodes ?? [];
+}
+
 function AddToCartButtonInner({
   analytics,
+  lines,
   children,
   disabled,
   onClick,
@@ -16,19 +34,24 @@ function AddToCartButtonInner({
   size,
   fetcher,
   showIcon = true,
+  variant = 'primary',
 }: {
   analytics?: unknown;
+  lines: Array<OptimisticCartLineInput>;
   children: React.ReactNode;
   disabled?: boolean;
   onClick?: () => void;
   onSuccess?: () => void;
   size?: IButtonSize
   showIcon?: boolean;
+  variant?: IButtonVariant;
   fetcher: FetcherWithComponents<any>;
 }) {
   const previousStateRef = useRef<string>('idle');
   const hasCalledSuccessRef = useRef<boolean>(false);
   const { revalidate } = useRevalidator();
+  const { publish, shop, cart, prevCart } = useAnalytics();
+  const publishEvent = publish as unknown as (event: string, payload: Record<string, unknown>) => void;
 
 
 
@@ -46,6 +69,35 @@ function AddToCartButtonInner({
       if (onSuccess) {
         onSuccess();
       }
+      if (typeof window !== 'undefined') {
+        const resultCart = fetcher.data?.cart ?? cart;
+        const resultLines = getCartLines(resultCart);
+        const prevLines = getCartLines(prevCart);
+
+        lines.forEach((lineInput) => {
+          const currentLine = resultLines.find(
+            (line) => line?.merchandise?.id === lineInput.merchandiseId,
+          );
+          const prevLine = prevLines.find(
+            (line) => line?.merchandise?.id === lineInput.merchandiseId,
+          );
+
+          publishEvent('product_added_to_cart', {
+            cart: resultCart,
+            prevCart,
+            currentLine,
+            prevLine,
+            shop,
+            url: window.location.href || '',
+          });
+        });
+
+        publishEvent('cart_updated', {
+          cart: resultCart,
+          prevCart,
+          shop,
+        });
+      }
       // Force root loader to re-run so deferred cart promise updates and drawer shows new item
       revalidate();
     }
@@ -56,7 +108,17 @@ function AddToCartButtonInner({
     if (fetcher.state === 'submitting' || fetcher.state === 'loading') {
       hasCalledSuccessRef.current = false;
     }
-  }, [fetcher.state, fetcher.data, onSuccess, revalidate]);
+  }, [
+    fetcher.state,
+    fetcher.data,
+    onSuccess,
+    revalidate,
+    publish,
+    shop,
+    cart,
+    prevCart,
+    lines,
+  ]);
 
   const handleClick = () => {
     if (onClick) {
@@ -77,6 +139,7 @@ function AddToCartButtonInner({
         onClick={handleClick}
         disabled={disabled ?? fetcher.state !== 'idle'}
         className='w-full'
+        variant={variant}
         IconBefore={showIcon ? Cart : undefined}
       >
         {children}
@@ -93,6 +156,7 @@ export function AddToCartButton({
   onClick,
   onSuccess,
   size,
+  variant = 'primary',
   showIcon = true,
 }: {
   analytics?: unknown;
@@ -100,6 +164,7 @@ export function AddToCartButton({
   disabled?: boolean;
   lines: Array<OptimisticCartLineInput>;
   size?: IButtonSize;
+  variant?: IButtonVariant;
   showIcon?:  boolean;
   onClick?: () => void;
   onSuccess?: () => void;
@@ -107,7 +172,6 @@ export function AddToCartButton({
   const cartRoute = useCartRoute();
   const fetcher = useFetcher<{ cart?: unknown; errors?: unknown[] }>();
   const { openCart } = usePlaypeak();
-
   // Submit programmatically so the request always uses the correct action URL and payload
   const formRef = useRef<HTMLFormElement>(null);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -134,10 +198,12 @@ export function AddToCartButton({
         showIcon={showIcon}
         size={size}
         analytics={analytics}
+        lines={lines}
         disabled={disabled}
         onClick={onClick}
         onSuccess={onSuccess}
         fetcher={fetcher}
+        variant={variant}
       >
         {children}
       </AddToCartButtonInner>
