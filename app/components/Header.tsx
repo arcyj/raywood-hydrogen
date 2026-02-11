@@ -256,8 +256,9 @@ function CartBadge({count}: {count: number | null}) {
         } as CartViewPayload);
       }}
       Icon={() => <Cart />}
-      label={count === null ? 'Cart' : `Cart ${count}`}
+      label="Cart"
       variant="menu"
+      badge={count ? count : undefined}
     />
   );
 }

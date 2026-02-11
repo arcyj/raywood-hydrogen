@@ -36,7 +36,7 @@ function FilterInput({
       value={query}
       onChange={(e) => setQuery(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+      className="w-full text-[16px] rounded border-0 px-8 bg-lightGrey px-2 py-1.5 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
       autoComplete="off"
       aria-label="Filter options"
     />
@@ -46,6 +46,7 @@ function FilterInput({
 export interface ComboboxOptionItem<T> {
   value: T;
   label: string;
+  mobileLabel?: string;
   disabled?: boolean;
 }
 
@@ -135,6 +136,8 @@ export function Combobox<T>({
     (i) => i.value === value || (getOptionKey && getOptionKey(i.value) === getOptionKey(value as T))
   );
   const displayValue = selectedItem?.label ?? (value != null ? getLabel(value) : null);
+  const mobileDisplayValue =
+    selectedItem?.mobileLabel ?? (value != null ? getLabel(value) : null);
 
   return (
     <HeadlessCombobox
@@ -153,7 +156,7 @@ export function Combobox<T>({
             typeof trigger === 'function' ? (
               <ComboboxButton
                 className={clsx(
-                  'flex items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50',
+                  'flex items-center justify-between gap-2 rounded-md border border-gray-300 bg-white py-2 text-left text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50',
                   buttonClassName
                 )}
               >
@@ -162,7 +165,7 @@ export function Combobox<T>({
             ) : (
               <ComboboxButton
                 className={clsx(
-                  'flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50',
+                  'flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white py-2 text-left text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50',
                   buttonClassName
                 )}
               >
@@ -172,16 +175,18 @@ export function Combobox<T>({
           ) : (
             <ComboboxButton
               className={clsx(
-                'flex flex-1 min-w-[160px] text-white text-medium-semi max-w-[250px] items-center justify-between gap-2 rounded-md bg-transparent px-3 py-2 text-left text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50',
+                'flex flex-1 min-w-[70px] tablet:min-w-[160px] text-white text-medium-semi max-w-[250px] items-center justify-between gap-2 rounded-md bg-transparent py-2 text-left text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50',
                 buttonClassName
               )}
             >
-              <span className={clsx(!displayValue && 'text-white')}>
-                {displayValue ?? placeholder}
+              <span className={clsx(!displayValue && !mobileDisplayValue && 'text-white')}>
+                <span className="tablet:hidden align-bottom">
+                  {mobileDisplayValue ?? displayValue ?? placeholder}
+                </span>
+                <span className="hidden tablet:inline align-bottom">
+                  {displayValue ?? placeholder}
+                </span>
               </span>
-              <ChevronDownIcon
-                className={clsx('shrink-0 transition', open && 'rotate-180')}
-              />
             </ComboboxButton>
           )}
 
@@ -189,13 +194,13 @@ export function Combobox<T>({
             anchor={false}
             modal={false}
             className={clsx(
-              'absolute left-0 top-full z-50 mt-1 min-w-[250px] max-h-[300px] overflow-auto rounded-md border border-gray-300 bg-white py-1 shadow-lg empty:invisible',
+              'absolute left-0 top-full z-50 mt-1 min-w-[250px] max-h-[300px] overflow-auto rounded-md border border-gray-300 bg-white shadow-lg empty:invisible',
               optionsClassName
             )}
           >
             {filterable && (
               <div
-                className="sticky top-0 z-10 border-b border-gray-200 bg-white px-2 py-2"
+                className="sticky top-0 z-10 border-b border-gray-200 bg-white"
                 onMouseDown={(e) => {
                   // Prevent panel from closing when clicking the filter (bubble to outside-click handler)
                   e.stopPropagation();
@@ -207,12 +212,12 @@ export function Combobox<T>({
                   inputRef={filterInputRef}
                   open={open}
                   filterable={filterable}
-                  placeholder="Filter options..."
+                  placeholder="Search currency..."
                 />
               </div>
             )}
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-500">No results</div>
+              <div className="px-12 py-12 text-sm text-small">No results</div>
             ) : (
               filteredOptions.map((item) => (
                 <ComboboxOption
@@ -224,7 +229,7 @@ export function Combobox<T>({
                   value={item.value}
                   disabled={item.disabled}
                   className={clsx(
-                    'cursor-pointer px-3 py-2 text-sm data-[focus]:bg-blue-100 data-[selected]:font-semibold',
+                    'cursor-pointer px-8 py-8 text-[14px] font-semibold data-[focus]:bg-blue-100 data-[selected]:bg-lightGrey data-[selected]:font-bold',
                     optionClassName
                   )}
                 >

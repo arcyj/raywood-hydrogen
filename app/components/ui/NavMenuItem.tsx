@@ -9,6 +9,7 @@ interface IButtonProps {
   type?: 'button' | 'submit';
   active?: boolean;
   className?: string;
+  badge?: string | number;
   variant?: 'menu' | 'navBar'
   onClick?: (e: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => void;
 }
@@ -35,6 +36,7 @@ export const NavMenuItem: FC<IButtonProps> = ({
   active = false,
   onClick,
   variant = 'navBar',
+  badge,
   className,
 }) => {
   const { base, variants } = navMenuItemStyle;
@@ -53,6 +55,11 @@ export const NavMenuItem: FC<IButtonProps> = ({
 
   return(
     <button className={classes} type={type} onClick={onClick}>
+      {badge && (
+        <span className="absolute top-0 right-0 inline-flex items-center justify-center px-8 py-4 text-xs font-bold leading-none text-white bg-primary rounded-full">
+          {badge}
+        </span>
+      )}
       {Icon && <Icon size={32} />}
       {label && <span className={labelClasses}>{label}</span>}
     </button>

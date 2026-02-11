@@ -1,3 +1,4 @@
+import {Suspense} from 'react';
 import { Drawer } from './ui/Drawer';
 import { NavMenuItem } from './ui/NavMenuItem';
 import { DropDownMenu } from './ui/DropdownMenu';
@@ -6,6 +7,7 @@ import { WishlistMenu } from './WishlistMenu';
 import { CartMenu } from './CartMenu';
 import { Cart, Heart, Menu } from './icons';
 import {usePlaypeak} from '~/lib/playpeakContext';
+import {Await} from 'react-router';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import { IconButton } from './ui/IconButton';
 import { MagnifyingGlassIcon, Cross1Icon } from "@radix-ui/react-icons";
@@ -122,7 +124,7 @@ export function Navbar({
           />
           <NavMenuItem
             onClick={handleSearchToggle}
-            Icon={() => <MagnifyingGlassIcon className='w-[20px] h-[20px]' />}
+            Icon={() => <MagnifyingGlassIcon className="w-[20px] h-[20px]" />}
             label={'Search'}
           />
           <NavMenuItem
@@ -131,12 +133,32 @@ export function Navbar({
             active={activeMenu === 'wishlist'}
             label={'Wishlist'}
           />
-          <NavMenuItem
-            onClick={() => onMenuToggle('cart')}
-            Icon={() => <Cart />}
-            active={activeMenu === 'cart'}
-            label={'Cart'}
-          />
+          <Suspense
+            fallback={
+              <NavMenuItem
+                onClick={() => onMenuToggle('cart')}
+                Icon={() => <Cart />}
+                active={activeMenu === 'cart'}
+                label={'Cart'}
+              />
+            }
+          >
+            <Await resolve={cart}>
+              {(resolvedCart) => (
+                <NavMenuItem
+                  onClick={() => onMenuToggle('cart')}
+                  Icon={() => <Cart />}
+                  active={activeMenu === 'cart'}
+                  label={'Cart'}
+                  badge={
+                    resolvedCart?.totalQuantity
+                      ? resolvedCart?.totalQuantity
+                      : undefined
+                  }
+                />
+              )}
+            </Await>
+          </Suspense>
         </div>
       </nav>
     </div>
