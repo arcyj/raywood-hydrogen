@@ -10,6 +10,7 @@ import {Header, HeaderMenu} from '~/components/Header';
 import { Navbar } from './Navbar';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { SearchDrawer } from './SearchDrawer';
+import { MenuDrawer } from './MenuDrawer';
 import { TopBar } from './TopBar';
 import { PlaypeakProvider, usePlaypeak } from '~/lib/playpeakContext';
 import { FilterDrawer } from './FilterDrawer';
@@ -89,8 +90,14 @@ function PageLayoutContent({
   return (
     <Aside.Provider>
       <FilterDrawer />
+
       {isDesktop && (
         <>
+          <MenuDrawer
+            isLoggedIn={isLoggedIn}
+            publicStoreDomain={publicStoreDomain}
+            header={header}
+          />
           <CartDrawer cart={cart} />
           <SearchDrawer />
           <WishlistDrawer />

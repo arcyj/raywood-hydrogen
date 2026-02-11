@@ -254,7 +254,7 @@ function CollectionProducts({
                     View All
                   </ButtonLink>
                 </div>
-                <div className="grid grid-cols-2 tablet:grid-cols-4 desktop:grid-cols-5 mediumDesktop:grid-cols-6 largeDesktop:grid-cols-7 gap-8">
+                <div className="products-grid products-grid--cols-">
                   {collection.products?.nodes
                     ? collection.products.nodes.map((product) => (
                         <ProductItem key={product.id} product={product} />
@@ -277,6 +277,28 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     title
     handle
     availableForSale
+    selectedOrFirstAvailableVariant {
+      id
+      availableForSale
+      image {
+        url
+        altText
+        width
+        height
+      }
+      price {
+        amount
+        currencyCode
+      }
+      compareAtPrice {
+        amount
+        currencyCode
+      }
+      product {
+        handle
+        title
+      }
+    }
     priceRange {
       minVariantPrice {
         amount
@@ -308,6 +330,28 @@ const LATEST_ADDED_PRODUCTS_QUERY = `#graphql
     handle
     vendor
     availableForSale
+    selectedOrFirstAvailableVariant {
+      id
+      availableForSale
+      image {
+        url
+        altText
+        width
+        height
+      }
+      price {
+        amount
+        currencyCode
+      }
+      compareAtPrice {
+        amount
+        currencyCode
+      }
+      product {
+        handle
+        title
+      }
+    }
     priceRange {
       minVariantPrice {
         amount

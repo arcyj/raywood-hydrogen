@@ -89,6 +89,28 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
     handle
     title
     availableForSale
+    selectedOrFirstAvailableVariant {
+      id
+      availableForSale
+      image {
+        url
+        altText
+        width
+        height
+      }
+      price {
+        amount
+        currencyCode
+      }
+      compareAtPrice {
+        amount
+        currencyCode
+      }
+      product {
+        handle
+        title
+      }
+    }
     featuredImage {
       id
       altText

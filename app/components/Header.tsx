@@ -12,7 +12,7 @@ import {usePlaypeak} from '~/lib/playpeakContext';
 
 import {useAside} from '~/components/Aside';
 import {NavMenuItem} from './ui/NavMenuItem';
-import {Cart, Heart} from './icons';
+import {Cart, Heart, Menu} from './icons';
 import {
   MagnifyingGlassIcon,
   ArrowRightIcon,
@@ -23,6 +23,7 @@ import {processUrl} from '~/helpers/processUrl';
 import {getMenuIconUrl} from '~/helpers/getMenuIconUrl';
 import {ButtonLink} from './ui/Link';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
+import { useBreakpoints } from '~/hooks/useBreakpoints';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -41,15 +42,18 @@ export function Header({
 }: HeaderProps) {
   const withLocale = useLocalizedPath();
   const {shop, menu} = header;
+  const { isLargeDesktop, isMobile } = useBreakpoints();
 
   return (
-    <header className="header justify-between items-center shadow-md rounded-b-xl hidden tablet:flex ">
+    <header className="header justify-between shadow-md rounded-b-xl hidden tablet:grid grid-cols-[auto_1fr_auto] items-center ">
+      {!isMobile && !isLargeDesktop && <MenuToggle />}
       <NavLink
         prefetch="intent"
         to={withLocale('/')}
         style={activeLinkStyle}
         viewTransition
         end
+        className="justify-self-center"
       >
         <Image
           src="./images/LogoPlaypeak.svg"
@@ -58,12 +62,15 @@ export function Header({
           height={0}
         />
       </NavLink>
-      <HeaderMenu
-        menu={menu}
-        viewport="desktop"
-        primaryDomainUrl={shop.primaryDomain.url}
-        publicStoreDomain={publicStoreDomain}
-      />
+      {isLargeDesktop && (
+        <HeaderMenu
+          menu={menu}
+          viewport="desktop"
+          primaryDomainUrl={shop.primaryDomain.url}
+          publicStoreDomain={publicStoreDomain}
+          className="hidden largeDesktop:flex justify-self-center"
+        />
+      )}
       <div className="flex items-center gap-4">
         <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
       </div>
@@ -76,18 +83,20 @@ export function HeaderMenu({
   primaryDomainUrl,
   viewport,
   publicStoreDomain,
+  className,
 }: {
   menu: HeaderProps['header']['menu'];
   primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url'];
   viewport: Viewport;
   publicStoreDomain: HeaderProps['publicStoreDomain'];
+  className?: string;
 }) {
   const withLocale = useLocalizedPath();
-  const className = `header-menu-${viewport}`;
+  const containerClass = `header-menu-${viewport}`;
   const {close} = useAside();
 
   return (
-    <nav className={className} role="navigation">
+    <nav className={`${containerClass} ${className}`} role="navigation">
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
 
@@ -106,7 +115,7 @@ export function HeaderMenu({
           <Dropdown key={item.id} openOnHover={true}>
             <Dropdown.Button>
               <NavLink
-                className="text-link flex items-center px-8 hover:bg-lightGrey rounded-lg py-8 active:bg-accentGrey active:inset-shadow-sm"
+                className="text-link flex items-center px-8 hover:bg-lightGrey rounded-lg py-8 active:bg-accentGrey active:inset-shadow-sm text-nowrap"
                 end
                 key={item.id}
                 onClick={close}
@@ -187,6 +196,25 @@ function SearchToggle() {
       Icon={() => <MagnifyingGlassIcon className="w-[20px] h-[20px]" />}
       label={'Search'}
       variant="menu"
+    />
+  );
+}
+
+function MenuToggle() {
+  const {openMenu, closeDrawer, isDrawerOpen} = usePlaypeak();
+  const handleToggle = () => {
+    if (isDrawerOpen('menu')) {
+      closeDrawer();
+    } else {
+      openMenu();
+    }
+  };
+  return (
+    <NavMenuItem
+      onClick={handleToggle}
+      Icon={() => <Menu className='w-[18px] h-[18px] flex' />}
+      label={'Menu'}
+      variant='menu'
     />
   );
 }

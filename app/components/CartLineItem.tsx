@@ -1,15 +1,28 @@
 import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
 import type {CartLayout} from '~/components/CartMain';
-import {CartForm, Image, type OptimisticCartLine} from '@shopify/hydrogen';
+import {CartForm, Image, useAnalytics, type OptimisticCartLine} from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
 import {Link} from 'react-router';
 import {ProductPrice} from './ProductPrice';
-import {useContext} from 'react';
+import {useContext, useEffect, useRef} from 'react';
 import {AsideContext} from './Aside';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
+type CartLineLike = {
+  id?: string;
+  quantity?: number;
+};
+
+function getCartLines(cartLike: unknown): CartLineLike[] {
+  if (!cartLike || typeof cartLike !== 'object') return [];
+  const cart = cartLike as {
+    lines?: { nodes?: CartLineLike[] } | CartLineLike[];
+  };
+  if (Array.isArray(cart.lines)) return cart.lines;
+  return cart.lines?.nodes ?? [];
+}
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -137,14 +150,67 @@ function CartLineRemoveButton({
       inputs={{lineIds}}
     >
       {(fetcher) => (
-        <button 
-          disabled={disabled || fetcher.state !== 'idle'} 
-          type="submit"
-        >
-          Remove
-        </button>
+        <CartLineRemoveButtonInner
+          fetcher={fetcher}
+          disabled={disabled}
+          lineIds={lineIds}
+        />
       )}
     </CartForm>
+  );
+}
+
+function CartLineRemoveButtonInner({
+  fetcher,
+  disabled,
+  lineIds,
+}: {
+  fetcher: { state: string; data?: { cart?: unknown; errors?: unknown[] } };
+  disabled: boolean;
+  lineIds: string[];
+}) {
+  const { publish, shop, cart, prevCart } = useAnalytics();
+  const publishEvent = publish as unknown as (event: string, payload: Record<string, unknown>) => void;
+  const previousStateRef = useRef<string>('idle');
+
+  useEffect(() => {
+    const wasNotIdle = previousStateRef.current !== 'idle';
+    const isNowIdle = fetcher.state === 'idle';
+    const hasData = fetcher.data && !fetcher.data.errors;
+
+    if (wasNotIdle && isNowIdle && hasData && typeof window !== 'undefined') {
+      const resultCart = fetcher.data?.cart ?? cart;
+      const resultLines = getCartLines(resultCart);
+      const prevLines = getCartLines(prevCart);
+
+      lineIds.forEach((lineId) => {
+        const currentLine = resultLines.find((line) => line?.id === lineId);
+        const prevLine = prevLines.find((line) => line?.id === lineId);
+
+        publishEvent('product_removed_from_cart', {
+          cart: resultCart,
+          prevCart,
+          currentLine,
+          prevLine,
+          shop,
+          url: window.location.href || '',
+        });
+      });
+
+      publishEvent('cart_updated', {
+        cart: resultCart,
+        prevCart,
+        shop,
+      });
+    }
+
+    previousStateRef.current = fetcher.state;
+  }, [fetcher.state, fetcher.data, lineIds, publish, shop, cart, prevCart]);
+
+  return (
+    <button disabled={disabled || fetcher.state !== 'idle'} type="submit">
+      Remove
+    </button>
   );
 }
 
@@ -164,9 +230,76 @@ function CartLineUpdateButton({
       action={CartForm.ACTIONS.LinesUpdate}
       inputs={{lines}}
     >
-      {children}
+      {(fetcher) => (
+        <CartLineUpdateButtonInner fetcher={fetcher} lines={lines}>
+          {children}
+        </CartLineUpdateButtonInner>
+      )}
     </CartForm>
   );
+}
+
+function CartLineUpdateButtonInner({
+  children,
+  fetcher,
+  lines,
+}: {
+  children: React.ReactNode;
+  fetcher: { state: string; data?: { cart?: unknown; errors?: unknown[] } };
+  lines: CartLineUpdateInput[];
+}) {
+  const { publish, shop, cart, prevCart } = useAnalytics();
+  const publishEvent = publish as unknown as (event: string, payload: Record<string, unknown>) => void;
+  const previousStateRef = useRef<string>('idle');
+
+  useEffect(() => {
+    const wasNotIdle = previousStateRef.current !== 'idle';
+    const isNowIdle = fetcher.state === 'idle';
+    const hasData = fetcher.data && !fetcher.data.errors;
+
+    if (wasNotIdle && isNowIdle && hasData && typeof window !== 'undefined') {
+      const resultCart = fetcher.data?.cart ?? cart;
+      const resultLines = getCartLines(resultCart);
+      const prevLines = getCartLines(prevCart);
+
+      lines.forEach((lineInput) => {
+        const currentLine = resultLines.find((line) => line?.id === lineInput.id);
+        const prevLine = prevLines.find((line) => line?.id === lineInput.id);
+        const currentQty = currentLine?.quantity ?? 0;
+        const prevQty = prevLine?.quantity ?? 0;
+
+        if (currentQty > prevQty) {
+          publishEvent('product_added_to_cart', {
+            cart: resultCart,
+            prevCart,
+            currentLine,
+            prevLine,
+            shop,
+            url: window.location.href || '',
+          });
+        } else if (currentQty < prevQty) {
+          publishEvent('product_removed_from_cart', {
+            cart: resultCart,
+            prevCart,
+            currentLine,
+            prevLine,
+            shop,
+            url: window.location.href || '',
+          });
+        }
+      });
+
+      publishEvent('cart_updated', {
+        cart: resultCart,
+        prevCart,
+        shop,
+      });
+    }
+
+    previousStateRef.current = fetcher.state;
+  }, [fetcher.state, fetcher.data, lines, publish, shop, cart, prevCart]);
+
+  return <>{children}</>;
 }
 
 /**

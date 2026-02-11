@@ -7,6 +7,7 @@ enum Breakpoints {
   TABLET = 768,
   LARGE_TABLET = 840,
   DESKTOP = 1024,
+  LARGE_DESKTOP = 1400,
 }
 
 interface IBreakpoints {
@@ -16,6 +17,7 @@ interface IBreakpoints {
   isTablet: boolean;
   isTabletLarge: boolean;
   isDesktop: boolean;
+  isLargeDesktop: boolean;
 }
 
 const getBreakpoints = (width: number): IBreakpoints => ({
@@ -25,6 +27,7 @@ const getBreakpoints = (width: number): IBreakpoints => ({
   isTablet: width > Breakpoints.TABLET,
   isTabletLarge: width < Breakpoints.LARGE_TABLET,
   isDesktop: width >= Breakpoints.DESKTOP,
+  isLargeDesktop: width >= Breakpoints.LARGE_DESKTOP,
 });
 
 export const useBreakpoints = () => {

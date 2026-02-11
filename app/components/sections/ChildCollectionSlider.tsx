@@ -43,7 +43,7 @@ export const ChildCollectionSlider: FC<IChildCollectionSlider> = ({className}) =
                       <img
                         src={childCollection.image.url}
                         alt={childCollection.title}
-                        className="h-48"
+                        className="h-48 max-w-[100px]"
                         width="100%"
                         height="48px"
                       />

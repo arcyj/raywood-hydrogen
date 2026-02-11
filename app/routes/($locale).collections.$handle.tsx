@@ -305,7 +305,7 @@ export default function Collection() {
         <div className="col-span-4 md:col-span-6 lg:col-span-12 bg-white">
           <PaginatedResourceSection<ProductItemFragment>
             connection={collection.products}
-            resourcesClassName={`products-grid auto-rows-[minmax(0,1fr)] ${collectionGrid === 4 ? 'products-grid--cols-4' : ''}`}
+            resourcesClassName={`products-grid ${collectionGrid === 4 ? 'products-grid--cols-4' : 'products-grid--cols-6'}`}
             skeletonComponent={ProductItemSkeleton}
             skeletonCount={1}
             nextPageUrl={nextPageUrl}
@@ -344,9 +344,25 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     vendor
     availableForSale
     selectedOrFirstAvailableVariant {
+      id
+      availableForSale
+      image {
+        url
+        altText
+        width
+        height
+      }
+      price {
+        amount
+        currencyCode
+      }
       compareAtPrice {
         amount
         currencyCode
+      }
+      product {
+        handle
+        title
       }
     }
     featuredImage {
