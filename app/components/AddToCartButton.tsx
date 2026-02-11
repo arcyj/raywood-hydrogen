@@ -1,32 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { Button } from './ui/Button';
 import { useFetcher, useRevalidator, type FetcherWithComponents } from 'react-router';
-import { CartForm, useAnalytics, type OptimisticCartLineInput } from '@shopify/hydrogen';
+import { CartForm, type OptimisticCartLineInput } from '@shopify/hydrogen';
 import type { IButtonSize, IButtonVariant } from './themes/ButtonTheme';
 import { usePlaypeak } from '~/lib/playpeakContext';
 import { useCartRoute } from '~/lib/cartRoute';
 import { Cart } from './icons';
 
-type CartLineLike = {
-  id?: string;
-  quantity?: number;
-  merchandise?: {
-    id?: string;
-  };
-};
-
-function getCartLines(cartLike: unknown): CartLineLike[] {
-  if (!cartLike || typeof cartLike !== 'object') return [];
-  const cart = cartLike as {
-    lines?: { nodes?: CartLineLike[] } | CartLineLike[];
-  };
-  if (Array.isArray(cart.lines)) return cart.lines;
-  return cart.lines?.nodes ?? [];
-}
-
 function AddToCartButtonInner({
   analytics,
-  lines,
   children,
   disabled,
   onClick,
@@ -37,7 +19,6 @@ function AddToCartButtonInner({
   variant = 'primary',
 }: {
   analytics?: unknown;
-  lines: Array<OptimisticCartLineInput>;
   children: React.ReactNode;
   disabled?: boolean;
   onClick?: () => void;
@@ -50,10 +31,6 @@ function AddToCartButtonInner({
   const previousStateRef = useRef<string>('idle');
   const hasCalledSuccessRef = useRef<boolean>(false);
   const { revalidate } = useRevalidator();
-  const { publish, shop, cart, prevCart } = useAnalytics();
-  const publishEvent = publish as unknown as (event: string, payload: Record<string, unknown>) => void;
-
-
 
   // Call onSuccess and revalidate when fetcher completes successfully so cart drawer updates
   useEffect(() => {
@@ -68,35 +45,6 @@ function AddToCartButtonInner({
 
       if (onSuccess) {
         onSuccess();
-      }
-      if (typeof window !== 'undefined') {
-        const resultCart = fetcher.data?.cart ?? cart;
-        const resultLines = getCartLines(resultCart);
-        const prevLines = getCartLines(prevCart);
-
-        lines.forEach((lineInput) => {
-          const currentLine = resultLines.find(
-            (line) => line?.merchandise?.id === lineInput.merchandiseId,
-          );
-          const prevLine = prevLines.find(
-            (line) => line?.merchandise?.id === lineInput.merchandiseId,
-          );
-
-          publishEvent('product_added_to_cart', {
-            cart: resultCart,
-            prevCart,
-            currentLine,
-            prevLine,
-            shop,
-            url: window.location.href || '',
-          });
-        });
-
-        publishEvent('cart_updated', {
-          cart: resultCart,
-          prevCart,
-          shop,
-        });
       }
       // Force root loader to re-run so deferred cart promise updates and drawer shows new item
       revalidate();
@@ -113,11 +61,6 @@ function AddToCartButtonInner({
     fetcher.data,
     onSuccess,
     revalidate,
-    publish,
-    shop,
-    cart,
-    prevCart,
-    lines,
   ]);
 
   const handleClick = () => {
@@ -198,7 +141,6 @@ export function AddToCartButton({
         showIcon={showIcon}
         size={size}
         analytics={analytics}
-        lines={lines}
         disabled={disabled}
         onClick={onClick}
         onSuccess={onSuccess}
