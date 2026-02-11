@@ -304,7 +304,7 @@ function ProductContent({
   }
 
   return (
-    <div className="container overflow-hidden max-w-full">
+    <div className="container overflow-hidden max-w-full mt-[40px]">
       <Breadcrumb
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
@@ -330,7 +330,7 @@ function ProductContent({
                 <span className="text-medium-semi text-gray">{vendor}</span>
               </div>
               <h1 className="text-h2 mt-4 mb-8">{title}</h1>
-              <div className="flex flex-col my-24">
+              <div className="flex flex-col mb-24 mt-12">
                 <div className="flex items-end gap-24 mb-12 justify-between">
                   <div className="flex gap-24 items-end">
                     <ProductPrice

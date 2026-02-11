@@ -59,7 +59,7 @@ function CartCheckoutActions({
         target="_self"
         variant="primary"
         className="w-full"
-        disabled={isCartMutating}
+        // disabled={isCartMutating}
       >
         {isCartMutating ? (
           <p>Updating cart ...</p>

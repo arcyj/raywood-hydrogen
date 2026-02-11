@@ -9,7 +9,9 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteLoaderData,
+  Link,
 } from 'react-router';
+import {Image} from '@shopify/hydrogen';
 import type {Route} from './+types/root';
 import {redirect} from 'react-router';
 import {FOOTER_QUERY, HEADER_QUERY, LOCALIZATION_QUERY} from '~/lib/fragments';
@@ -22,7 +24,9 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import resetStyles from '~/styles/reset.css?url';
 import {PageLayout} from './components/PageLayout';
+import {ErrorPage} from './components/ErrorPage';
 import { GoogleTagManager } from './helpers/GoogleTagManager';
+import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 declare global {
   interface Window {
@@ -31,6 +35,7 @@ declare global {
 }
 
 export type RootLoader = typeof loader;
+export type RootLoaderData = Awaited<ReturnType<RootLoader>>;
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -268,27 +273,74 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary() {
-  const error = useRouteError();
-  let errorMessage = 'Unknown error';
-  let errorStatus = 500;
+function ErrorLayout({
+  children,
+  withFullLayout,
+  data,
+}: {
+  children: React.ReactNode;
+  withFullLayout: boolean;
+  data: RootLoaderData | undefined;
+}) {
+  const withLocale = useLocalizedPath();
 
-  if (isRouteErrorResponse(error)) {
-    errorMessage = error?.data?.message ?? error.data;
-    errorStatus = error.status;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
+  if (withFullLayout && data) {
+    return (
+      <PageLayout
+        cart={data.cart}
+        footer={data.footer}
+        header={data.header}
+        isLoggedIn={data.isLoggedIn}
+        publicStoreDomain={data.publicStoreDomain}
+      >
+        {children}
+      </PageLayout>
+    );
   }
 
   return (
-    <div className="route-error">
-      <h1>Oops</h1>
-      <h2>{errorStatus}</h2>
-      {errorMessage && (
-        <fieldset>
-          <pre>{errorMessage}</pre>
-        </fieldset>
-      )}
-    </div>
+    <>
+      <header className="flex items-center justify-center shadow-md rounded-b-xl min-h-[var(--header-height)] px-4 py-2">
+        <div className="flex items-center justify-center w-full">
+          <Link to={withLocale('/')} prefetch="intent" className="inline-block">
+            <Image
+              src="./images/LogoPlaypeak.svg"
+              alt="Playpeak"
+              width={100}
+              height={40}
+            />
+          </Link>
+        </div>
+      </header>
+      <main>{children}</main>
+      <footer className="footer bg-midnight py-12">
+        <div className="container mx-auto text-center">
+          <p className="text-small text-white/80">© {new Date().getFullYear()}, PlayPeak</p>
+        </div>
+      </footer>
+    </>
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  const data = useRouteLoaderData<RootLoader>('root') as RootLoaderData | undefined;
+  let errorStatus = 500;
+
+  if (isRouteErrorResponse(error)) {
+    errorStatus = error.status;
+  } else if (error instanceof Error) {
+    // keep 500 for unknown errors
+  }
+
+  const withFullLayout = Boolean(data);
+
+  return (
+    <>
+      <GoogleTagManager />
+      <ErrorLayout withFullLayout={withFullLayout} data={data}>
+        <ErrorPage status={errorStatus} />
+      </ErrorLayout>
+    </>
   );
 }
