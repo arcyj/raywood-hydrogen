@@ -4,6 +4,7 @@ import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useEffect, useRef} from 'react';
 import {useFetcher} from 'react-router';
 import type {FetcherWithComponents} from 'react-router';
+import { useCartRoute } from '~/lib/cartRoute';
 import { ButtonLink } from './ui/Link';
 
 type CartSummaryProps = {
@@ -117,9 +118,10 @@ function UpdateDiscountForm({
   discountCodes?: string[];
   children: React.ReactNode;
 }) {
+  const cartRoute = useCartRoute();
   return (
     <CartForm
-      route="/cart"
+      route={cartRoute}
       action={CartForm.ACTIONS.DiscountCodesUpdate}
       inputs={{
         discountCodes: discountCodes || [],
@@ -207,10 +209,11 @@ function UpdateGiftCardForm({
   fetcherKey?: string;
   children: React.ReactNode;
 }) {
+  const cartRoute = useCartRoute();
   return (
     <CartForm
       fetcherKey={fetcherKey}
-      route="/cart"
+      route={cartRoute}
       action={CartForm.ACTIONS.GiftCardCodesUpdate}
       inputs={{
         giftCardCodes: giftCardCodes || [],
@@ -234,9 +237,10 @@ function RemoveGiftCardForm({
   giftCardId: string;
   children: React.ReactNode;
 }) {
+  const cartRoute = useCartRoute();
   return (
     <CartForm
-      route="/cart"
+      route={cartRoute}
       action={CartForm.ACTIONS.GiftCardCodesRemove}
       inputs={{
         giftCardCodes: [giftCardId],

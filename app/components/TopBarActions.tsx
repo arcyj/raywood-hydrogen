@@ -9,7 +9,7 @@ export function TopBarActions() {
   return (
     <>
 
-    <div className="top-button tablet:hidden text-center">
+    <div className="top-button tablet:hidden text-center z-[2000]">
       <NavLink prefetch="intent" to={withLocale('/')} viewTransition end>
         <Image
           src="./images/LogoPlaypeak.svg"

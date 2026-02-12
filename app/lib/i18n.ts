@@ -6,7 +6,7 @@ import type {
   ProductFilter,
 } from "@shopify/hydrogen/storefront-api-types";
 import type {LocalizationQuery} from 'storefrontapi.generated';
-import { COUNTRIES, DEFAULT_LOCALE } from "../helpers/const";
+import { CURRENCIES, DEFAULT_CURRENCY, getCurrencyByCode, getCurrencyForCountry } from "../helpers/currencies";
 
 export type I18nLocale = I18nBase & {
   currency: CurrencyCode;
@@ -17,51 +17,36 @@ export type I18nLocale = I18nBase & {
 export type LocaleOption = I18nLocale & { pathPrefix: string };
 
 /**
- * Builds locale options from Shopify Admin localization (available markets).
- * One option per country with its currency; uses defaultLanguage for pathPrefix only.
+ * Builds locale options from currency config (for backward compat with some components).
  */
 export function buildLocaleOptionsFromApi(
-  data: LocalizationQuery | null | undefined
+  _data: LocalizationQuery | null | undefined
 ): LocaleOption[] {
-  if (!data?.localization?.availableCountries?.length) {
-    return Object.entries(COUNTRIES).map(([key, locale]) => ({
-      ...locale,
-      pathPrefix: key === 'default' ? '' : key,
-    }));
-  }
-
-  const options: LocaleOption[] = [];
-  const defaultOption: LocaleOption = {
-    ...DEFAULT_LOCALE,
+  return CURRENCIES.map((c) => ({
+    language: 'EN' as LanguageCode,
+    country: c.countryCode,
+    currency: c.currency,
+    label: c.label,
     pathPrefix: '',
-  };
-  options.push(defaultOption);
-
-  const defaultCountryCode = DEFAULT_LOCALE.country;
-
-  for (const country of data.localization.availableCountries) {
-    const countryCode = country.isoCode;
-    // Skip duplicate of default locale (e.g. default is Latvia; don't add Latvia again from API)
-    if (countryCode === defaultCountryCode) continue;
-
-    const langCode = (country.defaultLanguage?.isoCode ?? 'EN').toUpperCase() as LanguageCode;
-    const pathPrefix = `/${langCode.toLowerCase()}-${countryCode}`;
-    const currencyCode = (country.currency?.isoCode ?? 'USD') as CurrencyCode;
-    const existing = COUNTRIES[pathPrefix];
-    options.push({
-      language: langCode,
-      country: countryCode,
-      currency: existing?.currency ?? currencyCode,
-      label: existing?.label ?? `${country.name} (${currencyCode})`,
-      pathPrefix,
-    });
-  }
-
-  return options;
+  }));
 }
 
-/** Matches locale path segment e.g. /en-ca, /fr-fr */
-const LOCALE_PATH_PATTERN = /^\/[a-z]{2}-[a-z]{2}$/;
+/** Cookie name for persisting selected currency across reloads */
+export const PREFERRED_CURRENCY_COOKIE = 'PREFERRED_CURRENCY';
+
+/** Valid currency codes */
+const VALID_CURRENCIES = new Set(['EUR', 'GBP', 'USD', 'AUD', 'CAD', 'CNY', 'JPY', 'VND']);
+
+export function getPreferredCurrencyFromCookie(request: Request): string | null {
+  const cookieHeader = request.headers.get('Cookie');
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(new RegExp(`${PREFERRED_CURRENCY_COOKIE}=([^;]*)`));
+  const raw = match?.[1];
+  if (raw === undefined) return null;
+  const value = decodeURIComponent(raw.trim()).toUpperCase();
+  if (VALID_CURRENCIES.has(value)) return value;
+  return null;
+}
 
 /** Country codes that should not trigger geo-based locale (unknown/Tor) */
 const SKIP_GEO_COUNTRIES = new Set(['XX', 'T1']);
@@ -94,32 +79,43 @@ export function getLocaleOptionForCountry(
   return options.find((opt) => opt.country.toUpperCase() === code) ?? null;
 }
 
+/**
+ * Gets locale from currency cookie + geo. No URL locale – currency in context/localStorage.
+ * Uses preferred currency from cookie; country from currency for cart. Geo used for detected country.
+ */
 export function getLocaleFromRequest(request: Request): I18nLocale {
-  const url = new URL(request.url);
-  let firstPathPart = `/${url.pathname.substring(1).split("/")[0].toLowerCase()}`;
-  firstPathPart = firstPathPart.replace(".data", "");
+  const preferredCurrency = getPreferredCurrencyFromCookie(request);
+  const detectedCountry = getDetectedCountryCode(request);
 
-  if (COUNTRIES[firstPathPart]) {
-    return {
-      ...COUNTRIES[firstPathPart],
-      pathPrefix: firstPathPart,
-    };
+  if (preferredCurrency) {
+    const currencyOption = getCurrencyByCode(preferredCurrency);
+    if (currencyOption) {
+      return {
+        language: 'EN' as LanguageCode,
+        country: currencyOption.countryCode as CountryCode,
+        currency: currencyOption.currency,
+        label: currencyOption.label,
+        pathPrefix: '',
+      };
+    }
   }
 
-  // Accept locale from API / URL even if not in COUNTRIES (avoids 404 on locale change)
-  if (LOCALE_PATH_PATTERN.test(firstPathPart)) {
-    const [lang, country] = firstPathPart.slice(1).split("-");
+  if (detectedCountry) {
+    const currencyOption = getCurrencyForCountry(detectedCountry);
     return {
-      language: (lang ?? "en").toUpperCase() as LanguageCode,
-      country: (country ?? "us").toUpperCase() as CountryCode,
-      currency: "USD" as CurrencyCode,
-      label: `${firstPathPart.slice(1)} (USD)`,
-      pathPrefix: firstPathPart,
+      language: 'EN' as LanguageCode,
+      country: currencyOption.countryCode as CountryCode,
+      currency: currencyOption.currency,
+      label: currencyOption.label,
+      pathPrefix: '',
     };
   }
 
   return {
-    ...COUNTRIES.default,
-    pathPrefix: "",
+    language: 'EN' as LanguageCode,
+    country: DEFAULT_CURRENCY.countryCode as CountryCode,
+    currency: DEFAULT_CURRENCY.currency,
+    label: DEFAULT_CURRENCY.label,
+    pathPrefix: '',
   };
 }

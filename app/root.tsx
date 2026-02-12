@@ -1,3 +1,4 @@
+import type {CountryCode} from '@shopify/hydrogen/storefront-api-types';
 import {Analytics, getShopAnalytics, useNonce, Script} from '@shopify/hydrogen';
 import {
   Outlet,
@@ -18,15 +19,20 @@ import {FOOTER_QUERY, HEADER_QUERY, LOCALIZATION_QUERY} from '~/lib/fragments';
 import {
   buildLocaleOptionsFromApi,
   getDetectedCountryCode,
-  getLocaleOptionForCountry,
+  getPreferredCurrencyFromCookie,
 } from '~/lib/i18n';
+import {
+  DEFAULT_CURRENCY,
+  getCurrencyByCode,
+  getCurrencyForCountry,
+} from '~/helpers/currencies';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import resetStyles from '~/styles/reset.css?url';
 import {PageLayout} from './components/PageLayout';
 import {ErrorPage} from './components/ErrorPage';
 import { GoogleTagManager } from './helpers/GoogleTagManager';
-import {useLocalizedPath} from '~/hooks/useLocalePath';
+import {CurrencyProvider} from '~/lib/CurrencyContext';
 
 declare global {
   interface Window {
@@ -37,25 +43,13 @@ declare global {
 export type RootLoader = typeof loader;
 export type RootLoaderData = Awaited<ReturnType<RootLoader>>;
 
-/**
- * This is important to avoid re-fetching root queries on sub-navigations
- */
 export const shouldRevalidate: ShouldRevalidateFunction = ({
   formMethod,
   currentUrl,
   nextUrl,
 }) => {
-  // revalidate when a mutation is performed e.g add to cart, login...
   if (formMethod && formMethod !== 'GET') return true;
-
-  // revalidate when manually revalidating via useRevalidator
   if (currentUrl.toString() === nextUrl.toString()) return true;
-
-  // Defaulting to no revalidation for root loader data to improve performance.
-  // When using this feature, you risk your UI getting out of sync with your server.
-  // Use with caution. If you are uncomfortable with this optimization, update the
-  // line below to `return defaultShouldRevalidate` instead.
-  // For more details see: https://remix.run/docs/en/main/route/should-revalidate
   return false;
 };
 
@@ -93,35 +87,34 @@ export function links() {
   ];
 }
 
-export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
-
-  const {storefront, env} = args.context;
-  const currentPathPrefix = (storefront.i18n as { pathPrefix?: string }).pathPrefix ?? '';
-
-  // When URL has no locale, redirect to locale matching user's country (geo)
-  if (!currentPathPrefix) {
-    const detected = getDetectedCountryCode(args.request);
-    if (detected) {
-      const localeForCountry = getLocaleOptionForCountry(
-        detected,
-        criticalData.availableLocales,
-      );
-      if (localeForCountry?.pathPrefix) {
-        const url = new URL(args.request.url);
-        const pathname = url.pathname === '/' ? '/' : url.pathname;
-        throw redirect(localeForCountry.pathPrefix + pathname + url.search);
-      }
-    }
+/** Redirect paths with locale segment (e.g. /en-gb/cart) to path without locale (/cart) */
+function redirectIfLocaleInPath(request: Request) {
+  const url = new URL(request.url);
+  const segment = url.pathname.slice(1).split('/')[0] ?? '';
+  if (/^[a-z]{2}-[a-z]{2}$/i.test(segment)) {
+    const pathWithoutLocale = url.pathname.slice(segment.length + 1) || '/';
+    throw redirect(pathWithoutLocale + url.search);
   }
+}
+
+export async function loader(args: Route.LoaderArgs) {
+  redirectIfLocaleInPath(args.request);
+
+  const criticalData = await loadCriticalData(args);
+  const {storefront, env} = args.context;
+  const detectedCountry = getDetectedCountryCode(args.request);
+  const preferredCurrency = getPreferredCurrencyFromCookie(args.request);
+  const initialCurrency = preferredCurrency
+    ? (getCurrencyByCode(preferredCurrency) ?? DEFAULT_CURRENCY)
+    : getCurrencyForCountry(detectedCountry ?? 'LV');
+
+  const deferredData = loadDeferredData(args);
 
   return {
     ...deferredData,
     ...criticalData,
+    detectedCountry,
+    initialCurrency,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -165,14 +158,13 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
 }
 
 /**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
+ * Load data for below-the-fold content. Returns promises so the loader doesn't block –
+ * cart streams in for fast navigation.
  */
 function loadDeferredData({context}: Route.LoaderArgs) {
   const {storefront, customerAccount, cart} = context;
+  const countryCode = (storefront.i18n as {country?: string}).country;
 
-  // defer the footer query (below the fold)
   const footer = storefront
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
@@ -182,12 +174,23 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       },
     })
     .catch((error: Error) => {
-      // Log query errors, but don't throw them so the page can still render
       console.error(error);
       return null;
     });
+
+  const cartPromise = (async () => {
+    const raw = await cart.get();
+    if (raw?.id && countryCode && raw.buyerIdentity?.countryCode !== countryCode) {
+      const updated = await cart.updateBuyerIdentity({
+        countryCode: countryCode as CountryCode,
+      });
+      if (updated?.cart) return updated.cart;
+    }
+    return raw;
+  })();
+
   return {
-    cart: cart.get(),
+    cart: cartPromise,
     isLoggedIn: customerAccount.isLoggedIn(),
     footer,
   };
@@ -260,16 +263,21 @@ export default function App() {
   }
 
   return (
-    <Analytics.Provider
-      cart={data.cart}
-      shop={data.shop}
-      consent={data.consent}
+    <CurrencyProvider
+      initialCurrency={data.initialCurrency}
+      initialDetectedCountry={data.detectedCountry}
     >
-      <GoogleTagManager />
-      <PageLayout {...data}>
-        <Outlet />
-      </PageLayout>
-    </Analytics.Provider>
+      <Analytics.Provider
+        cart={data.cart}
+        shop={data.shop}
+        consent={data.consent}
+      >
+        <GoogleTagManager />
+        <PageLayout {...data}>
+          <Outlet />
+        </PageLayout>
+      </Analytics.Provider>
+    </CurrencyProvider>
   );
 }
 
@@ -282,8 +290,6 @@ function ErrorLayout({
   withFullLayout: boolean;
   data: RootLoaderData | undefined;
 }) {
-  const withLocale = useLocalizedPath();
-
   if (withFullLayout && data) {
     return (
       <PageLayout
@@ -302,7 +308,7 @@ function ErrorLayout({
     <>
       <header className="flex items-center justify-center shadow-md rounded-b-xl min-h-[var(--header-height)] px-4 py-2">
         <div className="flex items-center justify-center w-full">
-          <Link to={withLocale('/')} prefetch="intent" className="inline-block">
+          <Link to="/" prefetch="intent" className="inline-block">
             <Image
               src="./images/LogoPlaypeak.svg"
               alt="Playpeak"
