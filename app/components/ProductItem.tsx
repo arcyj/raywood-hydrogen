@@ -119,7 +119,7 @@ export function ProductItem({
           </div>
         </Link>
         {availableForSale && variantWithId ? (
-          <div className="absolute bottom-0 right-0 z-10 h-[40px]">
+          <div className="absolute bottom-0 right-0 z-1 h-[40px]">
             <AddToCartButton
               onClick={openCart}
               lines={[

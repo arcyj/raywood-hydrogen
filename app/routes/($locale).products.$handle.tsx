@@ -304,7 +304,7 @@ function ProductContent({
   }
 
   return (
-    <div className="container overflow-hidden max-w-full mt-[40px]">
+    <div className="container overflow-hidden max-w-full max-tablet:mt-[40px]">
       <Breadcrumb
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
