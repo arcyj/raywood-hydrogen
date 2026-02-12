@@ -1,9 +1,8 @@
 import {Await, NavLink} from 'react-router';
 import {Suspense} from 'react';
 import { twClasses } from "~/helpers/twMerge";
-import { LocaleSwitcher } from '../LocaleSwitcher';
+import { CurrencySwitcher } from '../CurrencySwitcher';
 import {Profile } from '../icons';
-import {useLocalizedPath} from '~/hooks/useLocalePath';
 
 interface DesktopTopBarProps {
   isLoggedIn: Promise<boolean>;
@@ -12,8 +11,6 @@ interface DesktopTopBarProps {
 export function DesktopTopBar({
   isLoggedIn,
 }: DesktopTopBarProps) {
-  const withLocale = useLocalizedPath();
-
   const initial = 'h-48 w-full bg-[#1D1229] px-12 flex items-center justify-between absolute tablet:relative top-0 left-0 z-[1301]';
 
   const classes = twClasses([initial], {}, );
@@ -21,14 +18,14 @@ export function DesktopTopBar({
   return (
     <div className={classes}>
       <div className="z-1304">
-        <LocaleSwitcher />
+        <CurrencySwitcher />
       </div>
       <div>
         <p className="text-medium-semi text-white">
         </p>
       </div>
       <div>
-        <NavLink prefetch="intent" to={withLocale('/account')} style={activeLinkStyle}>
+        <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
           <Suspense fallback={<></>}>
             <Await resolve={isLoggedIn} errorElement="Sign in">
               {(isLoggedIn) => (

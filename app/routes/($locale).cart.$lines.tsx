@@ -1,3 +1,4 @@
+import type {CountryCode} from '@shopify/hydrogen/storefront-api-types';
 import {redirect} from 'react-router';
 import type {Route} from './+types/cart.$lines';
 
@@ -40,10 +41,15 @@ export async function loader({request, context, params}: Route.LoaderArgs) {
   const discount = searchParams.get('discount');
   const discountArray = discount ? [discount] : [];
 
-  // create a cart
+  const countryCode = (context.storefront.i18n as {country?: string}).country;
+
+  // create a cart with buyer identity so checkout uses the correct currency
   const result = await cart.create({
     lines: linesMap,
     discountCodes: discountArray,
+    ...(countryCode && {
+      buyerIdentity: {countryCode: countryCode as CountryCode},
+    }),
   });
 
   const cartResult = result.cart;

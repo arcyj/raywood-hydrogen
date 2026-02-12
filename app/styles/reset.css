@@ -41,7 +41,6 @@ body > main {
 .top-button {
   position: sticky;
   top: 4px;
-  z-index: 1000;
   width: 100px;
   margin: auto;
   height: 0px;

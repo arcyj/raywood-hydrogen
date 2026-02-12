@@ -8,6 +8,7 @@ import {useContext, useEffect, useRef} from 'react';
 import {AsideContext} from './Aside';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
+import {useCartRoute} from '~/lib/cartRoute';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 type CartLineLike = {
@@ -142,10 +143,11 @@ function CartLineRemoveButton({
   lineIds: string[];
   disabled: boolean;
 }) {
+  const cartRoute = useCartRoute();
   return (
     <CartForm
       fetcherKey={getRemoveKey(lineIds)}
-      route="/cart"
+      route={cartRoute}
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
@@ -221,12 +223,13 @@ function CartLineUpdateButton({
   children: React.ReactNode;
   lines: CartLineUpdateInput[];
 }) {
+  const cartRoute = useCartRoute();
   const lineIds = lines.map((line) => line.id);
 
   return (
     <CartForm
       fetcherKey={getUpdateKey(lineIds)}
-      route="/cart"
+      route={cartRoute}
       action={CartForm.ACTIONS.LinesUpdate}
       inputs={{lines}}
     >

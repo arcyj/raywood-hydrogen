@@ -42,12 +42,8 @@ export const WishlistMenu: FC = () => {
     setIsLoadingProducts(true);
     const handlesParam = wishlistHandles.join(',');
 
-    // Get current locale from URL or default to empty
-    const currentPath = window.location.pathname;
-    const localeMatch = currentPath.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)/);
-    const localePrefix = localeMatch ? `/${localeMatch[1]}` : '';
-
-    fetch(`${localePrefix}/api/wishlist/products?handles=${encodeURIComponent(handlesParam)}`)
+    // No locale in URL – currency in context
+    fetch(`/api/wishlist/products?handles=${encodeURIComponent(handlesParam)}`)
       .then((res) => res.json() as Promise<{ products?: WishlistProduct[] }>)
       .then((data) => {
         if (data.products) {
