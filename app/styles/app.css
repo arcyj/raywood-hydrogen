@@ -202,7 +202,7 @@ button.reset:hover:not(:has(> *)) {
   padding: 0 1rem;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 200;
 }
 
 .header-menu-mobile-toggle {

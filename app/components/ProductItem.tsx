@@ -95,16 +95,16 @@ export function ProductItem({
           </h4>
           <div className="flex justify-between items-center">
             <div className="flex items-center justify-between w-full min-h-[40px]">
-              <div>
+              <div className="flex flex-col">
                 {price && (
                   <span
-                    className={`text-[18px] desktop:text-[22px] leading-[26px] font-bold ${compareAtPrice ? 'text-danger mr-4' : null}`}
+                    className={`text-[18px] desktop:text-[22px] leading-[26px] font-bold ${compareAtPrice ? 'text-danger mt-4' : null}`}
                   >
                     <Money data={price} />
                   </span>
                 )}
                 {compareAtPrice && (
-                  <s className="text-[13px] desktop:text-[15px] leading-[22px] font-semibold text-gray">
+                  <s className="text-[13px] desktop:text-[15px] leading-[22px] font-bold text-gray">
                     <Money data={compareAtPrice} />
                   </s>
                 )}
@@ -132,7 +132,7 @@ export function ProductItem({
               variant="tertiary"
               size="small"
             >
-              {isDesktop ? 'Add' : ""}
+              {isDesktop ? 'Add' : ''}
             </AddToCartButton>
           </div>
         ) : null}
