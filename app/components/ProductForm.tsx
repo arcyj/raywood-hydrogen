@@ -25,7 +25,7 @@ export function ProductForm({
   const withLocale = useLocalizedPath();
   return (
     <div className={`product-form ${className ? ` ${className}` : ''}`}>
-      {productOptions.map((option) => {
+      {/* {productOptions.map((option) => {
         // If there is only a single value in the option values, don't display the option
         if (option.optionValues.length === 1) return null;
 
@@ -106,7 +106,7 @@ export function ProductForm({
             <br />
           </div>
         );
-      })}
+      })} */}
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {

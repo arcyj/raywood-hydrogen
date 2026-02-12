@@ -14,13 +14,13 @@ export function DesktopTopBar({
 }: DesktopTopBarProps) {
   const withLocale = useLocalizedPath();
 
-  const initial = 'h-48 w-full bg-[#1D1229] px-12 flex items-center justify-between absolute tablet:relative top-0 left-0 z-20';
+  const initial = 'h-48 w-full bg-[#1D1229] px-12 flex items-center justify-between absolute tablet:relative top-0 left-0 z-[1301]';
 
   const classes = twClasses([initial], {}, );
 
   return (
     <div className={classes}>
-      <div>
+      <div className="z-1304">
         <LocaleSwitcher />
       </div>
       <div>
