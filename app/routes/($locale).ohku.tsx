@@ -206,7 +206,7 @@ export default function OhkuPage() {
 
       {/* Hero section */}
       <div
-        className=" pb-32 pt-16 tablet:pt-0"
+        className=" pb-32 pt-16 tablet:pt-0 max-tablet:mt-[40px]"
         style={{
           background:
             'linear-gradient(180deg,rgba(227, 169, 183, 1) 56%, rgba(236, 209, 202, 1))',
