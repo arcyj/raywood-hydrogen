@@ -292,38 +292,50 @@ function ErrorLayout({
 }) {
   if (withFullLayout && data) {
     return (
-      <PageLayout
-        cart={data.cart}
-        footer={data.footer}
-        header={data.header}
-        isLoggedIn={data.isLoggedIn}
-        publicStoreDomain={data.publicStoreDomain}
+      <CurrencyProvider
+        initialCurrency={data.initialCurrency}
+        initialDetectedCountry={data.detectedCountry}
       >
-        {children}
-      </PageLayout>
+        <PageLayout
+          cart={data.cart}
+          footer={data.footer}
+          header={data.header}
+          isLoggedIn={data.isLoggedIn}
+          publicStoreDomain={data.publicStoreDomain}
+        >
+          {children}
+        </PageLayout>
+      </CurrencyProvider>
     );
   }
 
   return (
     <>
-      <header className="flex items-center justify-center shadow-md rounded-b-xl min-h-[var(--header-height)] px-4 py-2">
-        <div className="flex items-center justify-center w-full">
-          <Link to="/" prefetch="intent" className="inline-block">
-            <Image
-              src="./images/LogoPlaypeak.svg"
-              alt="Playpeak"
-              width={100}
-              height={40}
-            />
-          </Link>
-        </div>
-      </header>
-      <main>{children}</main>
-      <footer className="footer bg-midnight py-12">
-        <div className="container mx-auto text-center">
-          <p className="text-small text-white/80">© {new Date().getFullYear()}, PlayPeak</p>
-        </div>
-      </footer>
+      <CurrencyProvider
+        initialCurrency={{currency: 'EUR', label: '€ EUR', countryCode: 'DE'}}
+        initialDetectedCountry="EE"
+      >
+        <header className="flex items-center justify-center shadow-md rounded-b-xl min-h-[var(--header-height)] px-4 py-2">
+          <div className="flex items-center justify-center w-full">
+            <Link to="/" prefetch="intent" className="inline-block">
+              <Image
+                src="./images/LogoPlaypeak.svg"
+                alt="Playpeak"
+                width={100}
+                height={40}
+              />
+            </Link>
+          </div>
+        </header>
+        <main>{children}</main>
+        <footer className="footer bg-midnight py-12">
+          <div className="container mx-auto text-center">
+            <p className="text-small text-white/80">
+              © {new Date().getFullYear()}, PlayPeak
+            </p>
+          </div>
+        </footer>
+      </CurrencyProvider>
     </>
   );
 }
