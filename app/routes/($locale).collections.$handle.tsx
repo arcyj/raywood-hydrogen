@@ -18,6 +18,8 @@ import { ChildCollectionSlider } from '~/components/sections/ChildCollectionSlid
 import { Breadcrumb } from '~/components/sections/Breadcrumb';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import { ToggleGroup } from '~/components/ui/ToggleGroup';
+import { Slider } from '~/components/Slider';
+import { Cross1Icon } from "@radix-ui/react-icons";
 
 // Hooks
 import { useBreakpoints } from '~/hooks/useBreakpoints';
@@ -229,7 +231,7 @@ export default function Collection() {
       <h1 className="text-h1 my-12 tablet:my-24">{collection.title}</h1>
       <ChildCollectionSlider className="mb-24" />
       <div className="flex flex-col tablet:flex-row justify-between tablet:items-center">
-        <div className="flex items-center gap-8 mb-24 flex-wrap justify-between w-full">
+        <div className="flex items-center gap-8 mb-12 flex-wrap justify-between w-full">
           <div className="flex items-center gap-8 flex-wrap">
             <Button
               onClick={handleFilter}
@@ -262,45 +264,51 @@ export default function Collection() {
             ) : null}
           </div>
         </div>
-
       </div>
-        <div className="flex-1 overflow-x-auto mb-24">
-            {appliedFilters.length > 0 && (
-              <ul className="flex items-center gap-2 list-none p-0 m-0  w-full">
-                {appliedFilters.map((applied, index) => {
-                  const removeUrl = getAppliedFilterLink(
-                    {filter: applied.filter, label: applied.label},
-                    searchParams,
-                    location,
-                  );
-                  return (
-                    <li
-                      key={`${index}-${applied.label}-${JSON.stringify(applied.filter)}`}
-                      className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm mb-0"
+      <div className="mb-12">
+        {appliedFilters.length > 0 && (
+            <Slider
+              settings={{
+                slidesToShow: 'auto',
+                spaceBetween: 8,
+                dots: false,
+                arrows: false,
+              }}
+            >
+              {appliedFilters.map((applied, index) => {
+                const removeUrl = getAppliedFilterLink(
+                  {filter: applied.filter, label: applied.label},
+                  searchParams,
+                  location,
+                );
+                return (
+                  <span
+                    key={`${index}-${applied.label}-${JSON.stringify(applied.filter)}`}
+                    className="inline-flex  items-center gap-2 rounded-md border border-accentGrey bg-lightGrey pl-8 pr-4 py-8 text-sm mb-0"
+                  >
+                    {applied.imageUrl && (
+                      <Image
+                        src={applied.imageUrl}
+                        width={40}
+
+                        alt=""
+                        className="rounded object-contain shrink-0 mr-4"
+                      />
+                    )}
+                    <span className="text-nowrap text-medium-semi">{applied.label}</span>
+                    <Link
+                      to={withLocale(removeUrl)}
+                      className="inline-flex p-4 hover:bg-gray-200 text-gray-500 hover:text-gray-700 ml-8 "
+                      aria-label={`Remove ${applied.label}`}
                     >
-                      {applied.imageUrl && (
-                        <Image
-                          src={applied.imageUrl}
-                          width={24}
-                          height={24}
-                          alt=""
-                          className="rounded object-cover shrink-0"
-                        />
-                      )}
-                      <span>{applied.label}</span>
-                      <Link
-                        to={withLocale(removeUrl)}
-                        className="inline-flex p-0.5 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-700"
-                        aria-label={`Remove ${applied.label}`}
-                      >
-                        <Remove size={16} />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
+                      <Cross1Icon className='w-[18px] h-[18px]' />
+                    </Link>
+                  </span>
+                );
+              })}
+            </Slider>
+        )}
+      </div>
       <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 min-h-screen mb-64">
         <div className="col-span-4 md:col-span-6 lg:col-span-12 bg-white">
           <PaginatedResourceSection<ProductItemFragment>
