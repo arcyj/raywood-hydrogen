@@ -34,8 +34,8 @@ export function buildLocaleOptionsFromApi(
 /** Cookie name for persisting selected currency across reloads */
 export const PREFERRED_CURRENCY_COOKIE = 'PREFERRED_CURRENCY';
 
-/** Valid currency codes */
-const VALID_CURRENCIES = new Set(['EUR', 'GBP', 'USD', 'AUD', 'CAD', 'CNY', 'JPY', 'VND']);
+/** Valid currency codes – derived from CURRENCIES so we don't maintain two lists */
+const VALID_CURRENCIES = new Set(CURRENCIES.map((c) => c.currency));
 
 export function getPreferredCurrencyFromCookie(request: Request): string | null {
   const cookieHeader = request.headers.get('Cookie');
