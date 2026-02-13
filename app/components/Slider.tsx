@@ -30,7 +30,7 @@ const NextArrow = forwardRef<HTMLButtonElement, INavArrowProps>(
         type="button"
         onClick={onClick}
         disabled={disabled}
-        className={className ?? 'absolute top-1/2 right-12 -translate-y-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
+        className={className ?? 'absolute top-1/2 right-12 -translate-y-1/2 z-2 bg-white border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
         aria-label="Next slide"
         Icon={IconWithClass as Parameters<typeof IconButton>[0]['Icon']}
       />
@@ -51,7 +51,7 @@ const PrevArrow = forwardRef<HTMLButtonElement, INavArrowProps>(
         type="button"
         onClick={onClick}
         disabled={disabled}
-        className={className ?? 'absolute top-1/2 left-12 -translate-y-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
+        className={className ?? 'absolute top-1/2 left-12 -translate-y-1/2 z-2 bg-white border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
         aria-label="Previous slide"
         Icon={IconWithClass as Parameters<typeof IconButton>[0]['Icon']}
       />
@@ -213,13 +213,13 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
 
   const isVertical = carouselProps.direction === 'vertical';
   const prevArrowClassName = isVertical
-    ? 'absolute top-0 left-1/2 -translate-x-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'
+    ? 'absolute top-0 left-1/2 -translate-x-1/2 z-2 bg-white border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'
     : undefined;
   const nextArrowClassName = isVertical
-    ? 'absolute bottom-0 left-1/2 -translate-x-1/2 z-2 bg-none border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'
+    ? 'absolute bottom-0 left-1/2 -translate-x-1/2 z-2 bg-white border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'
     : undefined;
   const prevIconClassName = isVertical ? 'rotate-90' : undefined;
-  const nextIconClassName = isVertical ? '-rotate-90' : undefined;
+  const nextIconClassName = isVertical ? 'rotate-90' : undefined;
 
   return (
     <div className={wrapperClassName}>

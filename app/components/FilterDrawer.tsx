@@ -1,11 +1,30 @@
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import {Drawer} from './ui/Drawer';
 import {usePlaypeak} from '~/lib/playpeakContext';
 import { Button } from './ui/Button';
 import { Filters } from './filters/Filters';
 import { Error } from './icons';
+import { FILTER_URL_PREFIX } from '~/helpers/const';
 
 export function FilterDrawer() {
   const { isDrawerOpen, closeFilter } = usePlaypeak();
+  const [params] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const clearAllFilters = () => {
+    const paramsClone = new URLSearchParams(params);
+    [...paramsClone.keys()].forEach((key) => {
+      if (key.startsWith(FILTER_URL_PREFIX)) {
+        paramsClone.delete(key);
+      }
+    });
+    navigate(`${location.pathname}?${paramsClone.toString()}`, {
+      preventScrollReset: true,
+      replace: true,
+    });
+    closeFilter();
+  };
   const isOpen = isDrawerOpen('filter');
 
   const Header = () => {
@@ -25,7 +44,7 @@ export function FilterDrawer() {
         <Button variant='primary' size="medium" onClick={closeFilter} className='w-full'>
           Apply filters
         </Button>
-        <Button variant='secondary' size="medium" onClick={closeFilter} className='w-full'>
+        <Button variant='secondary' size="medium" onClick={clearAllFilters} className='w-full'>
           Clear all
         </Button>
       </div>

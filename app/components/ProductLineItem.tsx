@@ -102,14 +102,11 @@ function CartLineItemView({
     <li key={id} className="flex bg-lightGrey rounded-md px-4 py-8 w-full">
       {image && (
         <Image
-          sizes="100"
           alt={title}
-          aspectRatio="1/1"
           data={image}
-          height={100}
           loading="lazy"
           width={100}
-          className="p-4 mr-4 mix-blend-darken"
+          className="p-4 mr-4 mix-blend-darken object-contain"
         />
       )}
 
