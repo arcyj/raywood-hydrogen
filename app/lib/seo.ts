@@ -102,6 +102,61 @@ export function getSeoMeta(options: SeoMetaOptions): MetaDescriptor[] {
 }
 
 /**
+ * Product data shape for JSON-LD schema (from minimal/critical loader).
+ */
+export type ProductJsonLdInput = {
+  title: string;
+  description?: string | null;
+  featuredImage?: { url: string } | null;
+  selectedOrFirstAvailableVariant?: {
+    price?: { amount: string; currencyCode: string } | null;
+    availableForSale?: boolean | null;
+  } | null;
+};
+
+/**
+ * Build Google Product schema (JSON-LD) for rich snippets in search results.
+ * Use with meta: { "script:ld+json": getProductJsonLd(product, url) }
+ */
+export function getProductJsonLd(
+  product: ProductJsonLdInput,
+  url: string,
+): Record<string, unknown> {
+  const variant = product.selectedOrFirstAvailableVariant;
+  const price = variant?.price?.amount;
+  const currency = variant?.price?.currencyCode ?? 'EUR';
+  const available = variant?.availableForSale ?? false;
+
+  const offers: Record<string, unknown> = {
+    '@type': 'Offer',
+    url,
+    priceCurrency: currency,
+    availability: available
+      ? 'https://schema.org/InStock'
+      : 'https://schema.org/OutOfStock',
+    itemCondition: 'https://schema.org/NewCondition',
+  };
+  if (price != null) {
+    offers.price = price;
+  }
+
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.title,
+    url,
+    offers,
+  };
+  const description = product.description
+    ? stripHtml(product.description)
+    : null;
+  if (description) schema.description = description;
+  if (product.featuredImage?.url) schema.image = product.featuredImage.url;
+
+  return schema;
+}
+
+/**
  * Build absolute URL for the current page (for canonical and og:url).
  * Use from route meta: getAbsoluteUrl(matches, location).
  */

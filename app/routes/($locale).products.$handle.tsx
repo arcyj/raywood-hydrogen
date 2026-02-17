@@ -34,19 +34,25 @@ import { deliveryTime } from '~/helpers/deliveryTime';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { AddToCartButton } from '~/components/AddToCartButton';
 import { Cart } from '~/components/icons';
-import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
+import { getSeoMeta, getAbsoluteUrl, getProductJsonLd } from '~/lib/seo';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
   const product = data?.product;
   const title = product?.title ? `${product.title} | Playpeak` : 'Playpeak';
   const url = getAbsoluteUrl(matches ?? [], location);
-  return getSeoMeta({
+  const descriptors = getSeoMeta({
     title,
     description: product?.description ?? undefined,
     imageUrl: product?.featuredImage?.url ?? undefined,
     url,
     type: 'product',
   });
+  if (product) {
+    descriptors.push({
+      'script:ld+json': getProductJsonLd(product, url),
+    });
+  }
+  return descriptors;
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -77,8 +83,12 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
       handle: string;
       description?: string | null;
       featuredImage?: { url: string } | null;
+      selectedOrFirstAvailableVariant?: {
+        price?: { amount: string; currencyCode: string } | null;
+        availableForSale?: boolean | null;
+      } | null;
     } | null;
-  }>(MINIMAL_PRODUCT_QUERY, {variables: {handle}});
+  }>(MINIMAL_PRODUCT_QUERY, {variables: {handle, selectedOptions: []}});
   const product = result?.product;
 
   if (!product?.id) {
@@ -709,7 +719,7 @@ const PRODUCT_QUERY = `#graphql
 ` as const;
 
 const MINIMAL_PRODUCT_QUERY = `#graphql
-  query MinimalProduct($handle: String!) {
+  query MinimalProduct($handle: String!, $selectedOptions: [SelectedOptionInput!]!) {
     product(handle: $handle) {
       id
       title
@@ -717,6 +727,13 @@ const MINIMAL_PRODUCT_QUERY = `#graphql
       description
       featuredImage {
         url
+      }
+      selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions) {
+        price {
+          amount
+          currencyCode
+        }
+        availableForSale
       }
     }
   }

@@ -6,11 +6,22 @@ import type { IButtonSize, IButtonVariant } from './themes/ButtonTheme';
 import { usePlaypeak } from '~/lib/playpeakContext';
 import { useCartRoute } from '~/lib/cartRoute';
 import { Cart } from './icons';
+import { useAnalytics } from '@shopify/hydrogen';
+
+function getCartLines(cart: unknown): Array<{ id?: string; quantity?: number; merchandise?: { id?: string } }> {
+  if (!cart || typeof cart !== 'object') return [];
+  const c = cart as { lines?: { nodes?: unknown[]; edges?: Array<{ node?: unknown }> } };
+  const conn = c.lines;
+  if (!conn) return [];
+  const nodes = conn.nodes ?? (conn.edges ?? []).map((e: { node?: unknown }) => e.node);
+  return (nodes ?? []).filter(Boolean) as Array<{ id?: string; quantity?: number; merchandise?: { id?: string } }>;
+}
 
 function AddToCartButtonInner({
   analytics,
   children,
   disabled,
+  lines,
   onClick,
   onSuccess,
   size,
@@ -21,6 +32,7 @@ function AddToCartButtonInner({
   analytics?: unknown;
   children: React.ReactNode;
   disabled?: boolean;
+  lines: Array<OptimisticCartLineInput>;
   onClick?: () => void;
   onSuccess?: () => void;
   size?: IButtonSize
@@ -31,21 +43,50 @@ function AddToCartButtonInner({
   const previousStateRef = useRef<string>('idle');
   const hasCalledSuccessRef = useRef<boolean>(false);
   const { revalidate } = useRevalidator();
+  const { publish, shop, cart: prevCart } = useAnalytics();
+  const publishEvent = publish as (event: string, payload: Record<string, unknown>) => void;
 
-  // Call onSuccess and revalidate when fetcher completes successfully so cart drawer updates
+  // Call onSuccess, publish product_added_to_cart, and revalidate when fetcher completes successfully
   useEffect(() => {
     const wasNotIdle = previousStateRef.current !== 'idle';
     const isNowIdle = fetcher.state === 'idle';
 
     const hasData = fetcher.data && !fetcher.data.errors;
 
-    // If we transitioned from a non-idle state to idle with successful data, call onSuccess and revalidate root
+    // If we transitioned from a non-idle state to idle with successful data, call onSuccess, publish analytics, and revalidate root
     if (wasNotIdle && isNowIdle && hasData && !hasCalledSuccessRef.current) {
       hasCalledSuccessRef.current = true;
 
       if (onSuccess) {
         onSuccess();
       }
+
+      // Publish product_added_to_cart for each newly added line so Shopify analytics and GTM receive the event
+      const resultCart = fetcher.data?.cart as unknown;
+      if (resultCart && typeof window !== 'undefined') {
+        const resultLines = getCartLines(resultCart);
+        const prevLines = getCartLines(prevCart ?? null);
+        lines.forEach((lineInput) => {
+          const merchandiseId = typeof lineInput.merchandiseId === 'string'
+            ? lineInput.merchandiseId
+            : (lineInput.merchandiseId as { id?: string })?.id;
+          const currentLine = resultLines.find((l) => l.merchandise?.id === merchandiseId);
+          const prevLine = prevLines.find((l) => l.merchandise?.id === merchandiseId);
+          const prevQty = prevLine?.quantity ?? 0;
+          const currentQty = currentLine?.quantity ?? 0;
+          if (currentLine && currentQty > prevQty) {
+            publishEvent('product_added_to_cart', {
+              cart: resultCart,
+              prevCart: prevCart ?? null,
+              currentLine,
+              prevLine: prevLine ?? null,
+              shop,
+              url: window.location.href || '',
+            });
+          }
+        });
+      }
+
       // Force root loader to re-run so deferred cart promise updates and drawer shows new item
       revalidate();
     }
@@ -59,8 +100,12 @@ function AddToCartButtonInner({
   }, [
     fetcher.state,
     fetcher.data,
+    lines,
     onSuccess,
+    prevCart,
+    publishEvent,
     revalidate,
+    shop,
   ]);
 
   const handleClick = () => {
@@ -142,6 +187,7 @@ export function AddToCartButton({
         size={size}
         analytics={analytics}
         disabled={disabled}
+        lines={lines}
         onClick={onClick}
         onSuccess={onSuccess}
         fetcher={fetcher}
