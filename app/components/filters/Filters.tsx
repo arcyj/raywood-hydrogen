@@ -2,8 +2,7 @@ import { useMatches } from "react-router";
 import { PriceRangeFilter } from "./PriceRangeFilter";
 import type { CollectionQuery } from "storefrontapi.generated";
 import type { AppliedFilter } from "~/types/filterTypes";
-import { ExpansionFilter } from "./ExpansionFilter";
-import { Button } from "../ui/Button";
+import { CustomFilter } from "./CustomFilter";
 
 export const Filters = () => {
   // Use useMatches to access loader data from the collection route
@@ -27,10 +26,9 @@ export const Filters = () => {
 
   const collection = collectionData?.collection;
 
-  // Only render PriceRangeFilter if we have collection data
   return (
     <div className="">
-      <ExpansionFilter collection={collection} />
+      <CustomFilter collection={collection} />
       {collection && (
         <PriceRangeFilter
           collection={collection}

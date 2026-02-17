@@ -39,6 +39,11 @@ export function getCurrencyByCode(currency: string): CurrencyOption | undefined 
   return CURRENCIES.find((c) => c.currency.toUpperCase() === currency.toUpperCase());
 }
 
+/** Symbol for display (e.g. €, £, $, kr, CHF) – first part of label before space */
+export function getCurrencySymbol(option: CurrencyOption): string {
+  return option.label.split(' ')[0] ?? option.currency;
+}
+
 /** Eurozone countries map to EUR */
 const EUR_COUNTRIES = [
   'AT', 'BE', 'CY', 'DE', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PT', 'SI', 'SK',

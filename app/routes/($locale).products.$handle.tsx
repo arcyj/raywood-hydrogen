@@ -356,7 +356,7 @@ function ProductContent({
                         // }
                         count={productCount}
                         countChange={(val) => handleCountChange(val)}
-                        maxCount={10}
+                        maxCount={30}
                         minCount={1}
                         className="flex flex-col items-start justify-center"
                       />
