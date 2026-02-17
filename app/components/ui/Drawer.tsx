@@ -74,10 +74,10 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
     ['-translate-y-full']: position === 'top',
   });
 
-  const containerClasses = twClasses(['drawer-container max-tablet:rounded-xl mx-auto z-[9998]'], {
+  const containerClasses = twClasses(['drawer-container mx-auto z-[9998]'], {
     ['inset-y-0 right-0 min-w-[400px]  max-w-[500px] fixed']: position === 'right',
     ['inset-y-0 left-0  min-w-[400px]  max-w-[500px] fixed']: position === 'left',
-    ['inset-x-0 bottom-0 w-full h-[calc(100%-75px)] max-w-[550px] fixed']: position === 'bottom',
+    ['inset-x-0 bottom-0 w-full h-full max-w-[550px] fixed max-tablet:rounded-xl']: position === 'bottom',
     ['inset-x-0 top-44 fixed left-[50%] -translate-x-[50%] w-full']: position === 'top',
   }, className);
 
@@ -133,7 +133,7 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
                     {header}
                   </div>
                 )}
-                <div className="drawer-content flex-1 overflow-y-auto min-h-0">
+                <div className="drawer-content scrollbar flex-1 min-h-0">
                   {children}
                 </div>
                 {footer && (

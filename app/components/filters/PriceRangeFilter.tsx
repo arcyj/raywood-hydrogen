@@ -7,6 +7,8 @@ import { useLocation, useNavigate, useSearchParams } from "react-router";
 import type { CollectionQuery } from "storefrontapi.generated";
 import { FILTER_URL_PREFIX } from "~/helpers/const";
 import { filterInputToParams } from "~/helpers/filterInputToParams";
+import { getCurrencySymbol } from "~/helpers/currencies";
+import { useCurrency } from "~/lib/CurrencyContext";
 
 export function PriceRangeFilter({
   collection,
@@ -19,6 +21,8 @@ export function PriceRangeFilter({
   const location = useLocation();
   const navigate = useNavigate();
   const thumbRef = useRef<"from" | "to" | null>(null);
+  const { selectedCurrency } = useCurrency();
+  const currencySymbol = getCurrencySymbol(selectedCurrency);
 
   const { minVariantPrice, maxVariantPrice } = getPricesRange(collection);
   const { min, max } = getPricesFromFilter(params);
@@ -46,15 +50,15 @@ export function PriceRangeFilter({
 
   return (
     <div className={`space-y-4 rounded-lg p-24 mt-24 bg-lightGrey ${className}`}>
-      <h3 className="text-h2 font-semibold text-gray-900 mb-24">Price Range</h3>
+      <h3 className="text-h3 font-semibold text-gray-900 mb-24">Price Range</h3>
         <div className="flex items-center gap-4 mb-24">
-        <div className="flex shrink items-center gap-1 rounded-lg bg-white px-4">
+        <div className="flex flex-1 shrink items-center gap-1 rounded-lg bg-white px-4">
           <VisuallyHidden.Root asChild>
             <label htmlFor="minPrice" aria-label="Min price">
               Min price
             </label>
           </VisuallyHidden.Root>
-          <span>$</span>
+          <span className="text-medium-semi pl-4">{currencySymbol}</span>
           <input
             name="minPrice"
             type="number"
@@ -69,17 +73,17 @@ export function PriceRangeFilter({
               setMinPrice(newMinPrice);
             }}
             onBlur={handleFilter}
-            className="w-full border-none bg-transparent py-3 text-right focus:outline-hidden focus:ring-0 focus-visible:outline-hidden"
+            className="w-full border-none text-regular-semi bg-transparent py-3 px-8 text-right focus:outline-hidden focus:ring-0 focus-visible:outline-hidden"
           />
         </div>
-        <span>To</span>
-        <div className="flex items-center gap-1 rounded-lg bg-white px-4">
+        <span className="px-8 text-medium-semi">To</span>
+        <div className="flex flex-1 items-center gap-1 rounded-lg bg-white px-8">
           <VisuallyHidden.Root asChild>
             <label htmlFor="maxPrice" aria-label="Max price">
               Max price
             </label>
           </VisuallyHidden.Root>
-          <span>$</span>
+          <span className="text-medium-semi pl-4">{currencySymbol}</span>
           <input
             name="maxPrice"
             type="number"
@@ -94,7 +98,7 @@ export function PriceRangeFilter({
               setMaxPrice(newMaxPrice);
             }}
             onBlur={handleFilter}
-            className="w-full border-none bg-transparent py-3 text-right focus:outline-hidden focus:ring-0 focus-visible:outline-hidden"
+            className="w-full text-regular-semi border-none bg-transparent py-3 px-8 text-right focus:outline-hidden focus:ring-0 focus-visible:outline-hidden"
           />
         </div>
       </div>

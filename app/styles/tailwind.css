@@ -105,6 +105,24 @@
     margin: auto;
   }
 
+  .scrollbar{
+    overflow-y: auto;
+    scrollbar-width: thick;
+  }
+  .scrollbar::-webkit-scrollbar{
+    width: 12px;
+  }
+  .scrollbar::-webkit-scrollbar-thumb{
+    background-color: rgba(17 5 22/.40);
+    border-radius: 10px;
+    border: 3px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+  }
+  .scrollbar::-webkit-scrollbar-track-piece {
+    background-color: white;
+    padding: 8px;
+  }
+
   /* Mobile overrides */
   @media (max-width: 768px) {
     .text-h1 {

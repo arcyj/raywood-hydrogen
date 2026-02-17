@@ -331,7 +331,7 @@ function CounterWithCartUpdate({
         count={quantity}
         countChange={handleCountChange}
         minCount={1}
-        maxCount={10}
+        maxCount={30}
         incrementDisabled={isOptimistic}
         decrementDisabled={quantity <= 1 || isOptimistic}
         className={`flex flex-col items-start justify-center ${className}`}
