@@ -215,7 +215,7 @@ export default function Product() {
   const {fullProduct, relatedProducts} = data;
 
   return (
-    <div className="container mx-auto">
+    <div className="largeDesktop:container mx-auto">
       <Suspense fallback={<ProductPageSkeleton />}>
         <Await resolve={fullProduct}>
           <ProductContent relatedProductsPromise={relatedProducts} />
@@ -315,7 +315,7 @@ function ProductContent({
   }
 
   return (
-    <div className="container overflow-hidden max-w-full max-tablet:mt-[40px]">
+    <div className="largeDektop:container overflow-hidden max-w-full max-tablet:mt-[40px]">
       <Breadcrumb
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
@@ -324,13 +324,13 @@ function ProductContent({
       />
       <div
         id="product-content"
-        className="grid grid-cols-1 md:grid-cols-12 tablet:gap-64 min-w-0 tablet:pt-8"
+        className="grid grid-cols-1 md:grid-cols-12 gap-12 desktop:gap-64 min-w-0 tablet:pt-8"
       >
-        <div className="min-w-0 tablet:col-span-7">
+        <div className="min-w-0 col-span-6 desktop:col-span-7">
           <ProductGallery media={media.nodes} />
           {isTablet ? <ProductDescription /> : null}
         </div>
-        <div className="product-main col-span-5">
+        <div className="product-main col-span-6 desktop:col-span-5">
           <ClientSticky
             top={80}
             enabled={isDesktop ? true : false}
