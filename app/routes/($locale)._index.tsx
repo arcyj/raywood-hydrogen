@@ -12,10 +12,9 @@ import { Banner } from '~/components/sections/Banner';
 import { ButtonLink } from '~/components/ui/Link';
 import { CollectionCards } from '~/components/sections/CollectionCards';
 import {fetchCollectionsByHandles} from '~/lib/queries/collections';
-import {MagnifyingGlassIcon} from '@radix-ui/react-icons';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
-import { Button } from '~/components/ui/Button';
+import { SubscriptionForm } from '~/components/SubscriptionForm';
 
 export const meta: Route.MetaFunction = ({matches, location}) => {
   const url = getAbsoluteUrl(matches ?? [], location);
@@ -178,47 +177,28 @@ export default function Homepage() {
           />
         </section>
         {/* <RecommendedProducts products={data.recommendedProducts} /> */}
-        <section className="mb-12">
+        <section>
           <CollectionProducts
             title="New in Shop"
             text="Fresh hits just dropped! Explore our New Arrivals — the latest booster boxes, decks, and merch from Pokémon, Magic, Lorcana and more. Be first to grab them before they’re gone!"
             products={data.latestProducts}
           />
         </section>
-        <section className="mb-12">
+        <section>
           <CollectionProducts
             products={data.constructionSetsProducts}
             title="Construction Sets"
             text="From clasic builds to masterpieces! Explore our themed construction sets"
           />
         </section>
+        <section className="mb-24">
+          <SubscriptionForm />
+        </section>
       </div>
     </div>
   );
 }
 
-function FeaturedCollection({
-  collection,
-}: {
-  collection: FeaturedCollectionFragment;
-}) {
-  if (!collection) return null;
-  const withLocale = useLocalizedPath();
-  const image = collection?.image;
-  return (
-    <Link
-      className="featured-collection"
-      to={withLocale(`/collections/${collection.handle}`)}
-    >
-      {image && (
-        <div className="featured-collection-image">
-          <Image data={image} sizes="100vw" />
-        </div>
-      )}
-      <h1>{collection.title}</h1>
-    </Link>
-  );
-}
 
 function CollectionProducts({
   products,

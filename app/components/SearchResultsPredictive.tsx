@@ -46,7 +46,7 @@ export function SearchResultsPredictive({
 }: SearchResultsPredictiveProps) {
   const aside = useAside();
   const {term, inputRef, fetcher, total, items} = usePredictiveSearch();
-  
+
   // Use PlaypeakContext for closing search drawer (used in SearchDrawer)
   // This will throw if not in PlaypeakProvider, but SearchDrawer always is
   const playpeakContext = usePlaypeak();
@@ -311,10 +311,10 @@ function usePredictiveSearch(): UsePredictiveSearchReturn {
     term.current = String(fetcher.formData?.get('q') || '');
   }
 
-  // capture the search input element as a ref
+    // capture the search input element as a ref (use name="q" - stable selector, not type)
   useEffect(() => {
     if (!inputRef.current) {
-      inputRef.current = document.querySelector('input[type="search"]');
+      inputRef.current = document.querySelector<HTMLInputElement>('input[name="q"]');
     }
   }, []);
 

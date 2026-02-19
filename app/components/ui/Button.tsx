@@ -72,13 +72,13 @@ export const Button: FC<IButtonProps> = ({
         className="flex items-center justify-center w-full"
         style={{visibility: loading ? 'hidden' : 'visible'}}
       >
-        {IconBefore && (
+        {IconBefore && !loading && (
           <span className="mr-4" >
             <IconBefore size={24}/>
           </span>
         )}
         {children}
-        {IconAfter && <IconAfter size={24} className="ml-2" />}
+        {IconAfter && !loading && <IconAfter size={24} className="ml-2" />}
       </div>
       {loading ? (
         <div style={{position: 'absolute'}}>

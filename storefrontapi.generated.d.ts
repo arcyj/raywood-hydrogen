@@ -1613,12 +1613,20 @@ export type ProductQuery = {
 
 export type MinimalProductQueryVariables = StorefrontAPI.Exact<{
   handle: StorefrontAPI.Scalars['String']['input'];
+  selectedOptions:
+    | Array<StorefrontAPI.SelectedOptionInput>
+    | StorefrontAPI.SelectedOptionInput;
 }>;
 
 export type MinimalProductQuery = {
   product?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Product, 'id' | 'title' | 'handle' | 'description'> & {
       featuredImage?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Image, 'url'>>;
+      selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.ProductVariant, 'availableForSale'> & {
+          price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+        }
+      >;
     }
   >;
 };
@@ -1991,7 +1999,7 @@ interface GeneratedQueryTypes {
     return: ProductQuery;
     variables: ProductQueryVariables;
   };
-  '#graphql\n  query MinimalProduct($handle: String!) {\n    product(handle: $handle) {\n      id\n      title\n      handle\n      description\n      featuredImage {\n        url\n      }\n    }\n  }\n': {
+  '#graphql\n  query MinimalProduct($handle: String!, $selectedOptions: [SelectedOptionInput!]!) {\n    product(handle: $handle) {\n      id\n      title\n      handle\n      description\n      featuredImage {\n        url\n      }\n      selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions) {\n        price {\n          amount\n          currencyCode\n        }\n        availableForSale\n      }\n    }\n  }\n': {
     return: MinimalProductQuery;
     variables: MinimalProductQueryVariables;
   };

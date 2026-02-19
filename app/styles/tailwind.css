@@ -12,6 +12,7 @@
   --color-lightGrey: #F5F7FA;
   --color-accentGrey: #EEEEEE;
   --color-primary: #6610F2;
+  --color-lowPrimary: #f8f3ff;
   --color-danger: #FA5053;
   --font-serif: 'Gilroy', sans-serif;
 
@@ -77,7 +78,7 @@
   }
 
   .text-regular-semi {
-    font: 500 17px/26px 'Gilroy', sans-serif;
+    font: 600 16px/26px 'Gilroy', sans-serif;
   }
 
   .text-medium-semi {

@@ -102,7 +102,7 @@ export function PaginatedResourceSection<NodesType>({
               </>
             )}
             <NextLink>
-              {isLoading ? 'Loading...' : <Button variant="secondary" className='w-full'>Load more ↓</Button>}
+              {isLoading ? 'Loading...' : <Button variant="secondary" className='w-full mt-24'>Load more ↓</Button>}
             </NextLink>
           </div>
         );
@@ -175,7 +175,7 @@ function PageBasedSection<NodesType>({
       {hasNextPage && (
         <div className="text-center">
           <Link to={withLocale(nextPageUrl)} preventScrollReset replace>
-            {isLoading ? 'Loading...' : <Button variant="primary" className='w-full max-w-[450px] mx-auto'>Load more ↓</Button>}
+            {isLoading ? 'Loading...' : <Button variant="primary" className='w-full max-w-[450px] mx-auto mt-24'>Load more ↓</Button>}
           </Link>
         </div>
       )}

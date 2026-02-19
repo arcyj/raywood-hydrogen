@@ -35,6 +35,7 @@ import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { AddToCartButton } from '~/components/AddToCartButton';
 import { Cart } from '~/components/icons';
 import { getSeoMeta, getAbsoluteUrl, getProductJsonLd } from '~/lib/seo';
+import { SubscriptionForm } from '~/components/SubscriptionForm';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
   const product = data?.product;
@@ -378,6 +379,16 @@ function ProductContent({
                       />
                     </>
                   ) : null}
+                  {!isTablet ? (
+                    <>
+                      <ProductForm
+                        productOptions={productOptions}
+                        selectedVariant={selectedVariant}
+                        quantity={productCount}
+                        className={`flex-1 mb-8`}
+                      />
+                    </>
+                  ) : null}
                   <AddToWishlistButton
                     variant={isTablet ? 'icon' : 'button'}
                     className={`${!isTablet ? 'w-full' : null}`}
@@ -401,16 +412,6 @@ function ProductContent({
                       })(),
                     }}
                   />
-                  {!isTablet ? (
-                    <>
-                      <ProductForm
-                        productOptions={productOptions}
-                        selectedVariant={selectedVariant}
-                        quantity={productCount}
-                        className={`flex-1 mt-8`}
-                      />
-                    </>
-                  ) : null}
                 </div>
               </div>
               <Accordion className="mt-32" defaultOpenAll={false}>
@@ -486,6 +487,9 @@ function ProductContent({
       </div>
 
       <RelatedProducts products={relatedProductsPromise} />
+      <section className="my-48">
+        <SubscriptionForm />
+      </section>
       {/* {!isTablet && selectedVariant?.availableForSale ? (
         <div className="sticky bottom-[66px]">
           <AddToCartButton

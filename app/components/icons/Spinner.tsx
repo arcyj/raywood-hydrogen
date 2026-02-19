@@ -19,19 +19,19 @@ const spinnerSize: ISpinerSizes = {
 };
 
 const spinnerStyle = {
-  initial: twc`tw-m-0 tw-flex tw-p-0`,
+  initial: twc`m-0 flex p-0`,
 };
 
 export const Spinner: FC<ISpinnerProps> = ({ theme = 'light', size = 'small', className = '' }) => {
   const { initial } = spinnerStyle;
 
-  const firstPathClass = theme === 'light' ? twc`text-transparent-low` : twc`text-transparent-low-dark`;
-  const secondPathClass = theme === 'light' ? twc`text-text-layout-accent` : twc`text-text-layout-fixed-light`;
+  const firstPathClass = theme === 'light' ? twc`text-lowPrimary` : twc`text-lowPrimary`;
+  const secondPathClass = theme === 'light' ? twc`text-primary` : twc`text-primary`;
 
   const classes = twClasses([initial], {}, className);
 
   return (
-    <span className={`${classes} tw-relative tw-animate-spin`}>
+    <span className={`${classes} relative animate-spin`}>
       <svg
         className={firstPathClass}
         width={spinnerSize[size]}
@@ -49,7 +49,7 @@ export const Spinner: FC<ISpinnerProps> = ({ theme = 'light', size = 'small', cl
         />
       </svg>
       <svg
-        className={`${secondPathClass} tw-absolute`}
+        className={`${secondPathClass} absolute`}
         width={spinnerSize[size]}
         height={spinnerSize[size]}
         viewBox="0 0 32 32"

@@ -232,7 +232,7 @@ export const FormControl: FC<IFormControlProps> & IChildElements = ({
       ['h-56']: size === 'large',
       ['h-48']: size !== 'large',
       [disabledStyle['container']]: !!disabled,
-      ['bg-surface-low-brand-focus']: active,
+      ['bg-lowPrimary']: active,
     },
     className,
   );

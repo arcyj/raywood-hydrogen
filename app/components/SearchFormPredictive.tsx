@@ -4,7 +4,7 @@ import {
   type FormProps,
   type Fetcher,
 } from 'react-router';
-import React, {useRef, useEffect, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import type {PredictiveSearchReturn} from '~/lib/search';
 import {useAside} from './Aside';
 import {usePlaypeak} from '~/lib/playpeakContext';
@@ -70,14 +70,6 @@ export function SearchFormPredictive({
       {method: 'GET', action: SEARCH_ENDPOINT},
     );
   }
-
-  // ensure the passed input has a type of search, because SearchResults
-  // will select the element based on the input
-  useEffect(() => {
-    if (inputRef?.current && inputRef.current instanceof HTMLElement) {
-      inputRef.current.setAttribute('type', 'search');
-    }
-  }, []);
 
   if (typeof children !== 'function') {
     return null;
