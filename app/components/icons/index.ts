@@ -14,3 +14,4 @@ export { Search } from './Search';
 export { Home } from './Home';
 export { SmallGrid } from './SmallGrid'
 export { LargeGrid } from './LargeGrid'
+export { Privacy } from './Privacy'

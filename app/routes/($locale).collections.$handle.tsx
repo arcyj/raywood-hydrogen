@@ -36,6 +36,7 @@ import {useLocalizedPath} from '~/hooks/useLocalePath';
 import type { SortParam } from '~/helpers/getSortValuesFromParam';
 import type { ProductFilter } from "@shopify/hydrogen/storefront-api-types";
 import type {ProductItemFragment, CollectionQuery} from 'storefrontapi.generated';
+import { SubscriptionForm } from '~/components/SubscriptionForm';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
   const collection = data?.collection;
@@ -328,6 +329,9 @@ export default function Collection() {
           </PaginatedResourceSection>
         </div>
       </div>
+
+      <SubscriptionForm className='mb-64'/>
+
       <Analytics.CollectionView
         data={{
           collection: {

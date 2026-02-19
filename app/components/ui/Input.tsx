@@ -8,7 +8,7 @@ import type { ChangeEvent, ForwardedRef, MutableRefObject } from 'react';
 
 export const Input = forwardRef<
   HTMLInputElement,
-  IFormControlProps<string> & { autoFocus?: boolean; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; enterKeyHint?: React.HTMLAttributes<HTMLInputElement>['enterKeyHint'] }
+  IFormControlProps<string> & { autoFocus?: boolean; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; enterKeyHint?: React.HTMLAttributes<HTMLInputElement>['enterKeyHint']; required?: boolean }
 >(
   (
     {
@@ -28,6 +28,7 @@ export const Input = forwardRef<
       autoFocus,
       inputMode,
       enterKeyHint,
+      required,
     },
     ref: ForwardedRef<HTMLInputElement>,
   ) => {
@@ -95,6 +96,7 @@ export const Input = forwardRef<
             autoFocus={autoFocus}
             inputMode={inputMode}
             enterKeyHint={enterKeyHint}
+            required={required}
           />
         </FormControl.Label>
         <FormControl.Actions

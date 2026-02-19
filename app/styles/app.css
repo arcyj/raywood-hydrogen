@@ -445,7 +445,6 @@ button.reset:hover:not(:has(> *)) {
   @media (min-width: 990px) {
     grid-template-columns: repeat(auto-fit, minmax(var(--grid-item-width), 1fr));
   }
-  margin-bottom: 2rem;
 }
 
 .products-grid--cols-4 {

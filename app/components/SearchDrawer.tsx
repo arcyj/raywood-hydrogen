@@ -72,7 +72,7 @@ export function SearchDrawer() {
       >
         <SearchFormPredictive>
           {({fetchResults, goToSearch, inputRef, value}) => (
-            <div className='flex gap-4'>
+            <div className='flex gap-4 p-8 bg-lightGrey'>
               <Input
                 name="q"
                 value={value}
