@@ -89,7 +89,7 @@ export default function ContactUsPage() {
 
           <span className="text-medium-semi text-gray block">Hours:</span>
           <span className="text-regular-semi block">Monday - Friday: 9am - 6pm</span>
-          <span className="text-regular-semi block mb-24">Saturday and Saturday - Closed</span>
+          <span className="text-regular-semi block mb-24">Saturday and Sunday - Closed</span>
         </div>
         <div>
           <p className="mb-32 text-regular-semi text-gray-600">

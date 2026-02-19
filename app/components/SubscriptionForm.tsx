@@ -176,7 +176,7 @@ export function SubscriptionForm({
                 <p className="pl-12 text-small text-gray-600 border-l-2 border-solid border-black">
                   100% safe, Read more on{' '}
                   <Link
-                    to="/pages/privacy-policy"
+                    to="/policies/privacy-policy"
                     className="underline"
                     prefetch="intent"
                   >
