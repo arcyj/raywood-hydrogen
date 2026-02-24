@@ -251,27 +251,37 @@ export function Layout({children}: {children?: React.ReactNode}) {
   );
 }
 
+const posthogApiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
+const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST ?? '';
+const posthogOptions = {
+  api_host: '/services/ph',
+  ui_host: posthogHost.includes('eu.') ? 'https://eu.posthog.com' : 'https://us.posthog.com',
+  defaults: '2026-01-30',
+} as const;
+
+function AppWithPostHog({children}: {children: React.ReactNode}) {
+  if (!posthogApiKey) return <>{children}</>;
+  return (
+    <PostHogProvider apiKey={posthogApiKey} options={posthogOptions}>
+      {children}
+    </PostHogProvider>
+  );
+}
+
 export default function App() {
   const data = useRouteLoaderData<RootLoader>('root');
 
   if (!data) {
     return (
-      <>
+      <AppWithPostHog>
         <GoogleTagManager />
         <Outlet />
-      </>
+      </AppWithPostHog>
     );
   }
 
-  const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST ?? '';
-  const options = {
-    api_host: '/services/ph',
-    ui_host: posthogHost.includes('eu.') ? 'https://eu.posthog.com' : 'https://us.posthog.com',
-    defaults: '2026-01-30',
-  } as const
-
   return (
-    <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+    <AppWithPostHog>
       <CurrencyProvider
         initialCurrency={data.initialCurrency}
         initialDetectedCountry={data.detectedCountry}
@@ -287,7 +297,7 @@ export default function App() {
           </PageLayout>
         </Analytics.Provider>
       </CurrencyProvider>
-    </PostHogProvider>
+    </AppWithPostHog>
   );
 }
 
