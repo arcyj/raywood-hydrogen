@@ -2,6 +2,7 @@
 import {storefrontRedirect} from '@shopify/hydrogen';
 import {createRequestHandler} from '@shopify/hydrogen/oxygen';
 import {createHydrogenRouterContext} from '~/lib/context';
+import {createServerLogger} from '~/lib/logger.server';
 import * as serverBuild from 'virtual:react-router/server-build';
 
 /**
@@ -56,6 +57,8 @@ export default {
       return response;
     } catch (error) {
       console.error(error);
+      const log = createServerLogger(env);
+      log.error('Server request failed', { error: String(error) });
       return new Response('An unexpected error occurred', {status: 500});
     }
   },

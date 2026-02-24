@@ -9,6 +9,7 @@ import {
   type PredictiveSearchReturn,
   getEmptyPredictiveSearchResult,
 } from '~/lib/search';
+import { createServerLogger } from '~/lib/logger.server';
 import type {
   RegularSearchQuery,
   PredictiveSearchQuery,
@@ -36,12 +37,18 @@ export async function loader({request, context}: Route.LoaderArgs) {
       ? predictiveSearch({request, context})
       : regularSearch({request, context});
 
-  searchPromise.catch((error: Error) => {
-    console.error(error);
-    return {term: '', result: null, error: error.message};
-  });
-
-  return await searchPromise;
+  try {
+    return await searchPromise;
+  } catch (error) {
+    const log = createServerLogger(context.env);
+    log.error('Search failed', { error: String(error) });
+    return {
+      type: 'regular' as const,
+      term: '',
+      result: {total: 0, items: {articles: {nodes: []}, pages: {nodes: []}, products: {nodes: []}, collections: {nodes: []}}},
+      error: error instanceof Error ? error.message : 'Search failed',
+    } as unknown as RegularSearchReturn;
+  }
 }
 
 /**
