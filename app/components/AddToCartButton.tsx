@@ -7,6 +7,7 @@ import { usePlaypeak } from '~/lib/playpeakContext';
 import { useCartRoute } from '~/lib/cartRoute';
 import { Cart } from './icons';
 import { useAnalytics } from '@shopify/hydrogen';
+import { usePostHog } from '@posthog/react'
 
 function getCartLines(cart: unknown): Array<{ id?: string; quantity?: number; merchandise?: { id?: string } }> {
   if (!cart || typeof cart !== 'object') return [];
@@ -40,6 +41,7 @@ function AddToCartButtonInner({
   variant?: IButtonVariant;
   fetcher: FetcherWithComponents<any>;
 }) {
+  const posthog = usePostHog()
   const previousStateRef = useRef<string>('idle');
   const hasCalledSuccessRef = useRef<boolean>(false);
   const { revalidate } = useRevalidator();
@@ -109,6 +111,7 @@ function AddToCartButtonInner({
   ]);
 
   const handleClick = () => {
+    posthog.capture('add_to_cart', { button_name: 'add_to_cart', lines })
     if (onClick) {
       onClick();
     }
