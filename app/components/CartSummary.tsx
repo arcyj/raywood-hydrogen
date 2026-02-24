@@ -6,6 +6,7 @@ import {useFetcher} from 'react-router';
 import type {FetcherWithComponents} from 'react-router';
 import { useCartRoute } from '~/lib/cartRoute';
 import { ButtonLink } from './ui/Link';
+import { usePostHog } from '@posthog/react'
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -51,6 +52,8 @@ function CartCheckoutActions({
   checkoutUrl?: string;
   isCartMutating: boolean;
 }) {
+  const posthog = usePostHog()
+  
   if (!checkoutUrl) return null;
 
   return (
@@ -60,6 +63,9 @@ function CartCheckoutActions({
         target="_self"
         variant="primary"
         className="w-full"
+        onClick={() => {
+              posthog.capture('begin_checkout', { button_name: 'continue_to_checkout' })
+        }}
         // disabled={isCartMutating}
       >
         {isCartMutating ? (

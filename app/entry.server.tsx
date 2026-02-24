@@ -36,6 +36,9 @@ export default async function handleRequest(
       'https://*.google-analytics.com',
       'https://*.analytics.google.com',
       'https://*.googletagmanager.com',
+      'https://*.posthog.com',
+      'https://*.i.posthog.com',
+      'http://localhost:*',
     ],
   });
 

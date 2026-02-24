@@ -1,5 +1,6 @@
 import type {CountryCode} from '@shopify/hydrogen/storefront-api-types';
 import {Analytics, getShopAnalytics, useNonce, Script} from '@shopify/hydrogen';
+import { PostHogProvider } from '@posthog/react'
 import {
   Outlet,
   useRouteError,
@@ -262,22 +263,31 @@ export default function App() {
     );
   }
 
+  const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST ?? '';
+  const options = {
+    api_host: '/services/ph',
+    ui_host: posthogHost.includes('eu.') ? 'https://eu.posthog.com' : 'https://us.posthog.com',
+    defaults: '2026-01-30',
+  } as const
+
   return (
-    <CurrencyProvider
-      initialCurrency={data.initialCurrency}
-      initialDetectedCountry={data.detectedCountry}
-    >
-      <Analytics.Provider
-        cart={data.cart}
-        shop={data.shop}
-        consent={data.consent}
+    <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+      <CurrencyProvider
+        initialCurrency={data.initialCurrency}
+        initialDetectedCountry={data.detectedCountry}
       >
-        <GoogleTagManager />
-        <PageLayout {...data}>
-          <Outlet />
-        </PageLayout>
-      </Analytics.Provider>
-    </CurrencyProvider>
+        <Analytics.Provider
+          cart={data.cart}
+          shop={data.shop}
+          consent={data.consent}
+        >
+          <GoogleTagManager />
+          <PageLayout {...data}>
+            <Outlet />
+          </PageLayout>
+        </Analytics.Provider>
+      </CurrencyProvider>
+    </PostHogProvider>
   );
 }
 
