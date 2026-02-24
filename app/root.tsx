@@ -111,11 +111,22 @@ export async function loader(args: Route.LoaderArgs) {
 
   const deferredData = loadDeferredData(args);
 
+  const envVars = env as unknown as Record<string, string | undefined>;
+  const posthogApiKey = envVars.VITE_PUBLIC_POSTHOG_KEY ?? envVars.PUBLIC_POSTHOG_KEY;
+  const posthogHost = envVars.VITE_PUBLIC_POSTHOG_HOST ?? envVars.PUBLIC_POSTHOG_HOST ?? '';
+
   return {
     ...deferredData,
     ...criticalData,
     detectedCountry,
     initialCurrency,
+    posthog: posthogApiKey
+      ? {
+          apiKey: posthogApiKey,
+          uiHost:
+            posthogHost.includes('eu.') ? 'https://eu.posthog.com' : 'https://us.posthog.com',
+        }
+      : null,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -251,18 +262,34 @@ export function Layout({children}: {children?: React.ReactNode}) {
   );
 }
 
-const posthogApiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
-const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST ?? '';
-const posthogOptions = {
-  api_host: '/services/ph',
-  ui_host: posthogHost.includes('eu.') ? 'https://eu.posthog.com' : 'https://us.posthog.com',
-  defaults: '2026-01-30',
-} as const;
+function getPosthogConfig(data: RootLoaderData | undefined) {
+  if (data?.posthog) return data.posthog;
+  const host = import.meta.env.VITE_PUBLIC_POSTHOG_HOST ?? '';
+  const apiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
+  if (!apiKey) return null;
+  return {
+    apiKey,
+    uiHost: host.includes('eu.') ? 'https://eu.posthog.com' : 'https://us.posthog.com',
+  };
+}
 
-function AppWithPostHog({children}: {children: React.ReactNode}) {
-  if (!posthogApiKey) return <>{children}</>;
+function AppWithPostHog({
+  children,
+  posthog,
+}: {
+  children: React.ReactNode;
+  posthog: {apiKey: string; uiHost: string} | null;
+}) {
+  if (!posthog) return <>{children}</>;
   return (
-    <PostHogProvider apiKey={posthogApiKey} options={posthogOptions}>
+    <PostHogProvider
+      apiKey={posthog.apiKey}
+      options={{
+        api_host: '/services/ph',
+        ui_host: posthog.uiHost,
+        defaults: '2026-01-30',
+      }}
+    >
       {children}
     </PostHogProvider>
   );
@@ -271,9 +298,11 @@ function AppWithPostHog({children}: {children: React.ReactNode}) {
 export default function App() {
   const data = useRouteLoaderData<RootLoader>('root');
 
+  const posthog = getPosthogConfig(data);
+
   if (!data) {
     return (
-      <AppWithPostHog>
+      <AppWithPostHog posthog={posthog}>
         <GoogleTagManager />
         <Outlet />
       </AppWithPostHog>
@@ -281,7 +310,7 @@ export default function App() {
   }
 
   return (
-    <AppWithPostHog>
+    <AppWithPostHog posthog={posthog}>
       <CurrencyProvider
         initialCurrency={data.initialCurrency}
         initialDetectedCountry={data.detectedCountry}
