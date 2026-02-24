@@ -111,7 +111,7 @@ function AddToCartButtonInner({
   ]);
 
   const handleClick = () => {
-    posthog.capture('add_to_cart', { button_name: 'add_to_cart', lines })
+    posthog.capture('add_to_cart', { button_name: 'add_to_cart' })
     if (onClick) {
       onClick();
     }

@@ -27,6 +27,7 @@ import {
   getCurrencyByCode,
   getCurrencyForCountry,
 } from '~/helpers/currencies';
+import { createServerLogger } from '~/lib/logger.server';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import resetStyles from '~/styles/reset.css?url';
@@ -148,15 +149,21 @@ export async function loader(args: Route.LoaderArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({context}: Route.LoaderArgs) {
-  const {storefront} = context;
+  const {storefront, env} = context;
+  const log = createServerLogger(env);
 
-  const [header, localization] = await Promise.all([
-    storefront.query(HEADER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {
-        headerMenuHandle: 'main-menu', // Adjust to your header menu handle
-      },
-    }),
+  const [headerRaw, localization] = await Promise.all([
+    storefront
+      .query(HEADER_QUERY, {
+        cache: storefront.CacheLong(),
+        variables: {
+          headerMenuHandle: 'main-menu', // Adjust to your header menu handle
+        },
+      })
+      .catch((error: Error) => {
+        log.error('Header query failed', { error: String(error) });
+        return null;
+      }),
     storefront
       .query(LOCALIZATION_QUERY, {
         cache: storefront.CacheLong(),
@@ -165,6 +172,18 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   ]);
 
   const availableLocales = buildLocaleOptionsFromApi(localization);
+
+  // Fallback when header query fails so layout can still render (avoids 500)
+  const header = headerRaw ?? {
+    shop: {
+      id: '',
+      name: '',
+      description: null,
+      primaryDomain: {url: env.PUBLIC_STORE_DOMAIN ? `https://${env.PUBLIC_STORE_DOMAIN}` : ''},
+      brand: {logo: null},
+    },
+    menu: null,
+  } as const;
 
   return {header, availableLocales};
 }
