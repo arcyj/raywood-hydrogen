@@ -15,7 +15,6 @@ import {
 } from 'react-router';
 import {Image} from '@shopify/hydrogen';
 import type {Route} from './+types/root';
-import {redirect} from 'react-router';
 import {FOOTER_QUERY, HEADER_QUERY, LOCALIZATION_QUERY} from '~/lib/fragments';
 import {
   buildLocaleOptionsFromApi,
@@ -52,7 +51,9 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 }) => {
   if (formMethod && formMethod !== 'GET') return true;
   if (currentUrl.toString() === nextUrl.toString()) return true;
-  return false;
+  // Revalidate on navigation. Returning false caused deferred data (product fullProduct/
+  // relatedProducts) to hang indefinitely on client-side navigation (e.g. /ee/products/...).
+  return true;
 };
 
 /**
@@ -89,19 +90,7 @@ export function links() {
   ];
 }
 
-/** Redirect paths with locale segment (e.g. /en-gb/cart) to path without locale (/cart) */
-function redirectIfLocaleInPath(request: Request) {
-  const url = new URL(request.url);
-  const segment = url.pathname.slice(1).split('/')[0] ?? '';
-  if (/^[a-z]{2}-[a-z]{2}$/i.test(segment)) {
-    const pathWithoutLocale = url.pathname.slice(segment.length + 1) || '/';
-    throw redirect(pathWithoutLocale + url.search);
-  }
-}
-
 export async function loader(args: Route.LoaderArgs) {
-  // redirectIfLocaleInPath(args.request);
-
   const criticalData = await loadCriticalData(args);
   const {storefront, env} = args.context;
   const detectedCountry = getDetectedCountryCode(args.request);

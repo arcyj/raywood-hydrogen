@@ -1,5 +1,5 @@
-import {redirect, useLoaderData, Await, useAsyncValue, Link} from 'react-router';
-import {Suspense, useState} from 'react';
+import {useLoaderData, Link} from 'react-router';
+import {useState} from 'react';
 import type {Route} from './+types/products.$handle';
 import type {ProductFragment} from 'storefrontapi.generated';
 import { ClientSticky } from '~/components/ClientSticky';
@@ -23,10 +23,8 @@ import {ProductItem} from '~/components/ProductItem';
 import { Breadcrumb } from '~/components/sections/Breadcrumb';
 import { Accordion } from '~/components/ui/Accordion';
 import {getMetafield, parseMetaobjectFromMetafield} from '~/lib/metafields';
-import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import { Counter } from '~/components/ui/Counter';
 import { ProductStockStatus } from '~/components/ui/ProductStockStatus';
-import { ProductPageSkeleton } from '~/components/ProductPageSkeleton';
 import { ShippingPictogram } from '~/components/icons/ShippingPictogram';
 import { ReturnPictogram } from '~/components/icons/ReturnPictogram';
 import { GuaranteePictogram } from '~/components/icons/GuaranteePictogram';
@@ -59,10 +57,16 @@ export const meta: Route.MetaFunction = ({data, matches, location}) => {
 export async function loader(args: Route.LoaderArgs) {
   // Critical: minimal product for meta, redirect, 404 — blocks only briefly for SEO
   const criticalData = await loadCriticalData(args);
-  // Deferred: full product, breadcrumb, related products — page shows skeletons immediately
-  const deferredData = loadDeferredData(args);
+  // Await full product and related products. Deferred streaming caused infinite loading
+  // on client-side navigation to locale-prefixed URLs (e.g. /ee/products/...).
+  const fullProduct = await loadFullProductPayload(args);
+  const relatedProducts = await loadRelatedProducts(args, fullProduct.product);
 
-  return {...criticalData, ...deferredData};
+  return {
+    ...criticalData,
+    fullProduct,
+    relatedProducts,
+  };
 }
 
 /**
@@ -96,8 +100,6 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     throw new Response(null, {status: 404});
   }
 
-  redirectIfHandleIsLocalized(request, {handle, data: product});
-
   return {product};
 }
 
@@ -106,23 +108,6 @@ type FullProductPayload = {
   breadcrumbCollection: { title: string; handle: string } | null;
   breadcrumbParentCollection: { title: string; handle: string } | null;
 };
-
-/**
- * Load data for rendering the product page. This data is deferred and will be
- * fetched after the initial page load so the shell and skeletons render immediately.
- * If it's unavailable, the page should still 200. Don't throw here or it will 500.
- */
-function loadDeferredData(args: Route.LoaderArgs) {
-  const fullProductPromise = loadFullProductPayload(args);
-  const relatedProductsPromise = fullProductPromise.then((full) =>
-    loadRelatedProducts(args, full.product),
-  );
-
-  return {
-    fullProduct: fullProductPromise,
-    relatedProducts: relatedProductsPromise,
-  };
-}
 
 async function loadFullProductPayload({context, params, request}: Route.LoaderArgs): Promise<FullProductPayload> {
   const {handle} = params;
@@ -216,23 +201,24 @@ export default function Product() {
 
   return (
     <div className="largeDesktop:container mx-auto">
-      <Suspense fallback={<ProductPageSkeleton />}>
-        <Await resolve={fullProduct}>
-          <ProductContent relatedProductsPromise={relatedProducts} />
-        </Await>
-      </Suspense>
+      <ProductContent
+        fullProduct={fullProduct}
+        relatedProducts={relatedProducts}
+      />
     </div>
   );
 }
 
 function ProductContent({
-  relatedProductsPromise,
+  fullProduct,
+  relatedProducts,
 }: {
-  relatedProductsPromise: Promise<{products: {nodes: Array<any>}} | null>;
+  fullProduct: FullProductPayload;
+  relatedProducts: {products: {nodes: Array<any>}} | null;
 }) {
   const isDesktop = useBreakpoints().isDesktop;
   const isTablet = useBreakpoints().isTablet;
-  const fullData = useAsyncValue() as FullProductPayload;
+  const fullData = fullProduct;
   const {product, breadcrumbCollection, breadcrumbParentCollection} = fullData;
   const [productCount, setProductCount] = useState(1);
 
@@ -486,7 +472,7 @@ function ProductContent({
         </div>
       </div>
 
-      <RelatedProducts products={relatedProductsPromise} />
+      <RelatedProducts products={relatedProducts} />
       <section className="my-48">
         <SubscriptionForm />
       </section>
@@ -538,28 +524,17 @@ function ProductContent({
 function RelatedProducts({
   products,
 }: {
-  products: Promise<{products: {nodes: Array<any>}} | null> | undefined;
+  products: {products: {nodes: Array<any>}} | null;
 }) {
-  if (!products) return null;
+  if (!products?.products?.nodes?.length) return null;
   return (
     <div className="related-products my-48">
       <h2 className="text-large mb-24">Related Products</h2>
-      <Suspense fallback={<div>Loading related products...</div>}>
-        <Await resolve={products}>
-          {(response) => {
-            if (!response?.products?.nodes?.length) {
-              return null;
-            }
-            return (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-16">
-                {response.products.nodes.map((product) => (
-                  <ProductItem key={product.id} product={product} />
-                ))}
-              </div>
-            );
-          }}
-        </Await>
-      </Suspense>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-16">
+        {products.products.nodes.map((product) => (
+          <ProductItem key={product.id} product={product} />
+        ))}
+      </div>
     </div>
   );
 }

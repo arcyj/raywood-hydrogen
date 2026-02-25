@@ -1,6 +1,5 @@
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/pages.$handle';
-import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
@@ -46,8 +45,6 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   if (!page) {
     throw new Response('Not Found', {status: 404});
   }
-
-  redirectIfHandleIsLocalized(request, {handle: params.handle, data: page});
 
   return {
     page,

@@ -1,7 +1,6 @@
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/blogs.$blogHandle.$articleHandle';
 import {Image} from '@shopify/hydrogen';
-import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
@@ -48,18 +47,6 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   if (!blog?.articleByHandle) {
     throw new Response(null, {status: 404});
   }
-
-  redirectIfHandleIsLocalized(
-    request,
-    {
-      handle: articleHandle,
-      data: blog.articleByHandle,
-    },
-    {
-      handle: blogHandle,
-      data: blog,
-    },
-  );
 
   const article = blog.articleByHandle;
 
