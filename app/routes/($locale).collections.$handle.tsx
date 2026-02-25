@@ -3,8 +3,6 @@ import {redirect, useLoaderData, Link, useLocation, useSearchParams} from 'react
 import type {Route} from './+types/collections.$handle';
 
 import {Analytics, flattenConnection, Image} from '@shopify/hydrogen';
-import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-
 // App
 import { usePlaypeak } from "~/lib/playpeakContext";
 
@@ -113,9 +111,6 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
       status: 404,
     });
   }
-
-  // The API handle might be localized, so redirect to the localized handle
-  redirectIfHandleIsLocalized(request, {handle, data: collection});
 
   // Fetch child collections from metafield references
   let childCollections: Array<{id: string; title: string; handle: string; image?: {url: string; }}> = [];

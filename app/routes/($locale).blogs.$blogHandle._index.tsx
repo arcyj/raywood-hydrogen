@@ -3,7 +3,6 @@ import type {Route} from './+types/blogs.$blogHandle._index';
 import {Image, getPaginationVariables} from '@shopify/hydrogen';
 import type {ArticleItemFragment} from 'storefrontapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
 
@@ -55,8 +54,6 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   if (!blog?.articles) {
     throw new Response('Not found', {status: 404});
   }
-
-  redirectIfHandleIsLocalized(request, {handle: params.blogHandle, data: blog});
 
   return {blog};
 }
