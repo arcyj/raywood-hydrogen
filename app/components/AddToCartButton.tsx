@@ -63,6 +63,14 @@ function AddToCartButtonInner({
         onSuccess();
       }
 
+      posthog?.capture('add_to_cart', {
+        merchandise_ids: lines.map((l) =>
+          typeof l.merchandiseId === 'string' ? l.merchandiseId : '',
+        ),
+        cart_id: fetcher.data?.cart?.id,
+        url: window.location.href,
+      });
+
       // Publish product_added_to_cart for each newly added line so Shopify analytics and GTM receive the event
       const resultCart = fetcher.data?.cart as unknown;
       if (resultCart && typeof window !== 'undefined') {
