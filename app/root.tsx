@@ -100,7 +100,7 @@ function redirectIfLocaleInPath(request: Request) {
 }
 
 export async function loader(args: Route.LoaderArgs) {
-  redirectIfLocaleInPath(args.request);
+  // redirectIfLocaleInPath(args.request);
 
   const criticalData = await loadCriticalData(args);
   const {storefront, env} = args.context;
@@ -116,12 +116,23 @@ export async function loader(args: Route.LoaderArgs) {
   const posthogApiKey = envVars.VITE_PUBLIC_POSTHOG_KEY ?? envVars.PUBLIC_POSTHOG_KEY;
   const posthogHost = envVars.VITE_PUBLIC_POSTHOG_HOST ?? envVars.PUBLIC_POSTHOG_HOST ?? '';
 
+  const isLocalhostDev =
+    process.env.NODE_ENV === 'development' &&
+    (() => {
+      try {
+        const host = new URL(args.request.url).hostname;
+        return host === 'localhost' || host === '127.0.0.1';
+      } catch {
+        return false;
+      }
+    })();
+
   return {
     ...deferredData,
     ...criticalData,
     detectedCountry,
     initialCurrency,
-    posthog: posthogApiKey
+    posthog: !isLocalhostDev && posthogApiKey
       ? {
           apiKey: posthogApiKey,
           uiHost:
@@ -150,7 +161,7 @@ export async function loader(args: Route.LoaderArgs) {
  */
 async function loadCriticalData({context}: Route.LoaderArgs) {
   const {storefront, env} = context;
-  const log = createServerLogger(env);
+  const log = createServerLogger(env as Record<string, string | undefined>);
 
   const [headerRaw, localization] = await Promise.all([
     storefront
@@ -283,6 +294,13 @@ export function Layout({children}: {children?: React.ReactNode}) {
 
 function getPosthogConfig(data: RootLoaderData | undefined) {
   if (data?.posthog) return data.posthog;
+  if (
+    typeof window !== 'undefined' &&
+    import.meta.env.DEV &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ) {
+    return null;
+  }
   const host = import.meta.env.VITE_PUBLIC_POSTHOG_HOST ?? '';
   const apiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
   if (!apiKey) return null;
