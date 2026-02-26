@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { twClasses, twc } from '../../helpers/twMerge';
 import type { IIconProps } from '../icons/icon.types';
-import type { FC, ReactNode } from 'react';
+import type { FC, ReactNode, RefAttributes, SVGProps, ForwardRefExoticComponent } from 'react';
 
 export type IButtonVariant =
   | 'primary'
@@ -17,6 +17,12 @@ export interface RadixIconProps extends React.SVGAttributes<SVGElement> {
     children?: never;
     color?: string;
 }
+type SVGAttributes = Partial<SVGProps<SVGSVGElement>>;
+type ElementAttributes = RefAttributes<SVGSVGElement> & SVGAttributes;
+interface LucideProps extends ElementAttributes {
+    size?: string | number;
+    absoluteStrokeWidth?: boolean;
+}
 
 export interface ILinkButtonCoreProps {
   variant?: IButtonVariant;
@@ -26,13 +32,13 @@ export interface ILinkButtonCoreProps {
   children?: ReactNode;
   disabled?: boolean;
   testName?: string;
-  IconBefore?: FC<IIconProps> | React.ForwardRefExoticComponent<RadixIconProps & React.RefAttributes<SVGSVGElement>>;
-  IconAfter?: FC<IIconProps> | React.ForwardRefExoticComponent<RadixIconProps & React.RefAttributes<SVGSVGElement>>;
+  IconBefore?: FC<IIconProps> | React.ForwardRefExoticComponent<RadixIconProps & React.RefAttributes<SVGSVGElement>> | ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>;
+  IconAfter?: FC<IIconProps> | React.ForwardRefExoticComponent<RadixIconProps & React.RefAttributes<SVGSVGElement>> | ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>;
 }
 
 const ButtonTheme = {
   base: {
-    button: twc`inline-flex items-center justify-center rounded text-center no-underline font-semibold transition-all duration-100 ease-in-out`,
+    button: twc`inline-flex items-center justify-center rounded-4xl text-center no-underline font-semibold transition-all duration-100 ease-in-out`,
     link: twc`inline-flex items-center justify-between`,
     linkText: twc`text-text-layout-powerful`,
     linkTextActive: twc`border-text-layout-accent text-text-layout-accent`,

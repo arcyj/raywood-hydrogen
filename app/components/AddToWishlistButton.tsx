@@ -1,6 +1,6 @@
 import { useWishlist } from '~/hooks/useWishlist';
 import { Button } from './ui/Button';
-import { Heart } from './icons/Heart';
+import { Heart } from 'lucide-react';
 import { IconButton } from './ui/IconButton';
 
 // Support both product and variant structures
@@ -100,7 +100,7 @@ export function AddToWishlistButton({
           handleClick();
         }}
         className={`wishlist-icon-button ${className}`}
-        aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+        aria-label={inWishlist ? 'Remove' : 'Save'}
       >
       </IconButton>
     );
@@ -110,14 +110,14 @@ export function AddToWishlistButton({
     <Button
       type="button"
       onClick={handleButtonClick}
-      className={`wishlist-button ${className}`}
+      className={`wishlist-button w-full ${className}`}
       variant='secondary'
     >
       <Heart
-        size={16}
+        size={22}
         className={`mr-8 ${inWishlist ? 'fill-primary' : ''}`}
       />
-      {inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+      {inWishlist ? 'Remove' : 'Save'}
     </Button>
   );
 }

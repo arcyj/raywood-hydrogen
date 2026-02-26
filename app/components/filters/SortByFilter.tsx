@@ -39,18 +39,17 @@ export function SortByFilter() {
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="flex h-40 px-16 items-center gap-1.5 bg-lightGrey rounded py-2.5 focus-visible:outline-hidden hover:shadow-lg active:bg-accentGrey active:inset-shadow-sm">
-        <span className="hidden lg:inline">
+      <DropdownMenu.Trigger className="flex h-40 px-16 items-center gap-1.5 bg-lightGrey rounded-2xl py-2.5 focus-visible:outline-hidden hover:shadow-lg active:bg-accentGrey active:inset-shadow-sm">
+        <span className="inline">
           Sort by: <span className="font-semibold">{currentSort.label}</span>
         </span>
-        <span className="lg:hidden">Sort</span>
         <ChevronDownIcon />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           sideOffset={8}
           align="end"
-          className="flex flex-col gap-2 border border-line-subtle bg-white p-5"
+          className="flex flex-col gap-2 border border-accentGrey bg-white shadow-2xl rounded-2xl p-8"
         >
           {SORT_LIST.map(({ key, label }) => {
             params.set("sort", key);
@@ -59,9 +58,10 @@ export function SortByFilter() {
                 <Link
                   to={`${location.pathname}?${params.toString()}`}
                   className={twClasses(
-                    ['underline-offset-[6px] hover:underline hover:outline-hidden'],
+                    [' hover:underline hover:outline-hidden font-regular rounded-md px-12 py-4'],
                     {
-                      ['font-bold']: currentSort.key === key,
+                      ['bg-lightGrey']: currentSort.key != key,
+                      ['font-bold bg-accentGrey']: currentSort.key === key,
                     },
                   )}
                   preventScrollReset

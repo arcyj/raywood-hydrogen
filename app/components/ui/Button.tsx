@@ -74,7 +74,7 @@ export const Button: FC<IButtonProps> = ({
       >
         {IconBefore && !loading && (
           <span className="mr-4" >
-            <IconBefore size={24}/>
+            <IconBefore size={22}/>
           </span>
         )}
         {children}

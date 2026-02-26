@@ -20,10 +20,10 @@ export function CartSummary({cart, layout, isCartMutating}: CartSummaryProps) {
   if (!cartHasItems) return null;
 
   const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside border-t-2 border-lightGrey max-desktop:pb-[80px] px-12 pb-12';
+    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside ring-2 border-t-2 border-lightGrey max-desktop:pb-[80px] px-12 pb-12';
 
   return (
-    <div aria-labelledby="cart-summary" className={className}>
+    <div aria-labelledby="cart-summary " className={className}>
       <dl className="cart-subtotal flex justify-between">
         <dt className="text-large-semi ">Total</dt>
         <dd className="text-large-semi">
@@ -53,7 +53,7 @@ function CartCheckoutActions({
   isCartMutating: boolean;
 }) {
   const posthog = usePostHog()
-  
+
   if (!checkoutUrl) return null;
 
   return (

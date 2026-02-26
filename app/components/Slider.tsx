@@ -1,14 +1,11 @@
-import { useRef, useMemo, forwardRef, useEffect } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Children, useRef, useMemo, useEffect, useCallback, useState } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from './icons';
-import type { Swiper as SwiperType } from 'swiper';
-import type { SwiperOptions } from 'swiper/types';
+import type { EmblaCarouselType, EmblaOptionsType, EmblaPluginType } from 'embla-carousel';
+import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
+import type { MutableRefObject } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
 import { IconButton } from './ui/IconButton';
 
 interface INavArrowProps {
@@ -19,199 +16,215 @@ interface INavArrowProps {
   iconClassName?: string;
 }
 
-const NextArrow = forwardRef<HTMLButtonElement, INavArrowProps>(
-  ({ onClick, disabled, className, Icon, iconClassName }, ref) => {
-    const IconWithClass = iconClassName
-      ? (p: { size?: number; className?: string }) => <Icon {...p} className={[p.className, iconClassName].filter(Boolean).join(' ')} />
-      : Icon;
-    return (
-      <IconButton
-        ref={ref}
-        type="button"
-        onClick={onClick}
-        disabled={disabled}
-        className={className ?? 'absolute top-1/2 right-12 -translate-y-1/2 z-2 bg-white border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
-        aria-label="Next slide"
-        Icon={IconWithClass as Parameters<typeof IconButton>[0]['Icon']}
-      />
-    );
-  },
-);
+function NextArrow({ onClick, disabled, className, Icon, iconClassName }: INavArrowProps) {
+  const IconWithClass = iconClassName
+    ? (p: { size?: number; className?: string }) => <Icon {...p} className={[p.className, iconClassName].filter(Boolean).join(' ')} />
+    : Icon;
+  return (
+    <IconButton
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={className ?? 'absolute top-1/2 right-12 -translate-y-1/2 z-2 bg-white border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
+      aria-label="Next slide"
+      Icon={IconWithClass as Parameters<typeof IconButton>[0]['Icon']}
+      variant="round"
+    />
+  );
+}
 
-NextArrow.displayName = 'NextArrow';
+function PrevArrow({ onClick, disabled, className, Icon, iconClassName }: INavArrowProps) {
+  const IconWithClass = iconClassName
+    ? (p: { size?: number; className?: string }) => <Icon {...p} className={[p.className, iconClassName].filter(Boolean).join(' ')} />
+    : Icon;
+  return (
+    <IconButton
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      variant="round"
+      className={className ?? 'absolute top-1/2 left-12 -translate-y-1/2 z-2 bg-white border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
+      aria-label="Previous slide"
+      Icon={IconWithClass as Parameters<typeof IconButton>[0]['Icon']}
+    />
+  );
+}
 
-const PrevArrow = forwardRef<HTMLButtonElement, INavArrowProps>(
-  ({ onClick, disabled, className, Icon, iconClassName }, ref) => {
-    const IconWithClass = iconClassName
-      ? (p: { size?: number; className?: string }) => <Icon {...p} className={[p.className, iconClassName].filter(Boolean).join(' ')} />
-      : Icon;
-    return (
-      <IconButton
-        ref={ref}
-        type="button"
-        onClick={onClick}
-        disabled={disabled}
-        className={className ?? 'absolute top-1/2 left-12 -translate-y-1/2 z-2 bg-white border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'}
-        aria-label="Previous slide"
-        Icon={IconWithClass as Parameters<typeof IconButton>[0]['Icon']}
-      />
-    );
-  },
-);
-
-PrevArrow.displayName = 'PrevArrow';
-
-// Map react-slick Settings to Swiper options
-interface SwiperSettings extends Omit<SwiperOptions, 'modules' | 'navigation' | 'pagination' | 'onSlideChangeTransitionStart' | 'onSlideChangeTransitionEnd'> {
+interface EmblaSettings {
+  options?: EmblaOptionsType;
+  plugins?: EmblaPluginType[];
   slidesToShow?: number | 'auto';
   slidesToScroll?: number;
   dots?: boolean;
   arrows?: boolean;
   speed?: number;
-  responsive?: Array<{
-    breakpoint: number;
-    settings: Partial<SwiperSettings>;
-  }>;
+  spaceBetween?: number;
+  direction?: 'horizontal' | 'vertical';
+  loop?: boolean;
   beforeChange?: (currentSlide: number, nextSlide: number) => void;
   afterChange?: (currentSlide: number) => void;
   adaptiveHeight?: boolean;
-  ref?: React.Ref<SwiperType>;
-  /** Pass Swiper modules (e.g. Thumbs) and options when using thumbs or other modules */
-  modules?: SwiperOptions['modules'];
-  thumbs?: SwiperOptions['thumbs'];
+  ref?: React.Ref<EmblaCarouselType>;
 }
 
-const defaults: Partial<SwiperSettings> = {
+const defaults: Partial<EmblaSettings> = {
   slidesToShow: 1,
   slidesToScroll: 1,
   arrows: true,
   dots: true,
-  speed: 500,
-  responsive: [],
+  speed: 25,
+  spaceBetween: 0,
+  direction: 'horizontal',
+  loop: false,
 };
 
 export interface ICarouselProps {
   className?: string;
-  settings?: SwiperSettings;
+  settings?: EmblaSettings;
   display?: string;
   withoutScale?: boolean;
   children?: ReactNode;
 }
 
 export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props }) => {
-  const swiperRef = useRef<SwiperType | null>(null);
-  const navigationPrevRef = useRef<HTMLButtonElement>(null);
-  const navigationNextRef = useRef<HTMLButtonElement>(null);
-  const paginationRef = useRef<HTMLDivElement>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+  const previousIndexRef = useRef(0);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
 
-  const carouselProps = { ...defaults, ...props.settings };
+  const settings = useMemo(
+    () => ({ ...defaults, ...props.settings }),
+    [props.settings],
+  );
+  const isVertical = settings.direction === 'vertical';
 
-  // Initialize navigation after mount
+  const emblaOptions = useMemo<EmblaOptionsType>(
+    () => {
+      const baseOptions: EmblaOptionsType = {
+        align: 'start',
+        axis: isVertical ? 'y' : 'x',
+        containScroll: 'trimSnaps',
+        dragFree: settings.slidesToShow === 'auto',
+        loop: settings.loop ?? false,
+        slidesToScroll: settings.slidesToScroll ?? 1,
+        duration: settings.speed ?? 25,
+      };
+
+      return {
+        ...baseOptions,
+        ...settings.options,
+      };
+    },
+    [
+      settings.options,
+      isVertical,
+      settings.slidesToShow,
+      settings.loop,
+      settings.slidesToScroll,
+      settings.speed,
+    ],
+  );
+
+  const emblaPlugins = useMemo<EmblaPluginType[]>(
+    () => [...(settings.plugins ?? []), WheelGesturesPlugin()],
+    [settings.plugins],
+  );
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(emblaOptions, emblaPlugins);
+
+  const setApiRef = useCallback(
+    (api: EmblaCarouselType | null) => {
+      if (!settings.ref) return;
+      if (typeof settings.ref === 'function') {
+        settings.ref(api);
+      } else if ('current' in settings.ref) {
+        (settings.ref as MutableRefObject<EmblaCarouselType | null>).current = api;
+      }
+    },
+    [settings.ref],
+  );
+
+  const updateControls = useCallback((api: EmblaCarouselType) => {
+    setSelectedIndex(api.selectedScrollSnap());
+    setScrollSnaps(api.scrollSnapList());
+    setCanScrollPrev(api.canScrollPrev());
+    setCanScrollNext(api.canScrollNext());
+  }, []);
+
   useEffect(() => {
-    if (swiperRef.current && carouselProps.arrows !== false && swiperRef.current.navigation) {
-      swiperRef.current.navigation.init();
-      swiperRef.current.navigation.update();
-    }
-  }, [carouselProps.arrows]);
-
-  // Convert react-slick settings to Swiper options
-  const swiperOptions = useMemo(() => {
-    const modules = [];
-    if (carouselProps.arrows !== false) {
-      modules.push(Navigation);
-    }
-    if (carouselProps.dots !== false) {
-      modules.push(Pagination);
+    if (!emblaApi) {
+      return;
     }
 
-    const options: SwiperOptions = {
-      modules,
-      speed: carouselProps.speed || 500,
-      slidesPerView: carouselProps.slidesToShow === 'auto' ? 'auto' : (carouselProps.slidesToShow || 1),
-      slidesPerGroup: carouselProps.slidesToScroll || 1,
-      spaceBetween: 0,
+    const onSelect = () => {
+      const currentIndex = emblaApi.selectedScrollSnap();
+      const previousIndex = previousIndexRef.current;
+      if (currentIndex !== previousIndex && settings.beforeChange) {
+        settings.beforeChange(previousIndex, currentIndex);
+      }
+      settings.afterChange?.(currentIndex);
+      previousIndexRef.current = currentIndex;
+      updateControls(emblaApi);
     };
 
-    // Add navigation if arrows are enabled
-    if (carouselProps.arrows !== false) {
-      options.navigation = {
-        prevEl: navigationPrevRef.current,
-        nextEl: navigationNextRef.current,
-      };
+    previousIndexRef.current = emblaApi.selectedScrollSnap();
+    updateControls(emblaApi);
+    settings.afterChange?.(previousIndexRef.current);
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    setApiRef(emblaApi);
+
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+      setApiRef(null);
+    };
+  }, [
+    emblaApi,
+    settings.beforeChange,
+    settings.afterChange,
+    updateControls,
+    setApiRef,
+  ]);
+
+  useEffect(() => {
+    if (!emblaApi || !settings.adaptiveHeight || !viewportRef.current) {
+      return;
     }
 
-    // Add pagination if dots are enabled
-    if (carouselProps.dots !== false) {
-      options.pagination = {
-        el: paginationRef.current,
-        clickable: true,
-        bulletClass: 'swiper-pagination-bullet',
-        bulletActiveClass: 'swiper-pagination-bullet-active',
-        renderBullet: (index: number, className: string) => {
-          return `<div class="${className}"></div>`;
-        },
-      };
-    }
+    const updateHeight = () => {
+      const index = emblaApi.selectedScrollSnap();
+      const activeSlide = emblaApi.slideNodes()[index] as HTMLElement | undefined;
+      if (activeSlide) {
+        viewportRef.current!.style.height = `${activeSlide.offsetHeight}px`;
+      }
+    };
 
-    // Handle responsive breakpoints
-    if (carouselProps.responsive && carouselProps.responsive.length > 0) {
-      options.breakpoints = {};
-      carouselProps.responsive.forEach(({ breakpoint, settings }) => {
-        const key = breakpoint.toString();
-        options.breakpoints![key] = {
-          slidesPerView: settings.slidesToShow === 'auto' ? 'auto' : (settings.slidesToShow || options.slidesPerView),
-          slidesPerGroup: settings.slidesToScroll || options.slidesPerGroup,
-        };
-      });
-    }
+    updateHeight();
+    emblaApi.on('select', updateHeight);
+    emblaApi.on('reInit', updateHeight);
+    window.addEventListener('resize', updateHeight);
 
-    // Handle adaptiveHeight (autoHeight in Swiper)
-    if (carouselProps.adaptiveHeight) {
-      options.autoHeight = true;
-    }
-
-    // Merge any additional Swiper-specific options
-    const { slidesToShow, slidesToScroll, dots, arrows, responsive, beforeChange, afterChange, adaptiveHeight, ref, ...rest } = carouselProps;
-    return { ...options, ...rest };
-  }, [carouselProps]);
-
-  // Convert children to SwiperSlides
-  const slides = useMemo(() => {
-    if (!children) return [];
-    const childrenArray = Array.isArray(children) ? children : [children];
-    const isAutoWidth = carouselProps.slidesToShow === 'auto';
-    return childrenArray.filter(Boolean).map((child, index) => (
-      <SwiperSlide key={index} style={isAutoWidth ? { width: 'auto' } : undefined}>
-        {child as ReactNode}
-      </SwiperSlide>
-    ));
-  }, [children, carouselProps.slidesToShow]);
-
-  // Handle callbacks
-  const handleSlideChangeTransitionStart = (swiper: SwiperType) => {
-    if (carouselProps.beforeChange) {
-      carouselProps.beforeChange(swiper.previousIndex, swiper.activeIndex);
-    }
-  };
-
-  const handleSlideChangeTransitionEnd = (swiper: SwiperType) => {
-    if (carouselProps.afterChange) {
-      carouselProps.afterChange(swiper.activeIndex);
-    }
-  };
+    return () => {
+      emblaApi.off('select', updateHeight);
+      emblaApi.off('reInit', updateHeight);
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [emblaApi, settings.adaptiveHeight]);
 
   const wrapperClassName = useMemo(() => {
-    const classes = ['relative', className];
+    const classes = ['embla', 'relative', className];
     if (props.display) {
-      classes.push(`[&_.swiper-wrapper]:${props.display === 'flex' ? 'flex' : props.display}`);
+      classes.push(`[&_.embla__container]:${props.display === 'flex' ? 'flex' : props.display}`);
     }
     if (!props.withoutScale) {
-      classes.push('[&_.swiper-slide]:scale-100');
+      classes.push('[&_.embla__slide]:scale-100');
     }
     return classes.join(' ');
   }, [className, props.display, props.withoutScale]);
 
-  const isVertical = carouselProps.direction === 'vertical';
   const prevArrowClassName = isVertical
     ? 'absolute top-0 left-1/2 -translate-x-1/2 z-2 bg-white border-none p-0 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:hidden'
     : undefined;
@@ -220,60 +233,76 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
     : undefined;
   const prevIconClassName = isVertical ? 'rotate-90' : undefined;
   const nextIconClassName = isVertical ? 'rotate-90' : undefined;
+  const isAutoWidth = settings.slidesToShow === 'auto';
+  const slidesToShow = isAutoWidth ? 1 : Math.max(1, Number(settings.slidesToShow ?? 1));
+  const gap = settings.spaceBetween ?? 0;
+  const childNodes = Children.toArray(children).filter(Boolean);
+  const slideBasis = isAutoWidth
+    ? 'auto'
+    : `calc((100% - ${(slidesToShow - 1) * gap}px) / ${slidesToShow})`;
 
   return (
     <div className={wrapperClassName}>
-      {carouselProps.arrows !== false && (
+      {settings.arrows !== false && (
         <>
           <PrevArrow
-            ref={navigationPrevRef}
-            onClick={() => swiperRef.current?.slidePrev()}
-            disabled={swiperRef.current?.isBeginning}
+            onClick={() => emblaApi?.scrollPrev()}
+            disabled={!canScrollPrev}
             className={prevArrowClassName}
             Icon={ChevronLeft as INavArrowProps['Icon']}
             iconClassName={prevIconClassName}
           />
           <NextArrow
-            ref={navigationNextRef}
-            onClick={() => swiperRef.current?.slideNext()}
-            disabled={swiperRef.current?.isEnd}
+            onClick={() => emblaApi?.scrollNext()}
+            disabled={!canScrollNext}
             className={nextArrowClassName}
             Icon={ChevronRight as INavArrowProps['Icon']}
             iconClassName={nextIconClassName}
           />
         </>
       )}
-      <Swiper
-        {...swiperOptions}
-        className='h-full'
-        onSwiper={(swiper) => {
-          swiperRef.current = swiper;
-          // Handle ref if provided
-          if (carouselProps.ref && typeof carouselProps.ref === 'function') {
-            carouselProps.ref(swiper);
-          } else if (carouselProps.ref && 'current' in carouselProps.ref) {
-            (carouselProps.ref as React.MutableRefObject<SwiperType | null>).current = swiper;
-          }
+      <div
+        ref={(node) => {
+          viewportRef.current = node;
+          emblaRef(node);
         }}
-        onSlideChangeTransitionStart={handleSlideChangeTransitionStart}
-        onSlideChangeTransitionEnd={handleSlideChangeTransitionEnd}
-        onSlideChange={(swiper) => {
-          // Update button disabled states
-          if (carouselProps.arrows !== false) {
-            const prevButton = navigationPrevRef.current;
-            const nextButton = navigationNextRef.current;
-            if (prevButton) {
-              prevButton.disabled = swiper.isBeginning;
-            }
-            if (nextButton) {
-              nextButton.disabled = swiper.isEnd;
-            }
-          }
-        }}
+        className="embla__viewport"
       >
-        {slides}
-      </Swiper>
-      {carouselProps.dots !== false && <div ref={paginationRef} className="swiper-pagination" />}
+        <div
+          className="embla__container"
+          style={{
+            display: 'flex',
+            flexDirection: isVertical ? 'column' : 'row',
+            gap: `${gap}px`,
+          }}
+        >
+          {childNodes.map((child, index) => (
+            <div
+              key={index}
+              className="embla__slide"
+              style={{
+                flex: isAutoWidth ? '0 0 auto' : `0 0 ${slideBasis}`,
+                width: isAutoWidth ? 'auto' : undefined,
+              }}
+            >
+              {child}
+            </div>
+          ))}
+        </div>
+      </div>
+      {settings.dots !== false && scrollSnaps.length > 1 && (
+        <div className="embla__dots">
+          {scrollSnaps.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => emblaApi?.scrollTo(index)}
+              className={`embla__dot ${index === selectedIndex ? 'embla__dot--selected' : ''}`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -45,11 +45,11 @@ export function FilterDrawer() {
   const Footer = () => {
     return(
       <div className='p-12 flex justify-between items-center gap-4'>
-        <Button variant='primary' size="medium" onClick={closeFilter} className='w-full'>
-          Apply filters
-        </Button>
         <Button variant='secondary' size="medium" onClick={clearAllFilters} className='w-full'>
           Clear all
+        </Button>
+        <Button variant='primary' size="medium" onClick={closeFilter} className='w-full'>
+          Apply filters
         </Button>
       </div>
     )
