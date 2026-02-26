@@ -105,6 +105,15 @@
     max-width: 900px;
     margin: auto;
   }
+  .container-large{
+    max-width: 1900px;
+    margin: auto;
+    padding: 8px;
+    padding-top: 44px;
+    @media (min-width: 768px) {
+      padding: 12px
+    }
+  }
 
   .scrollbar{
     overflow-y: auto;

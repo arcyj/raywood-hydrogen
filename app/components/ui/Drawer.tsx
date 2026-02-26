@@ -42,11 +42,11 @@ const DrawerCloseButton: FC<IDrawerCloseButtonProps> = ({ className, onClick }) 
 const DrawerBackDrop: FC<{onClick?: () => void}> = ({onClick}) => (
   <TransitionChild
     as={Fragment}
-    enter="ease duration-100"
+    enter="transition-opacity duration-350 ease-[cubic-bezier(0.32,0.72,0,1)]"
     enterFrom="opacity-20"
     enterTo="opacity-90"
-    leave="ease duration-100"
-    leaveFrom="opacity-100"
+    leave="transition-opacity duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]"
+    leaveFrom="opacity-90"
     leaveTo="opacity-20"
   >
     <div
@@ -67,16 +67,19 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
   footer,
 }) => {
   const lockScroll = useScrollLocker();
-  const transitionEnterLeaveFrom = twClasses(['opacity-0'], {
-    ['translate-x-full']: position === 'right',
-    ['-translate-x-full']: position === 'left',
-    ['translate-y-full']: position === 'bottom',
-    ['-translate-y-full']: position === 'top',
-  });
+  const transitionEnterLeaveFrom = twClasses(
+    'opacity-0 transform-gpu',
+    {
+      'translate-x-full': position === 'right',
+      '-translate-x-full': position === 'left',
+      'translate-y-full': position === 'bottom',
+      '-translate-y-full': position === 'top',
+    }
+  );
 
-  const containerClasses = twClasses(['drawer-container mx-auto z-[9998]'], {
-    ['inset-y-0 right-0 min-w-[400px]  max-w-[500px] fixed']: position === 'right',
-    ['inset-y-0 left-0  min-w-[400px]  max-w-[500px] fixed']: position === 'left',
+  const containerClasses = twClasses(['drawer-container mx-auto z-[9998] overflow-hidden'], {
+    ['inset-y-24 right-24 min-w-[400px]  max-w-[500px] tablet:w-[500px] fixed rounded-2xl']: position === 'right',
+    ['tablet:inset-y-24 tablet:left-24 inset-y-0 left-0  tablet:min-w-[400px]  max-w-[500px] tablet:w-[500px] tablet:rounded-2xl fixed']: position === 'left',
     ['inset-x-0 bottom-0 w-full h-full max-w-[550px] fixed']: position === 'bottom',
     ['inset-x-0 top-44 fixed left-[50%] -translate-x-[50%] w-full']: position === 'top',
   }, className);
@@ -115,19 +118,18 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
   return (
     <DrawerContext.Provider value={{ onClose }}>
       <Transition show={visible} as={Fragment}>
-
           <DrawerBackDrop onClick={onClose} />
           <div className={containerClasses}>
-            <TransitionChild
-              as={Fragment}
-              enter="transform transition ease duration-200"
-              enterFrom={transitionEnterLeaveFrom}
-              enterTo={`opacity-100 ${position === 'bottom' || position === 'top' ? 'translate-y-0' : 'translate-x-0'}`}
-              leave="transform transition ease duration-150"
-              leaveFrom={`opacity-100 ${position === 'bottom' || position === 'top' ? 'translate-y-0' : 'translate-x-0'}`}
-              leaveTo={transitionEnterLeaveFrom}
-            >
-              <div className={panelClasses}>
+              <TransitionChild
+                as="div"
+                className={panelClasses}
+                enter="transform-gpu transition-transform transition-opacity duration-350 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                enterFrom={transitionEnterLeaveFrom}
+                enterTo="opacity-100 translate-x-0 translate-y-0"
+                leave="transform-gpu transition-transform transition-opacity duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                leaveFrom="opacity-100 translate-x-0 translate-y-0"
+                leaveTo={transitionEnterLeaveFrom}
+              >
                 {header && (
                   <div className="drawer-header flex-shrink-0">
                     {header}
@@ -141,8 +143,7 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
                     {footer}
                   </div>
                 )}
-              </div>
-            </TransitionChild>
+              </TransitionChild>
           </div>
       </Transition>
     </DrawerContext.Provider>

@@ -1,7 +1,7 @@
 
 import {Drawer} from './ui/Drawer';
-import { Button } from './ui/Button';
-import { Error } from './icons';
+import { IconButton } from './ui/IconButton';
+import { Cross1Icon } from "@radix-ui/react-icons";
 import { DropDownMenu } from './ui/DropdownMenu';
 import {usePlaypeak} from '~/lib/playpeakContext';
 import type {HeaderQuery} from 'storefrontapi.generated';
@@ -23,16 +23,14 @@ export function MenuDrawer({
 
   const Header = () => {
     return (
-      <div className="p-12 flex justify-between items-center">
-        <span className="text-h1">Menu</span>
-        <Button
-          IconBefore={Error}
+      <div className='p-12 flex justify-between items-center'>
+        <span className='text-h1'>Menu</span>
+        <IconButton
+          Icon={Cross1Icon}
           variant="secondary"
-          size="small"
+          size="medium"
           onClick={closeDrawer}
-        >
-          CLOSE
-        </Button>
+        />
       </div>
     );
   };
@@ -45,9 +43,9 @@ export function MenuDrawer({
     <Drawer
       onClose={closeDrawer}
       visible={isOpen}
-      position="right"
+      position="left"
       className="overflow-hidden h-full"
-      panelClassName="bg-white p-12"
+      panelClassName="p-12 bg-white "
       header={<Header />}
     >
       <DropDownMenu

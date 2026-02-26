@@ -3,7 +3,7 @@ import type { RadixIconProps } from './ButtonTheme';
 import type { IIconProps } from '../icons/icon.types';
 import type { FC } from 'react';
 
-type IIconButtonVariant = 'filled' | 'outlined' | 'ghost' | 'secondary';
+type IIconButtonVariant = 'filled' | 'outlined' | 'ghost' | 'secondary' | 'round';
 type IIconLinkTheme = 'light' | 'dark';
 export type IIconButtonSize = 'small' | 'medium' | 'large';
 
@@ -17,12 +17,13 @@ export interface IIconCoreProps {
 }
 
 const IconButtonTheme = {
-  initial: twc`flex items-center justify-center rounded-[4px] focus-visible:glow-focus focus:outline-none`,
+  initial: twc`flex items-center justify-center focus-visible:glow-focus focus:outline-none`,
   variants: {
-    filled: twc`border-transparent-full bg-[#d7dae0] text-text-buttons-secondary`,
-    secondary: twc`border-transparent-full`,
-    outlined: twc`border border-solid border-gray`,
-    ghost: twc`border-transparent-full bg-transparent-full text-text-buttons-tertiary`,
+    filled: twc`border-transparent-full bg-[#d7dae0] text-small-semi rounded-xl`,
+    secondary: twc`border-transparent-full rounded-xl bg-lightGrey text-small-semi`,
+    outlined: twc`border border-solid border-accentGrey bg-white rounded-full shadow-sm `,
+    ghost: twc`border-transparent-full bg-transparent-full text-small-semi yrounded-full `,
+    round: twc`border-transparent-full bg-[#d7dae0] text-small-semi rounded-full shadow-xl`,
   },
   state: {
     secondary: {
@@ -44,18 +45,20 @@ const IconButtonTheme = {
     filled: twc`active:inset-shadow-sm`,
     outlined: twc`active:bg-lightGrey active:inset-shadow-sm`,
     secondary: twc`active:inset-shadow-sm`,
+    round: twc`active:inset-shadow-sm active:shadow-sm active:bg-grey`,
     ghost: twc`active:bg-foreground-lowest`,
   },
   keyPress: {
     filled: twc`!bg-surface-high-secondary-action`,
     secondary: twc`!inset-shadow-sm`,
+    round: twc`!inset-shadow-sm shadow-sm bg-grey`,
     outlined: twc`!bg-foreground-lowest`,
     ghost: twc`!bg-foreground-lowest`,
   },
   disable: {
-    filled: twc`bg-surface-high-secondary-disabled`,
-    outlined: twc`border-layout-low text-text-layout-low`,
-    ghost: twc`text-text-layout-low`,
+    filled: twc`bg-[#f6f6f6]`,
+    outlined: twc``,
+    ghost: twc``,
   },
   cursor: {
     initial: twc`cursor-pointer`,

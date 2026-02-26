@@ -218,7 +218,7 @@ export default function Collection() {
   };
 
   return (
-    <div className="collection largeDesktop:container mx-auto max-tablet:pt-44">
+    <div className="container-large mx-auto max-tablet:pt-44">
       <Breadcrumb
         collection={{title: collection.title, handle: collection.handle}}
         parentCollection={parentCollection ?? undefined}

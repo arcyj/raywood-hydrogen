@@ -1,5 +1,5 @@
 import {useLoaderData, Link} from 'react-router';
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import type {Route} from './+types/products.$handle';
 import type {ProductFragment} from 'storefrontapi.generated';
 import { ClientSticky } from '~/components/ClientSticky';
@@ -27,11 +27,11 @@ import { Counter } from '~/components/ui/Counter';
 import { ProductStockStatus } from '~/components/ui/ProductStockStatus';
 import { ShippingPictogram } from '~/components/icons/ShippingPictogram';
 import { ReturnPictogram } from '~/components/icons/ReturnPictogram';
+import {CopyCheck, Share} from 'lucide-react';
 import { GuaranteePictogram } from '~/components/icons/GuaranteePictogram';
+import { Button } from '~/components/ui/Button';
 import { deliveryTime } from '~/helpers/deliveryTime';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
-import { AddToCartButton } from '~/components/AddToCartButton';
-import { Cart } from '~/components/icons';
 import { getSeoMeta, getAbsoluteUrl, getProductJsonLd } from '~/lib/seo';
 import { SubscriptionForm } from '~/components/SubscriptionForm';
 
@@ -200,7 +200,7 @@ export default function Product() {
   const {fullProduct, relatedProducts} = data;
 
   return (
-    <div className="largeDesktop:container mx-auto">
+    <div className="container-large mx-auto">
       <ProductContent
         fullProduct={fullProduct}
         relatedProducts={relatedProducts}
@@ -221,6 +221,8 @@ function ProductContent({
   const fullData = fullProduct;
   const {product, breadcrumbCollection, breadcrumbParentCollection} = fullData;
   const [productCount, setProductCount] = useState(1);
+  const [isUrlCopied, setIsUrlCopied] = useState(false);
+  const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
@@ -251,6 +253,33 @@ function ProductContent({
   const handleCountChange = (val: number) => {
     setProductCount(val);
   };
+
+  const copyCurrentUrlToClipboard = async () => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setIsUrlCopied(true);
+
+      if (copyResetTimeoutRef.current) {
+        clearTimeout(copyResetTimeoutRef.current);
+      }
+
+      copyResetTimeoutRef.current = setTimeout(() => {
+        setIsUrlCopied(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to copy URL to clipboard:', error);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (copyResetTimeoutRef.current) {
+        clearTimeout(copyResetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const ProductDescription = () => {
     return (
@@ -301,7 +330,7 @@ function ProductContent({
   }
 
   return (
-    <div className="largeDektop:container overflow-hidden max-w-full max-tablet:mt-[40px]">
+    <div className="largeDektop:container-large overflow-hidden max-w-full">
       <Breadcrumb
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
@@ -312,17 +341,17 @@ function ProductContent({
         id="product-content"
         className="grid grid-cols-1 md:grid-cols-12 gap-12 desktop:gap-64 min-w-0 tablet:pt-8"
       >
-        <div className="min-w-0 col-span-6 desktop:col-span-7">
+        <div className="min-w-0 col-span-6 mediumDesktop:col-span-8">
           <ProductGallery media={media.nodes} />
           {isTablet ? <ProductDescription /> : null}
         </div>
-        <div className="product-main col-span-6 desktop:col-span-5">
+        <div className="product-main col-span-6 mediumDesktop:col-span-4">
           <ClientSticky
             top={80}
             enabled={isDesktop ? true : false}
             bottomBoundary="#product-content"
           >
-            <div className="bg-white">
+            <div className="bg-white max-w-[500px] mx-auto">
               <div className="flex items-center justify-between mb-8">
                 <span className="text-medium-semi text-gray">{vendor}</span>
               </div>
@@ -344,7 +373,7 @@ function ProductContent({
                     className="self-end"
                   />
                 </div>
-                <div className="tablet:flex gap-12 mb-12 items-center">
+                <div className="tablet:flex gap-8 mb-8 items-center">
                   {isTablet ? (
                     <>
                       <Counter
@@ -375,8 +404,10 @@ function ProductContent({
                       />
                     </>
                   ) : null}
+                </div>
+                <div className="flex gap-8 mt-4">
                   <AddToWishlistButton
-                    variant={isTablet ? 'icon' : 'button'}
+                    variant="button"
                     className={`${!isTablet ? 'w-full' : null}`}
                     product={selectedVariant}
                     productData={{
@@ -398,6 +429,15 @@ function ProductContent({
                       })(),
                     }}
                   />
+                  <Button
+                    type="button"
+                    IconBefore={isUrlCopied ? CopyCheck : Share}
+                    onClick={copyCurrentUrlToClipboard}
+                    className={`wishlist-button w-full`}
+                    variant="secondary"
+                  >
+                    {isUrlCopied ? 'Copied to clipboard' : 'Share'}
+                  </Button>
                 </div>
               </div>
               <Accordion className="mt-32" defaultOpenAll={false}>

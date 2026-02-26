@@ -27,7 +27,7 @@ export const Filters = () => {
   const collection = collectionData?.collection;
 
   return (
-    <div className="">
+    <div className="scrollbar">
       <CustomFilter collection={collection} />
       {collection && (
         <PriceRangeFilter

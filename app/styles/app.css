@@ -298,7 +298,8 @@ button.reset:hover:not(:has(> *)) {
   bottom: 0;
   left: 0;
   position: absolute;
-  width: 100%
+  width: 100%;
+  box-shadow: 1px -9px 31px -19px #bebebe;
 }
 
 .cart-line-quantity {
@@ -524,19 +525,46 @@ button.reset:hover:not(:has(> *)) {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  min-height: 0;
+  min-height: 300px;
+  max-height: 300px;
   overflow: hidden;
 }
 
-.product-gallery-main .swiper-wrapper {
-  min-width: 0;
-  min-height: 0;
+.product-gallery-main .embla__viewport,
+.product-gallery-main .embla__container,
+.product-gallery-main .embla__slide,
+.product-gallery-main-slide {
+  min-height: 300px;
 }
 
-/* Slide has aspect-ratio from first frame so image never overflows before Swiper init */
-.product-gallery-main .swiper-slide {
+@media (min-width: 769px) {
+  .product-gallery-main {
+    min-height: 600px;
+    max-height: 600px;
+  }
+
+  .product-gallery-main .embla__viewport,
+  .product-gallery-main .embla__container,
+  .product-gallery-main .embla__slide,
+  .product-gallery-main-slide {
+    min-height: 600px;
+  }
+}
+
+.product-gallery-main .embla__viewport {
+  max-height: inherit;
+}
+
+.product-gallery-main .embla__container {
+  min-width: 0;
+  min-height: 0;
+  max-height: inherit;
+}
+
+/* Slide has aspect-ratio from first frame so image never overflows before Embla init */
+.product-gallery-main .embla__slide {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  max-height: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -544,22 +572,71 @@ button.reset:hover:not(:has(> *)) {
   flex-shrink: 0;
 }
 
+.product-gallery-main--peek-mobile .embla__slide {
+  flex: 0 0 calc((100% - 8px) / 1.3) !important;
+}
+
+@media (min-width: 769px) {
+  .product-gallery-main--peek-mobile .embla__slide {
+    flex: 0 0 100% !important;
+  }
+}
+
+@media (min-width: 990px) {
+  .product-gallery-main--peek-mobile .embla__slide {
+    flex: 0 0 calc((100% - 10.4px) / 2.3) !important;
+  }
+}
+
 /* Contain main image from first frame so it never flashes outside */
 .product-gallery-main-slide {
+  position: relative;
   width: 100%;
   max-width: 100%;
-  max-height: 100%;
-  aspect-ratio: 1 / 1;
+  max-height: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
 
+.product-gallery-main-slide-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #efefef 25%, #f7f7f7 50%, #efefef 75%);
+  background-size: 200% 100%;
+  animation: product-gallery-shimmer 1.4s ease-in-out infinite;
+}
+
+.product-gallery-main-image {
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.product-gallery-main-image.is-loaded {
+  opacity: 1;
+}
+
+@keyframes product-gallery-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .product-gallery-main-slide img {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 400px;
   object-fit: contain;
+}
+
+@media (min-width: 769px) {
+  .product-gallery-main-slide img {
+    max-height: 600px;
+  }
 }
 
 .product-gallery-thumbs {
@@ -569,11 +646,11 @@ button.reset:hover:not(:has(> *)) {
   margin-top: 1rem;
 }
 
-.product-gallery-thumbs .swiper-wrapper {
+.product-gallery-thumbs .embla__container {
   min-width: 0;
 }
 
-.product-gallery-thumbs .swiper-slide {
+.product-gallery-thumbs .embla__slide {
   width: auto;
   height: 70px;
 }
@@ -603,18 +680,18 @@ button.reset:hover:not(:has(> *)) {
   min-height: 0;
 }
 
-/* Slider puts className on wrapper; inner Swiper must fill it so thumbs don't expand */
-.product-gallery-thumbs-vertical .swiper {
+/* Slider puts className on wrapper; inner Embla viewport must fill it */
+.product-gallery-thumbs-vertical .embla__viewport {
   height: 100% !important;
   min-height: 0;
   overflow: hidden;
 }
 
-.product-gallery-thumbs-vertical .swiper-wrapper {
+.product-gallery-thumbs-vertical .embla__container {
   flex-direction: column;
 }
 
-.product-gallery-thumbs-vertical .swiper-slide {
+.product-gallery-thumbs-vertical .embla__slide {
   height: 70px;
   min-height: 70px;
   flex-shrink: 0;
@@ -800,24 +877,24 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Carousel/Slider styles */
-.swiper {
+.embla__viewport {
   overflow: hidden;
 }
 
-.swiper-slide span {
+.embla__slide span {
   @media (max-width: 640px) {
     display: inline-flex;
     overflow: hidden;
   }
 }
 
-.swiper-slide p {
+.embla__slide p {
   @media (max-width: 640px) {
     overflow: hidden;
   }
 }
 
-.swiper-pagination {
+.embla__dots {
   position: relative;
   margin-top: 1rem;
   display: flex;
@@ -826,7 +903,7 @@ button.reset:hover:not(:has(> *)) {
   gap: 0.5rem;
 }
 
-.swiper-pagination-bullet {
+.embla__dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -836,7 +913,7 @@ button.reset:hover:not(:has(> *)) {
   transition: background-color 0.3s;
 }
 
-.swiper-pagination-bullet-active {
+.embla__dot--selected {
   background-color: rgb(0, 0, 0);
 }
 
