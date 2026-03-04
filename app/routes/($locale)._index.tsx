@@ -300,7 +300,7 @@ export default function Homepage() {
         <section>
           <CollectionSlider
             title="New in Shop"
-            collectionPath="/collections/construction-set"
+            collectionPath="/collections/latest-added-products"
             products={data.latestProducts}
             className="mb-24 py-12"
           />
@@ -329,7 +329,7 @@ export default function Homepage() {
             />
             <CollectionSlider
               title="Plushies and blind boxes"
-              collectionPath="/collections/figurines"
+              collectionPath="/collections/blind-boxes"
               products={data.blindBoxesBestSelling}
               className="mb-24 py-12"
             />
@@ -342,7 +342,7 @@ export default function Homepage() {
           />
           <CollectionSlider
             title="Sports Cards"
-            collectionPath="/collections/figurines"
+            collectionPath="/collections/sports-cards"
             products={data.sportCardsBestSelling}
             className="mb-24 py-12"
           />
