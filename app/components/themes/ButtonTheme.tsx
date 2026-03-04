@@ -38,7 +38,7 @@ export interface ILinkButtonCoreProps {
 
 const ButtonTheme = {
   base: {
-    button: twc`inline-flex items-center justify-center rounded-4xl text-center no-underline font-semibold transition-all duration-100 ease-in-out`,
+    button: twc`inline-flex text-nowrap items-center justify-center rounded-4xl text-center no-underline font-semibold transition-all duration-100 ease-in-out`,
     link: twc`inline-flex items-center justify-between`,
     linkText: twc`text-text-layout-powerful`,
     linkTextActive: twc`border-text-layout-accent text-text-layout-accent`,

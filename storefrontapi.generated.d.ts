@@ -1772,6 +1772,9 @@ export type RelatedProductsQueryVariables = StorefrontAPI.Exact<{
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   collectionHandle: StorefrontAPI.Scalars['String']['input'];
+  filters?: StorefrontAPI.InputMaybe<
+    Array<StorefrontAPI.ProductFilter> | StorefrontAPI.ProductFilter
+  >;
 }>;
 
 export type RelatedProductsQuery = {
@@ -2119,7 +2122,7 @@ interface GeneratedQueryTypes {
     return: CollectionBreadcrumbQuery;
     variables: CollectionBreadcrumbQueryVariables;
   };
-  '#graphql\n  fragment RelatedProduct on Product {\n    id\n    title\n    handle\n    vendor\n    availableForSale\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n      maxVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query RelatedProducts(\n    $country: CountryCode\n    $language: LanguageCode\n    $collectionHandle: String!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $collectionHandle) {\n      id\n      products(first: 6) {\n        nodes {\n          ...RelatedProduct\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  fragment RelatedProduct on Product {\n    id\n    title\n    handle\n    vendor\n    availableForSale\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n      maxVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query RelatedProducts(\n    $country: CountryCode\n    $language: LanguageCode\n    $collectionHandle: String!\n    $filters: [ProductFilter!]\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $collectionHandle) {\n      id\n      products(first: 6, filters:$filters) {\n        nodes {\n          ...RelatedProduct\n        }\n      }\n    }\n  }\n': {
     return: RelatedProductsQuery;
     variables: RelatedProductsQueryVariables;
   };
