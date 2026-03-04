@@ -266,10 +266,10 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
           viewportRef.current = node;
           emblaRef(node);
         }}
-        className="embla__viewport"
+        className="embla__viewport h-full"
       >
         <div
-          className="embla__container"
+          className="embla__container h-full"
           style={{
             display: 'flex',
             flexDirection: isVertical ? 'column' : 'row',

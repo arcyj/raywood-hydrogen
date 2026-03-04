@@ -174,6 +174,7 @@ function loadRelatedProducts(
     .query(RELATED_PRODUCTS_QUERY, {
       variables: {
         collectionHandle: firstCollection.handle,
+        filters: {available: true}
       },
     })
     .then((result: {collection?: {products?: {nodes?: Array<{id: string}>}}}) => {
@@ -321,7 +322,7 @@ function ProductContent({
         </div>
         {descriptionHtml.length > 0 ? (
           <div
-            className="mt-24 text-regular"
+            className="mt-24 text-regular product__description max-w-[900px] text-justify"
             dangerouslySetInnerHTML={{__html: descriptionHtml}}
           />
         ) : null}
@@ -804,10 +805,11 @@ const RELATED_PRODUCTS_QUERY = `#graphql
     $country: CountryCode
     $language: LanguageCode
     $collectionHandle: String!
+    $filters: [ProductFilter!]
   ) @inContext(country: $country, language: $language) {
     collection(handle: $collectionHandle) {
       id
-      products(first: 6) {
+      products(first: 6, filters:$filters) {
         nodes {
           ...RelatedProduct
         }

@@ -2,14 +2,12 @@ import { Image } from "@shopify/hydrogen";
 import { NavLink } from "react-router";
 import {useLocalizedPath} from '~/hooks/useLocalePath';
 
-
 export function TopBarActions() {
   const withLocale = useLocalizedPath();
 
   return (
     <>
-
-    <div className="top-button tablet:hidden text-center z-[2000]">
+      <div className="top-button tablet:hidden text-center z-[2000]">
       <NavLink prefetch="intent" to={withLocale('/')} viewTransition end>
         <Image
           src="./images/LogoPlaypeak.svg"

@@ -1017,3 +1017,41 @@ button.reset:hover:not(:has(> *)) {
     margin-bottom: 70px;
   }
 }
+
+/*
+* --------------------------------------------------
+* Product description style
+* --------------------------------------------------
+*/
+
+.product__description ul li {
+  list-style-type: disc;
+  margin-left: 30px;
+  margin-bottom: 8px;
+}
+
+.product__description ol li {
+  list-style-type: decimal;
+  margin-left: 30px;
+  margin-bottom: 8px;
+}
+
+.product__description h1 {
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.product__description h2,
+.product__description h3,
+.product__description h4 {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.product__description p {
+  margin-bottom: 12px;
+}
+
+.product__description-title {
+  font-weight: 600;
+}

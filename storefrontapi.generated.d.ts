@@ -554,6 +554,9 @@ export type CollectionCardFragment = Pick<
   StorefrontAPI.Collection,
   'id' | 'title' | 'handle'
 > & {
+  shortDescription?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'value'>
+  >;
   image?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
   >;
@@ -568,6 +571,33 @@ export type CollectionByHandleQueryVariables = StorefrontAPI.Exact<{
 export type CollectionByHandleQuery = {
   collection?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
+      featuredExpansions?: StorefrontAPI.Maybe<{
+        references?: StorefrontAPI.Maybe<{
+          nodes: Array<
+            Pick<StorefrontAPI.Metaobject, 'id'> & {
+              fields: Array<
+                Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
+                  reference?: StorefrontAPI.Maybe<{
+                    image?: StorefrontAPI.Maybe<
+                      Pick<StorefrontAPI.Image, 'url' | 'altText'>
+                    >;
+                  }>;
+                }
+              >;
+            }
+          >;
+        }>;
+      }>;
+      childCollections?: StorefrontAPI.Maybe<{
+        references?: StorefrontAPI.Maybe<{
+          nodes: Array<
+            Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'>
+          >;
+        }>;
+      }>;
+      shortDescription?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'value'>
+      >;
       image?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
       >;
@@ -672,6 +702,84 @@ export type LatestAddedProductsQueryVariables = StorefrontAPI.Exact<{
 }>;
 
 export type LatestAddedProductsQuery = {
+  collection?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
+      products: {
+        nodes: Array<
+          Pick<
+            StorefrontAPI.Product,
+            'id' | 'title' | 'handle' | 'vendor' | 'availableForSale'
+          > & {
+            selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.ProductVariant, 'id' | 'availableForSale'> & {
+                image?: StorefrontAPI.Maybe<
+                  Pick<
+                    StorefrontAPI.Image,
+                    'url' | 'altText' | 'width' | 'height'
+                  >
+                >;
+                price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+                compareAtPrice?: StorefrontAPI.Maybe<
+                  Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
+                >;
+                product: Pick<StorefrontAPI.Product, 'handle' | 'title'>;
+              }
+            >;
+            priceRange: {
+              minVariantPrice: Pick<
+                StorefrontAPI.MoneyV2,
+                'amount' | 'currencyCode'
+              >;
+            };
+            featuredImage?: StorefrontAPI.Maybe<
+              Pick<
+                StorefrontAPI.Image,
+                'id' | 'url' | 'altText' | 'width' | 'height'
+              >
+            >;
+          }
+        >;
+      };
+    }
+  >;
+};
+
+export type BestSellingProductFragment = Pick<
+  StorefrontAPI.Product,
+  'id' | 'title' | 'handle' | 'vendor' | 'availableForSale'
+> & {
+  selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.ProductVariant, 'id' | 'availableForSale'> & {
+      image?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+      >;
+      price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+      compareAtPrice?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
+      >;
+      product: Pick<StorefrontAPI.Product, 'handle' | 'title'>;
+    }
+  >;
+  priceRange: {
+    minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+  };
+  featuredImage?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+  >;
+};
+
+export type BestSellingCollectionProductsQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+  handle: StorefrontAPI.Scalars['String']['input'];
+  first?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']['input']>;
+  sortKey?: StorefrontAPI.InputMaybe<StorefrontAPI.ProductCollectionSortKeys>;
+  filters?: StorefrontAPI.InputMaybe<
+    Array<StorefrontAPI.ProductFilter> | StorefrontAPI.ProductFilter
+  >;
+}>;
+
+export type BestSellingCollectionProductsQuery = {
   collection?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
       products: {
@@ -1939,7 +2047,7 @@ interface GeneratedQueryTypes {
     return: LocalizationQuery;
     variables: LocalizationQueryVariables;
   };
-  '#graphql\n  query CollectionByHandle(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      ...CollectionCard\n    }\n  }\n  #graphql\n  fragment CollectionCard on Collection {\n    id\n    title\n    handle\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n\n': {
+  '#graphql\n  query CollectionByHandle(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      ...CollectionCard\n      featuredExpansions: metafield(\n        namespace: "custom"\n        key: "featured_expansions"\n      ) {\n        references(first: 20) {\n          nodes {\n            ... on Metaobject {\n              id\n              fields {\n                key\n                value\n                reference {\n                  ... on MediaImage {\n                    image {\n                      url\n                      altText\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n      childCollections: metafield(namespace: "custom", key: "child_collections") {\n        references(first: 20) {\n          nodes {\n            ... on Collection {\n              id\n              title\n              handle\n            }\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment CollectionCard on Collection {\n    id\n    title\n    handle\n    shortDescription: metafield(namespace: "custom", key: "short_description") {\n      value\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n\n': {
     return: CollectionByHandleQuery;
     variables: CollectionByHandleQueryVariables;
   };
@@ -1950,6 +2058,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  fragment LatestAddedProduct on Product {\n    id\n    title\n    handle\n    vendor\n    availableForSale\n    selectedOrFirstAvailableVariant {\n      id\n      availableForSale\n      image {\n        url\n        altText\n        width\n        height\n      }\n      price {\n        amount\n        currencyCode\n      }\n      compareAtPrice {\n        amount\n        currencyCode\n      }\n      product {\n        handle\n        title\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query LatestAddedProducts ($country: CountryCode, $language: LanguageCode, $handle: String! $first: Int)\n    @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      title\n      handle\n      products(first: $first) {\n        nodes {\n          ...LatestAddedProduct\n        }\n      }\n    }\n  }\n': {
     return: LatestAddedProductsQuery;
     variables: LatestAddedProductsQueryVariables;
+  };
+  '#graphql\n  fragment BestSellingProduct on Product {\n    id\n    title\n    handle\n    vendor\n    availableForSale\n    selectedOrFirstAvailableVariant {\n      id\n      availableForSale\n      image {\n        url\n        altText\n        width\n        height\n      }\n      price {\n        amount\n        currencyCode\n      }\n      compareAtPrice {\n        amount\n        currencyCode\n      }\n      product {\n        handle\n        title\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query BestSellingCollectionProducts (\n    $country: CountryCode\n    $language: LanguageCode\n    $handle: String!\n    $first: Int\n    $sortKey: ProductCollectionSortKeys\n    $filters: [ProductFilter!]\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      title\n      handle\n      products(first: $first, sortKey: $sortKey, filters: $filters) {\n        nodes {\n          ...BestSellingProduct\n        }\n      }\n    }\n  }\n': {
+    return: BestSellingCollectionProductsQuery;
+    variables: BestSellingCollectionProductsQueryVariables;
   };
   '#graphql\n              query WishlistProduct(\n                $country: CountryCode\n                $language: LanguageCode\n                $handle: String!\n              ) @inContext(country: $country, language: $language) {\n                product(handle: $handle) {\n                  ...WishlistProduct\n                }\n              }\n              #graphql\n  fragment WishlistProduct on Product {\n    id\n    title\n    handle\n    vendor\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    selectedOrFirstAvailableVariant {\n      id\n      availableForSale\n    }\n  }\n\n            ': {
     return: WishlistProductQuery;
