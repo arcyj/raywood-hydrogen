@@ -7,6 +7,8 @@ import { IconButton } from './ui/IconButton';
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { FILTER_URL_PREFIX } from '~/helpers/const';
 
+const LEGACY_IN_STOCK_PARAM = 'inStock';
+
 export function FilterDrawer() {
   const { isDrawerOpen, closeFilter } = usePlaypeak();
   const [params] = useSearchParams();
@@ -20,7 +22,9 @@ export function FilterDrawer() {
         paramsClone.delete(key);
       }
     });
-    navigate(`${location.pathname}?${paramsClone.toString()}`, {
+    paramsClone.delete(LEGACY_IN_STOCK_PARAM);
+    const nextSearch = paramsClone.toString();
+    navigate(nextSearch ? `${location.pathname}?${nextSearch}` : location.pathname, {
       preventScrollReset: true,
       replace: true,
     });

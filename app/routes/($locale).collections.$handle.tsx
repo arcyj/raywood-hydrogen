@@ -74,7 +74,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   const searchParams = new URL(request.url).searchParams;
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1);
-  const pageBy = 24;
+  const pageBy = 28;
   const first = page * pageBy;
 
   const { sortKey, reverse } = getSortValuesFromParam(
@@ -90,13 +90,19 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     }
     return flt;
   }, [] as ProductFilter[]);
+  const hasAvailabilityFilter = filters.some(
+    (filter) => typeof filter.available === 'boolean',
+  );
+  const queryFilters = hasAvailabilityFilter
+    ? filters
+    : [...filters, {available: true} as ProductFilter];
 
   const [{collection, collections}] = await Promise.all([
     storefront.query<CollectionQuery>(COLLECTION_QUERY, {
       variables: {
         handle,
         first,
-        filters,
+        filters: queryFilters,
         sortKey,
         reverse,
         country: storefront.i18n.country,
@@ -152,6 +158,13 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
           : "";
         const label = min && max ? `${min} - ${max}` : "Price";
         return { filter, label, imageUrl: undefined };
+      }
+      if (typeof filter.available === 'boolean') {
+        return {
+          filter,
+          label: filter.available ? 'In stock' : 'Out of stock',
+          imageUrl: undefined,
+        };
       }
 
       const foundValue = allFilterValues.find((value) => {

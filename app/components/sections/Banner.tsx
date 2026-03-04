@@ -30,7 +30,7 @@ export const Banner: FC<IBannerProps> = ({
   const withLocale = useLocalizedPath();
   return(
     <div
-      className="tablet:rounded tablet:min-h-[475px] bg-black relative h-full overflow-hidden bg-no-repeat bg-cover"
+      className="rounded-lg tablet:min-h-[475px] bg-black relative h-full overflow-hidden bg-no-repeat bg-cover h-full"
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
       }}

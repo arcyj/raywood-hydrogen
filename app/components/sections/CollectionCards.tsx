@@ -7,6 +7,7 @@ export type CollectionCardData = {
   id: string;
   title: string;
   handle: string;
+  shortDescription?: string | null;
   image?: {
     id?: string;
     url: string;
@@ -34,7 +35,7 @@ export const CollectionCards: FC<ICollectionCardsProps> = ({
   return (
     <div className={className}>
       <div
-        className={`grid grid-cols-2 tablet:grid-cols-4 gap-12 rounded-lg  ${gridClassName}`}
+        className={`grid grid-rows-3 grid-cols-2 gap-12 rounded-lg  ${gridClassName}`}
       >
         {collections.map((collection) => (
           <CollectionCard key={collection.id} collection={collection} />
@@ -49,7 +50,7 @@ function CollectionCard({collection}: {collection: CollectionCardData}) {
   return (
     <Link
       to={withLocale(`/collections/${collection.handle}`)}
-      className="block bg-lightGrey hover:scale-102 transition-all hover:drop-shadow-md rounded overflow-hidden hover:shadow-lg active:bg-accentGrey active:inset-shadow-sm transition-all duration-200 ease-in-out"
+      className="block bg-lightGrey hover:scale-102 transition-all hover:drop-shadow-md rounded-lg overflow-hidden hover:shadow-lg active:bg-accentGrey active:inset-shadow-sm transition-all duration-200 ease-in-out"
       prefetch="intent"
     >
       {collection.image?.url && (

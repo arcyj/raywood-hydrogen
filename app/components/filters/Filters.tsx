@@ -3,6 +3,7 @@ import { PriceRangeFilter } from "./PriceRangeFilter";
 import type { CollectionQuery } from "storefrontapi.generated";
 import type { AppliedFilter } from "~/types/filterTypes";
 import { CustomFilter } from "./CustomFilter";
+import { AvailabilityFilter } from "./AvailabilityFilter";
 
 export const Filters = () => {
   // Use useMatches to access loader data from the collection route
@@ -31,10 +32,11 @@ export const Filters = () => {
       <CustomFilter collection={collection} />
       {collection && (
         <PriceRangeFilter
-          collection={collection}
-          className="my-12"
+        collection={collection}
+        className="my-12"
         />
       )}
+      <AvailabilityFilter />
     </div>
   );
 }

@@ -40,9 +40,11 @@ function getVariantPrice(variant: unknown): VariantPrice | undefined {
 export function ProductItem({
   product,
   loading,
+  className,
 }: {
   product: ProductItemProduct;
   loading?: 'eager' | 'lazy';
+  className?: string;
 }) {
   const isDesktop = useBreakpoints().isDesktop;
   const variantUrl = useVariantUrl(product.handle);
@@ -63,7 +65,7 @@ export function ProductItem({
 
   const productClasses = twClasses(["relative product-item bg-lightGrey rounded px-12 pt-12 pb-24 active:bg-accentGrey active:inset-shadow-sm hover:shadow-md transition-all duration-100 ease-in-out"], {
     'opacity-60': !availableForSale,
-  }, );
+  }, className);
 
   return (
     <div className={productClasses} key={product.id}>
