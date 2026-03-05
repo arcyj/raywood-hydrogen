@@ -88,11 +88,22 @@ function CartLineItemView({
   layout?: CartLayout;
   onClose?: () => void;
   showCartControls?: boolean;
+  isCartMutating?: boolean;
 }) {
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   const withLocale = useLocalizedPath();
+  const variantLabel =
+    title && title !== 'Default Title'
+      ? title
+      : selectedOptions
+          .filter(
+            (option) =>
+              option.name !== 'Title' && option.value !== 'Default Title',
+          )
+          .map((option) => option.value)
+          .join(' / ');
 
   // Safely get close function - prefer onClose prop, fallback to Aside context
   const aside = AsideContext ? useContext(AsideContext) : null;
@@ -123,6 +134,11 @@ function CartLineItemView({
           <h4 className="text-h4 pt-4 line-clamp-2 overflow-hidden text-ellipsis">
             {product.title}
           </h4>
+          {variantLabel ? (
+            <p className="text-small text-gray mt-2 line-clamp-1 overflow-hidden text-ellipsis">
+              {variantLabel}
+            </p>
+          ) : null}
         </Link>
         <div className="my-8 flex justify-between items-center flex-wrap">
           <ProductPrice size="small" price={line?.cost?.amountPerQuantity} />

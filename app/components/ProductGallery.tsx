@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { Slider } from './Slider';
 import type { EmblaCarouselType } from 'embla-carousel';
@@ -7,8 +7,10 @@ import type { ProductFragment } from 'storefrontapi.generated';
 
 export function ProductGallery({
   media,
+  selectedImage,
 }: {
   media: ProductFragment['media']['nodes'];
+  selectedImage?: NonNullable<ProductFragment['selectedOrFirstAvailableVariant']>['image'] | null;
 }) {
   const [thumbsApi, setThumbsApi] = useState<EmblaCarouselType | null>(null);
   const [mainApi, setMainApi] = useState<EmblaCarouselType | null>(null);
@@ -27,13 +29,40 @@ export function ProductGallery({
     thumbsApi.scrollTo(activeIndex);
   }, [thumbsApi, activeIndex]);
 
+  const imageMediaItems = useMemo(
+    () =>
+      media.filter(
+        (m): m is Extract<typeof m, { __typename: 'MediaImage' }> =>
+          m.__typename === 'MediaImage' && !!m.image,
+      ),
+    [media],
+  );
+
+  useEffect(() => {
+    if (!mainApi || !selectedImage) return;
+
+    const selectedImageId = selectedImage.id;
+    const selectedImageUrl = selectedImage.url;
+    const selectedImageIndex = imageMediaItems.findIndex(
+      (mediaItem) =>
+        mediaItem.image?.id === selectedImageId ||
+        mediaItem.image?.url === selectedImageUrl,
+    );
+
+    if (
+      selectedImageIndex >= 0 &&
+      selectedImageIndex !== mainApi.selectedScrollSnap()
+    ) {
+      mainApi.scrollTo(selectedImageIndex);
+      setActiveIndex(selectedImageIndex);
+    }
+  }, [mainApi, selectedImage, imageMediaItems]);
+
   if (!media || media.length === 0) {
     return null;
   }
 
-  const mainSlides = media
-    .filter((m): m is Extract<typeof m, { __typename: 'MediaImage' }> => m.__typename === 'MediaImage' && !!m.image)
-    .map((mediaItem) => {
+  const mainSlides = imageMediaItems.map((mediaItem) => {
       const isLoaded = !!loadedMainImages[mediaItem.id];
       return (
         <div
@@ -53,9 +82,7 @@ export function ProductGallery({
       );
     });
 
-  const thumbSlides = media
-    .filter((m): m is Extract<typeof m, { __typename: 'MediaImage' }> => m.__typename === 'MediaImage' && !!m.image)
-    .map((mediaItem, index) => (
+  const thumbSlides = imageMediaItems.map((mediaItem, index) => (
       <button
         type="button"
         onClick={() => mainApi?.scrollTo(index)}
@@ -114,6 +141,7 @@ export function ProductGallery({
               slidesToScroll: 1,
               slidesToShow: media.length > 1 ? 'auto' : 1,
               spaceBetween: 8,
+              loop: true,
             }}
           >
             {mainSlides}
