@@ -34,6 +34,7 @@ import { deliveryTime } from '~/helpers/deliveryTime';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { getSeoMeta, getAbsoluteUrl, getProductJsonLd } from '~/lib/seo';
 import { SubscriptionForm } from '~/components/SubscriptionForm';
+import { ProductOptions } from '~/components/ProductOptions';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
   const product = data?.product;
@@ -343,7 +344,10 @@ function ProductContent({
         className="grid grid-cols-1 md:grid-cols-12 gap-12 desktop:gap-64 min-w-0 tablet:pt-8"
       >
         <div className="min-w-0 col-span-6 mediumDesktop:col-span-8">
-          <ProductGallery media={media.nodes} />
+          <ProductGallery
+            media={media.nodes}
+            selectedImage={selectedVariant?.image}
+          />
           {isTablet ? <ProductDescription /> : null}
         </div>
         <div className="product-main col-span-6 mediumDesktop:col-span-4">
@@ -374,6 +378,9 @@ function ProductContent({
                     className="self-end"
                   />
                 </div>
+                <ProductOptions
+                  productOptions={productOptions}
+                />
                 <div className="tablet:flex gap-8 mb-8 items-center">
                   {isTablet ? (
                     <>
@@ -388,7 +395,6 @@ function ProductContent({
                         className="flex flex-col items-start justify-center"
                       />
                       <ProductForm
-                        productOptions={productOptions}
                         selectedVariant={selectedVariant}
                         quantity={productCount}
                         className={`flex-1`}
@@ -398,7 +404,6 @@ function ProductContent({
                   {!isTablet ? (
                     <>
                       <ProductForm
-                        productOptions={productOptions}
                         selectedVariant={selectedVariant}
                         quantity={productCount}
                         className={`flex-1 mb-8`}

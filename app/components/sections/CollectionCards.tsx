@@ -15,6 +15,11 @@ export type CollectionCardData = {
     width?: number;
     height?: number;
   } | null;
+  coverImage?: {
+    id?: string;
+    url: string;
+    altText?: string | null;
+  } | null;
 };
 
 interface ICollectionCardsProps {
@@ -35,7 +40,7 @@ export const CollectionCards: FC<ICollectionCardsProps> = ({
   return (
     <div className={className}>
       <div
-        className={`grid grid-rows-3 grid-cols-2 gap-12 rounded-lg  ${gridClassName}`}
+        className={`grid grid-rows-3 grid-cols-2 gap-12 rounded-lg h-full  ${gridClassName}`}
       >
         {collections.map((collection) => (
           <CollectionCard key={collection.id} collection={collection} />

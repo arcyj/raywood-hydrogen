@@ -294,8 +294,8 @@ export default function Homepage() {
               />
             </Slider>
           </div>
-          <CollectionCards collections={data.collections} />
           <WideCollectionCards collections={data.wideCollections} />
+          <CollectionCards collections={data.collections} />
         </section>
         <section>
           <CollectionSlider

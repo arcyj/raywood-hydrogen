@@ -30,6 +30,22 @@ export const COLLECTION_CARD_FRAGMENT = `#graphql
     shortDescription: metafield(namespace: "custom", key: "short_description") {
       value
     }
+    coverImage: metafield(namespace: "custom", key: "cover_image") {
+      id
+      value
+      reference {
+        ... on MediaImage {
+          id
+          image {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+    }
     image {
       id
       url
@@ -117,8 +133,17 @@ export async function fetchCollectionsByHandles(
             },
           });
           const collection = result.collection as
-            | (Omit<CollectionCardData, 'shortDescription'> & {
+            | (Omit<CollectionCardData, 'shortDescription' | 'coverImage'> & {
                 shortDescription?: {value?: string | null} | null;
+                coverImage?: {
+                  reference?: {
+                    image?: {
+                      id?: string;
+                      url: string;
+                      altText?: string | null;
+                    } | null;
+                  } | null;
+                } | null;
               })
             | null;
 
@@ -127,6 +152,7 @@ export async function fetchCollectionsByHandles(
           return {
             ...collection,
             shortDescription: collection.shortDescription?.value,
+            coverImage: collection.coverImage?.reference?.image ?? null,
           };
         } catch (error) {
           console.error(`Error fetching collection ${handle}:`, error);
@@ -169,6 +195,10 @@ export async function fetchFeaturedCollectionsByHandles(
           const collection = result.collection as
             | (CollectionCardData & {
                 shortDescription?: {value?: string | null} | null;
+                coverImage?: {
+                  url?: string | null;
+                  altText?: string | null;
+                } | null;
                 childCollections?: {
                   references?: {
                     nodes?: Array<{
@@ -242,6 +272,7 @@ export async function fetchFeaturedCollectionsByHandles(
             handle: collection.handle,
             shortDescription: collection.shortDescription?.value ?? null,
             image: collection.image ?? undefined,
+            coverImage: collection.image ?? undefined,
             childCollections,
             featuredExpansions,
           };
