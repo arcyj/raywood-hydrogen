@@ -557,6 +557,20 @@ export type CollectionCardFragment = Pick<
   shortDescription?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Metafield, 'value'>
   >;
+  coverImage?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'id' | 'value'> & {
+      reference?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.MediaImage, 'id'> & {
+          image?: StorefrontAPI.Maybe<
+            Pick<
+              StorefrontAPI.Image,
+              'id' | 'url' | 'altText' | 'width' | 'height'
+            >
+          >;
+        }
+      >;
+    }
+  >;
   image?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
   >;
@@ -597,6 +611,20 @@ export type CollectionByHandleQuery = {
       }>;
       shortDescription?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Metafield, 'value'>
+      >;
+      coverImage?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'id' | 'value'> & {
+          reference?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.MediaImage, 'id'> & {
+              image?: StorefrontAPI.Maybe<
+                Pick<
+                  StorefrontAPI.Image,
+                  'id' | 'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            }
+          >;
+        }
       >;
       image?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
@@ -2050,7 +2078,7 @@ interface GeneratedQueryTypes {
     return: LocalizationQuery;
     variables: LocalizationQueryVariables;
   };
-  '#graphql\n  query CollectionByHandle(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      ...CollectionCard\n      featuredExpansions: metafield(\n        namespace: "custom"\n        key: "featured_expansions"\n      ) {\n        references(first: 20) {\n          nodes {\n            ... on Metaobject {\n              id\n              fields {\n                key\n                value\n                reference {\n                  ... on MediaImage {\n                    image {\n                      url\n                      altText\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n      childCollections: metafield(namespace: "custom", key: "child_collections") {\n        references(first: 20) {\n          nodes {\n            ... on Collection {\n              id\n              title\n              handle\n            }\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment CollectionCard on Collection {\n    id\n    title\n    handle\n    shortDescription: metafield(namespace: "custom", key: "short_description") {\n      value\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n\n': {
+  '#graphql\n  query CollectionByHandle(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      ...CollectionCard\n      featuredExpansions: metafield(\n        namespace: "custom"\n        key: "featured_expansions"\n      ) {\n        references(first: 20) {\n          nodes {\n            ... on Metaobject {\n              id\n              fields {\n                key\n                value\n                reference {\n                  ... on MediaImage {\n                    image {\n                      url\n                      altText\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n      childCollections: metafield(namespace: "custom", key: "child_collections") {\n        references(first: 20) {\n          nodes {\n            ... on Collection {\n              id\n              title\n              handle\n            }\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment CollectionCard on Collection {\n    id\n    title\n    handle\n    shortDescription: metafield(namespace: "custom", key: "short_description") {\n      value\n    }\n    coverImage: metafield(namespace: "custom", key: "cover_image") {\n      id\n      value\n      reference {\n        ... on MediaImage {\n          id\n          image {\n            id\n            url\n            altText\n            width\n            height\n          }\n        }\n      }\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n\n': {
     return: CollectionByHandleQuery;
     variables: CollectionByHandleQueryVariables;
   };
