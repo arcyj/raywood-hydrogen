@@ -94,16 +94,7 @@ function CartLineItemView({
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   const withLocale = useLocalizedPath();
-  const variantLabel =
-    title && title !== 'Default Title'
-      ? title
-      : selectedOptions
-          .filter(
-            (option) =>
-              option.name !== 'Title' && option.value !== 'Default Title',
-          )
-          .map((option) => option.value)
-          .join(' / ');
+  const variantLabel = title === "Default Title" ? '' : title ;
 
   // Safely get close function - prefer onClose prop, fallback to Aside context
   const aside = AsideContext ? useContext(AsideContext) : null;
