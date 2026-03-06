@@ -18,6 +18,7 @@ import {
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 import { SubscriptionForm } from '~/components/SubscriptionForm';
 import { WideCollectionCards } from '~/components/sections/WideCollectionCards';
+import { useBreakpoints } from '~/hooks/useBreakpoints';
 
 export const meta: Route.MetaFunction = ({matches, location}) => {
   const url = getAbsoluteUrl(matches ?? [], location);
@@ -226,6 +227,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+  const { isDesktop } = useBreakpoints();
   return (
     <div className="home">
       <div className="container-large mx-auto">
@@ -240,11 +242,23 @@ export default function Homepage() {
                 slidesToShow: 1,
                 spaceBetween: 8,
                 dots: false,
-                arrows: false,
+                arrows: isDesktop ? true : false,
+                autoplay: true,
+                loop: true,
                 options: {},
               }}
               className="col-span-3 md:col-span-2 h-full"
             >
+              <Banner
+                heading="Ascended Heroes now in stock!"
+                text=""
+                backgroundImage="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/measscendingheroes-large-bg_1.webp?v=1772785511"
+                logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/Ascended-Heroes.png?v=1772180539"
+                overlayFromColor="#301c54"
+                overlayToColor="#301c54"
+                buttonText="Browse products"
+                buttonUrl={`/collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F156415754551"%7D`}
+              />
               <Banner
                 heading="Seven Legends of the Azure Sea"
                 text="One Piece TCG OP-14 Available now for purchase"
