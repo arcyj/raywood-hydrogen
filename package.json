@@ -24,6 +24,7 @@
     "@shopify/remix-oxygen": "^3.0.2",
     "atropos": "^2.0.2",
     "clsx": "^2.1.1",
+    "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "embla-carousel-wheel-gestures": "^8.1.0",
     "graphql": "^16.10.0",

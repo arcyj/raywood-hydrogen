@@ -3,6 +3,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from './icons';
 import type { EmblaCarouselType, EmblaOptionsType, EmblaPluginType } from 'embla-carousel';
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
+import Autoplay from 'embla-carousel-autoplay'
 import type { MutableRefObject } from 'react';
 import type { FC, ReactNode } from 'react';
 
@@ -61,6 +62,7 @@ interface EmblaSettings {
   spaceBetween?: number;
   direction?: 'horizontal' | 'vertical';
   loop?: boolean;
+  autoplay?: boolean;
   beforeChange?: (currentSlide: number, nextSlide: number) => void;
   afterChange?: (currentSlide: number) => void;
   adaptiveHeight?: boolean;
@@ -76,6 +78,7 @@ const defaults: Partial<EmblaSettings> = {
   spaceBetween: 0,
   direction: 'horizontal',
   loop: false,
+  autoplay: false,
 };
 
 export interface ICarouselProps {
@@ -128,7 +131,7 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
   );
 
   const emblaPlugins = useMemo<EmblaPluginType[]>(
-    () => [...(settings.plugins ?? []), WheelGesturesPlugin()],
+    () => [...(settings.plugins ?? []), WheelGesturesPlugin(), Autoplay({ active: settings.autoplay, delay: 3000 })],
     [settings.plugins],
   );
 
@@ -213,6 +216,8 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
       window.removeEventListener('resize', updateHeight);
     };
   }, [emblaApi, settings.adaptiveHeight]);
+
+  const { autoplayIsPlaying, toggleAutoplay, onAutoplayButtonClick } = useAutoplay(emblaApi)
 
   const wrapperClassName = useMemo(() => {
     const classes = ['embla', 'relative', className];
@@ -306,3 +311,51 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
     </div>
   );
 };
+
+type UseAutoplayType = {
+  autoplayIsPlaying: boolean
+  toggleAutoplay: () => void
+  onAutoplayButtonClick: (callback: () => void) => void
+}
+
+const useAutoplay = (
+  emblaApi: EmblaCarouselType | undefined
+): UseAutoplayType => {
+  const [autoplayIsPlaying, setAutoplayIsPlaying] = useState(false)
+
+  const onAutoplayButtonClick = useCallback(
+    (callback: () => void) => {
+      const autoplay = emblaApi?.plugins()?.autoplay
+      if (!autoplay) return
+
+      autoplay.stop()
+      callback()
+    },
+    [emblaApi]
+  )
+
+  const toggleAutoplay = useCallback(() => {
+    const autoplay = emblaApi?.plugins()?.autoplay
+    if (!autoplay) return
+
+    const playOrStop = autoplay.isPlaying() ? autoplay.stop : autoplay.play
+    playOrStop()
+  }, [emblaApi])
+
+  useEffect(() => {
+    const autoplay = emblaApi?.plugins()?.autoplay
+    if (!autoplay) return
+
+    setAutoplayIsPlaying(autoplay.isPlaying())
+    emblaApi
+      .on('autoplay:play', () => setAutoplayIsPlaying(true))
+      .on('autoplay:stop', () => setAutoplayIsPlaying(false))
+      .on('reinit', () => setAutoplayIsPlaying(autoplay.isPlaying()))
+  }, [emblaApi])
+
+  return {
+    autoplayIsPlaying,
+    toggleAutoplay,
+    onAutoplayButtonClick
+  }
+}
