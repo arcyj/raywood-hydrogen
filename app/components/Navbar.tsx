@@ -5,7 +5,9 @@ import { DropDownMenu } from './ui/DropdownMenu';
 import { ProfileMenu } from './ProfileMenu';
 import { WishlistMenu } from './WishlistMenu';
 import { CartMenu } from './CartMenu';
-import { Cart, Heart, Menu } from './icons';
+import { Cart, Menu } from './icons';
+import { Heart } from 'lucide-react';
+import {useWishlist} from '~/hooks/useWishlist';
 import {usePlaypeak} from '~/lib/playpeakContext';
 import {Await} from 'react-router';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
@@ -102,6 +104,9 @@ export function Navbar({
     }
   };
 
+    const {wishlistHandles} = useWishlist();
+    const hasWishlistItems = wishlistHandles.length > 0;
+
   return (
     <div className="bottom-0 w-full">
       <Drawer
@@ -129,7 +134,7 @@ export function Navbar({
           />
           <NavMenuItem
             onClick={() => onMenuToggle('wishlist')}
-            Icon={() => <Heart />}
+            Icon={() => <Heart size={20} className={hasWishlistItems ? 'text-primary fill-primary' : ''} />}
             active={activeMenu === 'wishlist'}
             label={'Wishlist'}
           />
