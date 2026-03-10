@@ -1,5 +1,6 @@
 const BASE_URL = 'https://judge.me/api/v1';
 const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
+const DEFAULT_FETCH_TIMEOUT_MS = 5000;
 
 type EnvLike = Record<string, string | undefined>;
 
@@ -119,16 +120,35 @@ function sanitizeReview(review: JudgeMeReview): PublicJudgeMeReview {
 async function fetchJudgeMeReviews({
   token,
   cleanDomain,
+  timeoutMs = DEFAULT_FETCH_TIMEOUT_MS,
 }: {
   token: string;
   cleanDomain: string;
+  timeoutMs?: number;
 }): Promise<JudgeMeReview[]> {
   const url = new URL(`${BASE_URL}/reviews`);
   url.searchParams.set('shop_domain', cleanDomain);
   url.searchParams.set('api_token', token);
   url.searchParams.set('per_page', '100');
 
-  const response = await fetch(url.toString());
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), {signal: controller.signal});
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.name === 'AbortError' || /abort/i.test(error.message))
+    ) {
+      throw new Error(`Judge.me request timed out after ${timeoutMs}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+
   if (!response.ok) {
     throw new Error(`Failed to fetch Judge.me reviews (HTTP ${response.status})`);
   }
@@ -167,11 +187,23 @@ export function createJudgeMeClient({
 
       const request = fetchJudgeMeReviews({token, cleanDomain})
         .then((reviews) => {
+          const resolvedAt = Date.now();
           reviewCacheByShop.set(cacheKey, {
             reviews,
-            expiresAt: now + cacheTtlMs,
+            expiresAt: resolvedAt + cacheTtlMs,
           });
           return reviews;
+        })
+        .catch((error) => {
+          const stale = reviewCacheByShop.get(cacheKey);
+          if (stale?.reviews?.length) {
+            console.warn(
+              `Judge.me request failed for ${cacheKey}; serving stale cache.`,
+              error,
+            );
+            return stale.reviews;
+          }
+          throw error;
         })
         .finally(() => {
           inFlightByShop.delete(cacheKey);
