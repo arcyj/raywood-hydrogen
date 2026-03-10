@@ -57,7 +57,7 @@ export function CollectionSlider({
                 }}
               >
                 {productNodes.map((product) => (
-                  <ProductItem key={product.id} product={product} className="w-[170px] tablet:w-[241px]"/>
+                  <ProductItem key={product.id} product={product} className="w-[170px] tablet:w-[257px]"/>
                 ))}
               </Slider>
             );
