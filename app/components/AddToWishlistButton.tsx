@@ -115,7 +115,7 @@ export function AddToWishlistButton({
     >
       <Heart
         size={22}
-        className={`mr-8 ${inWishlist ? 'fill-primary' : ''}`}
+        className={`mr-8 ${inWishlist ? 'text-primary fill-primary' : ''}`}
       />
       {inWishlist ? 'Remove' : 'Save'}
     </Button>

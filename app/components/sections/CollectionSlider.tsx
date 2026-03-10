@@ -45,6 +45,7 @@ export function CollectionSlider({
 
             return (
               <Slider
+                fadeUnderArrows
                 settings={{
                   slidesToShow: 'auto',
                   spaceBetween: 8,
@@ -56,7 +57,7 @@ export function CollectionSlider({
                 }}
               >
                 {productNodes.map((product) => (
-                  <ProductItem key={product.id} product={product} className="w-[170px] tablet:w-[220px]"/>
+                  <ProductItem key={product.id} product={product} className="w-[170px] tablet:w-[241px]"/>
                 ))}
               </Slider>
             );
