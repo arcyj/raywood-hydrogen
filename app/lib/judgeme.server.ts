@@ -1,6 +1,7 @@
 const BASE_URL = 'https://judge.me/api/v1';
 const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const DEFAULT_FETCH_TIMEOUT_MS = 5000;
+const FAILURE_COOLDOWN_MS = 60 * 1000;
 
 type EnvLike = Record<string, string | undefined>;
 
@@ -50,6 +51,7 @@ export type PublicJudgeMeReview = {
 
 const reviewCacheByShop = new Map<string, ReviewsCacheEntry>();
 const inFlightByShop = new Map<string, Promise<JudgeMeReview[]>>();
+const failureCooldownUntilByShop = new Map<string, number>();
 
 function getJudgeMeConfig(env: EnvLike) {
   const token = env.JUDGEME_API_TOKEN;
@@ -172,6 +174,33 @@ export function createJudgeMeClient({
   const cleanDomain = normalizeShopDomain(shopDomain);
   const cacheKey = cleanDomain;
 
+  const refreshReviews = () =>
+    fetchJudgeMeReviews({token, cleanDomain})
+      .then((reviews) => {
+        const resolvedAt = Date.now();
+        reviewCacheByShop.set(cacheKey, {
+          reviews,
+          expiresAt: resolvedAt + cacheTtlMs,
+        });
+        failureCooldownUntilByShop.delete(cacheKey);
+        return reviews;
+      })
+      .catch((error) => {
+        failureCooldownUntilByShop.set(cacheKey, Date.now() + FAILURE_COOLDOWN_MS);
+        const stale = reviewCacheByShop.get(cacheKey);
+        if (stale) {
+          console.warn(
+            `Judge.me request failed for ${cacheKey}; serving stale cache.`,
+            error,
+          );
+          return stale.reviews;
+        }
+        throw error;
+      })
+      .finally(() => {
+        inFlightByShop.delete(cacheKey);
+      });
+
   return {
     async getAllReviews() {
       const now = Date.now();
@@ -180,36 +209,24 @@ export function createJudgeMeClient({
         return cached.reviews;
       }
 
-      const inFlight = inFlightByShop.get(cacheKey);
-      if (inFlight) {
-        return inFlight;
+       const cooldownUntil = failureCooldownUntilByShop.get(cacheKey) ?? 0;
+       if (now < cooldownUntil) {
+        return cached?.reviews ?? [];
       }
 
-      const request = fetchJudgeMeReviews({token, cleanDomain})
-        .then((reviews) => {
-          const resolvedAt = Date.now();
-          reviewCacheByShop.set(cacheKey, {
-            reviews,
-            expiresAt: resolvedAt + cacheTtlMs,
-          });
-          return reviews;
-        })
-        .catch((error) => {
-          const stale = reviewCacheByShop.get(cacheKey);
-          if (stale?.reviews?.length) {
-            console.warn(
-              `Judge.me request failed for ${cacheKey}; serving stale cache.`,
-              error,
-            );
-            return stale.reviews;
-          }
-          throw error;
-        })
-        .finally(() => {
-          inFlightByShop.delete(cacheKey);
-        });
+      const inFlight = inFlightByShop.get(cacheKey);
+      if (inFlight) {
+        return cached?.reviews ?? inFlight;
+      }
 
+      const request = refreshReviews();
       inFlightByShop.set(cacheKey, request);
+
+      // Keep navigation fast: return stale data while refreshing in background.
+      if (cached) {
+        return cached.reviews;
+      }
+
       return request;
     },
     async getPublicReviews() {
