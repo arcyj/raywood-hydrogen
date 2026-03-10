@@ -12,7 +12,8 @@ import {usePlaypeak} from '~/lib/playpeakContext';
 
 import {useAside} from '~/components/Aside';
 import {NavMenuItem} from './ui/NavMenuItem';
-import {Cart, Heart, Menu} from './icons';
+import {Cart, Menu} from './icons';
+import { Heart } from 'lucide-react';
 import {
   MagnifyingGlassIcon,
   ArrowRightIcon,
@@ -24,6 +25,7 @@ import {getMenuIconUrl} from '~/helpers/getMenuIconUrl';
 import {ButtonLink} from './ui/Link';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
+import {useWishlist} from '~/hooks/useWishlist';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -221,10 +223,13 @@ function MenuToggle() {
 
 function WishlistToggle() {
   const {openWishlist} = usePlaypeak();
+  const {wishlistHandles} = useWishlist();
+  const hasWishlistItems = wishlistHandles.length > 0;
+
   return (
     <NavMenuItem
       onClick={openWishlist}
-      Icon={() => <Heart />}
+      Icon={() => <Heart size={20} className={hasWishlistItems ? 'text-primary fill-primary' : ''} />}
       label={'Wishlist'}
       variant="menu"
     />

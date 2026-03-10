@@ -906,14 +906,14 @@ button.reset:hover:not(:has(> *)) {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: rgb(229, 231, 235);
+  background-color: #f8f3ff;
   opacity: 1;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .embla__dot--selected {
-  background-color: rgb(0, 0, 0);
+  background-color: #6610F2;
 }
 
 /*

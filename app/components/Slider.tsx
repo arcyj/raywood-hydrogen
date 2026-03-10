@@ -86,6 +86,7 @@ export interface ICarouselProps {
   settings?: EmblaSettings;
   display?: string;
   withoutScale?: boolean;
+  fadeUnderArrows?: boolean;
   children?: ReactNode;
 }
 
@@ -250,6 +251,18 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
     <div className={wrapperClassName}>
       {settings.arrows !== false && (
         <>
+          {props.fadeUnderArrows && !isVertical && canScrollPrev && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 z-1 w-44 bg-gradient-to-r from-white to-transparent"
+            />
+          )}
+          {props.fadeUnderArrows && !isVertical && canScrollNext && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 right-0 z-1 w-44 bg-gradient-to-l from-white to-transparent"
+            />
+          )}
           <PrevArrow
             onClick={() => emblaApi?.scrollPrev()}
             disabled={!canScrollPrev}
@@ -350,7 +363,7 @@ const useAutoplay = (
     emblaApi
       .on('autoplay:play', () => setAutoplayIsPlaying(true))
       .on('autoplay:stop', () => setAutoplayIsPlaying(false))
-      .on('reinit', () => setAutoplayIsPlaying(autoplay.isPlaying()))
+      .on('reInit', () => setAutoplayIsPlaying(autoplay.isPlaying()))
   }, [emblaApi])
 
   return {

@@ -1,5 +1,5 @@
-import {useLoaderData, Link} from 'react-router';
-import {useEffect, useRef, useState} from 'react';
+import {Await, useLoaderData, Link} from 'react-router';
+import {Suspense, useEffect, useRef, useState} from 'react';
 import type {Route} from './+types/products.$handle';
 import type {ProductFragment} from 'storefrontapi.generated';
 import { ClientSticky } from '~/components/ClientSticky';
@@ -35,6 +35,11 @@ import { useBreakpoints } from '~/hooks/useBreakpoints';
 import { getSeoMeta, getAbsoluteUrl, getProductJsonLd } from '~/lib/seo';
 import { SubscriptionForm } from '~/components/SubscriptionForm';
 import { ProductOptions } from '~/components/ProductOptions';
+import { ReviewsSlider } from '~/components/reviews/ReviewsSlider';
+import {
+  createJudgeMeClientFromEnv,
+  type PublicJudgeMeReview,
+} from '~/lib/judgeme.server';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
   const product = data?.product;
@@ -56,6 +61,7 @@ export const meta: Route.MetaFunction = ({data, matches, location}) => {
 };
 
 export async function loader(args: Route.LoaderArgs) {
+  const deferredData = loadDeferredData(args);
   // Critical: minimal product for meta, redirect, 404 — blocks only briefly for SEO
   const criticalData = await loadCriticalData(args);
   // Await full product and related products. Deferred streaming caused infinite loading
@@ -64,6 +70,7 @@ export async function loader(args: Route.LoaderArgs) {
   const relatedProducts = await loadRelatedProducts(args, fullProduct.product);
 
   return {
+    ...deferredData,
     ...criticalData,
     fullProduct,
     relatedProducts,
@@ -102,6 +109,18 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   }
 
   return {product};
+}
+
+function loadDeferredData({context}: Route.LoaderArgs) {
+  const judgeMe = createJudgeMeClientFromEnv(context.env);
+  const reviews = judgeMe.getPublicReviews().catch((error) => {
+    console.error('Error fetching Judge.me reviews:', error);
+    return [];
+  });
+
+  return {
+    reviews
+  }
 }
 
 type FullProductPayload = {
@@ -199,13 +218,14 @@ function loadRelatedProducts(
 
 export default function Product() {
   const data = useLoaderData<typeof loader>();
-  const {fullProduct, relatedProducts} = data;
+  const {fullProduct, relatedProducts, reviews} = data;
 
   return (
     <div className="container-large mx-auto">
       <ProductContent
         fullProduct={fullProduct}
         relatedProducts={relatedProducts}
+        reviews={reviews}
       />
     </div>
   );
@@ -214,9 +234,11 @@ export default function Product() {
 function ProductContent({
   fullProduct,
   relatedProducts,
+  reviews
 }: {
   fullProduct: FullProductPayload;
   relatedProducts: {products: {nodes: Array<any>}} | null;
+  reviews: Promise<PublicJudgeMeReview[]>;
 }) {
   const isDesktop = useBreakpoints().isDesktop;
   const isTablet = useBreakpoints().isTablet;
@@ -349,6 +371,7 @@ function ProductContent({
             selectedImage={selectedVariant?.image}
           />
           {isTablet ? <ProductDescription /> : null}
+          {isTablet ? <DeferredReviews reviewsPromise={reviews} /> : null}
         </div>
         <div className="product-main col-span-6 mediumDesktop:col-span-4">
           <ClientSticky
@@ -513,6 +536,7 @@ function ProductContent({
                 </Accordion.Item>
               </Accordion>
               {!isTablet ? <ProductDescription /> : null}
+              {!isTablet ? <DeferredReviews reviewsPromise={reviews} /> : null}
             </div>
           </ClientSticky>
         </div>
@@ -564,6 +588,37 @@ function ProductContent({
         }}
       />
     </div>
+  );
+}
+
+function DeferredReviews({
+  reviewsPromise,
+}: {
+  reviewsPromise: Promise<PublicJudgeMeReview[]>;
+}) {
+  return (
+    <>
+      <h2 className='text-h3 mt-64 pb-8'>Reviews</h2>
+      <p className="text-[14px] font-semibold pb-24">Reviews on this page are not specific to this product. They include customer feedback from various products and general store reviews.</p>
+      <Suspense
+        fallback={
+          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-midnight/70">
+            Loading reviews...
+          </div>
+        }
+      >
+        <Await
+          resolve={reviewsPromise}
+          errorElement={
+            <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-midnight/70">
+              Reviews are temporarily unavailable.
+            </div>
+          }
+        >
+          {(resolvedReviews) => <ReviewsSlider reviews={resolvedReviews} />}
+        </Await>
+      </Suspense>
+    </>
   );
 }
 
@@ -788,6 +843,25 @@ const RELATED_PRODUCTS_QUERY = `#graphql
     handle
     vendor
     availableForSale
+    selectedOrFirstAvailableVariant {
+      id
+      availableForSale
+      price {
+        amount
+        currencyCode
+      }
+      compareAtPrice {
+        amount
+        currencyCode
+      }
+      image {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
     priceRange {
       minVariantPrice {
         amount

@@ -2,6 +2,28 @@ import { useState, useEffect, useCallback } from 'react';
 
 // Store only handles in localStorage
 const WISHLIST_STORAGE_KEY = 'playpeak-wishlist';
+const WISHLIST_UPDATED_EVENT = 'playpeak-wishlist-updated';
+
+function readWishlistFromStorage(): string[] {
+  try {
+    const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
+    if (!stored) return [];
+
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch (error) {
+    console.error('Error loading wishlist from localStorage:', error);
+    return [];
+  }
+}
+
+function persistWishlist(handles: string[]) {
+  try {
+    localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(handles));
+  } catch (error) {
+    console.error('Error saving wishlist to localStorage:', error);
+  }
+}
 
 export function useWishlist() {
   const [wishlistHandles, setWishlistHandles] = useState<string[]>([]);
@@ -9,29 +31,30 @@ export function useWishlist() {
 
   // Load wishlist from localStorage on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
-      if (stored) {
-        const handles = JSON.parse(stored) as string[];
-        setWishlistHandles(handles);
-      }
-    } catch (error) {
-      console.error('Error loading wishlist from localStorage:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    setWishlistHandles(readWishlistFromStorage());
+    setIsLoading(false);
   }, []);
 
-  // Save wishlist to localStorage whenever it changes
+  // Keep all hook instances in sync within the same tab and across tabs.
   useEffect(() => {
-    if (!isLoading) {
-      try {
-        localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlistHandles));
-      } catch (error) {
-        console.error('Error saving wishlist to localStorage:', error);
+    const syncFromStorage = () => {
+      setWishlistHandles(readWishlistFromStorage());
+    };
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === WISHLIST_STORAGE_KEY) {
+        syncFromStorage();
       }
-    }
-  }, [wishlistHandles, isLoading]);
+    };
+
+    window.addEventListener('storage', onStorage);
+    window.addEventListener(WISHLIST_UPDATED_EVENT, syncFromStorage);
+
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(WISHLIST_UPDATED_EVENT, syncFromStorage);
+    };
+  }, []);
 
   const addToWishlist = useCallback((handle: string) => {
     setWishlistHandles((prev) => {
@@ -39,12 +62,21 @@ export function useWishlist() {
       if (prev.includes(handle)) {
         return prev;
       }
-      return [...prev, handle];
+
+      const next = [...prev, handle];
+      persistWishlist(next);
+      window.dispatchEvent(new Event(WISHLIST_UPDATED_EVENT));
+      return next;
     });
   }, []);
 
   const removeFromWishlist = useCallback((handle: string) => {
-    setWishlistHandles((prev) => prev.filter((h) => h !== handle));
+    setWishlistHandles((prev) => {
+      const next = prev.filter((h) => h !== handle);
+      persistWishlist(next);
+      window.dispatchEvent(new Event(WISHLIST_UPDATED_EVENT));
+      return next;
+    });
   }, []);
 
   const isInWishlist = useCallback(
@@ -55,7 +87,11 @@ export function useWishlist() {
   );
 
   const clearWishlist = useCallback(() => {
-    setWishlistHandles([]);
+    setWishlistHandles(() => {
+      persistWishlist([]);
+      window.dispatchEvent(new Event(WISHLIST_UPDATED_EVENT));
+      return [];
+    });
   }, []);
 
   return {
