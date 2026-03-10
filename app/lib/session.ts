@@ -24,7 +24,9 @@ export class AppSession implements HydrogenSession {
   static async init(request: Request, secrets: string[]) {
     const storage = createCookieSessionStorage({
       cookie: {
-        name: 'session',
+        // Use a unique cookie name to avoid collisions with generic "session"
+        // cookies from other services on the same domain.
+        name: '__playpeak_hydrogen_session',
         httpOnly: true,
         path: '/',
         sameSite: 'lax',

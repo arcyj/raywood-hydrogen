@@ -1,4 +1,3 @@
-import type {CountryCode} from '@shopify/hydrogen/storefront-api-types';
 import {Analytics, getShopAnalytics, useNonce, Script} from '@shopify/hydrogen';
 import { PostHogProvider } from '@posthog/react'
 import {
@@ -194,7 +193,6 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
  */
 function loadDeferredData({context}: Route.LoaderArgs) {
   const {storefront, customerAccount, cart} = context;
-  const countryCode = (storefront.i18n as {country?: string}).country;
 
   const footer = storefront
     .query(FOOTER_QUERY, {
@@ -209,16 +207,9 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       return null;
     });
 
-  const cartPromise = (async () => {
-    const raw = await cart.get();
-    if (raw?.id && countryCode && raw.buyerIdentity?.countryCode !== countryCode) {
-      const updated = await cart.updateBuyerIdentity({
-        countryCode: countryCode as CountryCode,
-      });
-      if (updated?.cart) return updated.cart;
-    }
-    return raw;
-  })();
+  // Keep root loader read-only; mutating cart identity during page loads can
+  // intermittently swap carts during reload and surface as an empty cart.
+  const cartPromise = cart.get();
 
   return {
     cart: cartPromise,

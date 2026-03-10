@@ -1,4 +1,3 @@
-import type {CountryCode} from '@shopify/hydrogen/storefront-api-types';
 import {useLoaderData, data, type HeadersFunction} from 'react-router';
 import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
@@ -102,16 +101,8 @@ export async function action({request, context}: Route.ActionArgs) {
 }
 
 export async function loader({context}: Route.LoaderArgs) {
-  const {cart, storefront} = context;
-  const countryCode = (storefront.i18n as {country?: string}).country;
-  const raw = await cart.get();
-  if (raw?.id && countryCode && raw.buyerIdentity?.countryCode !== countryCode) {
-    const updated = await cart.updateBuyerIdentity({
-      countryCode: countryCode as CountryCode,
-    });
-    if (updated?.cart) return updated.cart;
-  }
-  return raw;
+  const {cart} = context;
+  return cart.get();
 }
 
 export default function Cart() {
