@@ -111,7 +111,7 @@ export function AddToWishlistButton({
       type="button"
       onClick={handleButtonClick}
       className={`wishlist-button w-full ${className}`}
-      variant='secondary'
+      variant='tertiary'
     >
       <Heart
         size={22}

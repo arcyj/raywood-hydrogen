@@ -7,6 +7,7 @@ enum Breakpoints {
   TABLET = 768,
   LARGE_TABLET = 840,
   DESKTOP = 1024,
+  MEDIUM_DESKTOP = 1200,
   LARGE_DESKTOP = 1400,
 }
 
@@ -17,6 +18,7 @@ interface IBreakpoints {
   isTablet: boolean;
   isTabletLarge: boolean;
   isDesktop: boolean;
+  isMediumDesktop: boolean;
   isLargeDesktop: boolean;
 }
 
@@ -27,6 +29,7 @@ const getBreakpoints = (width: number): IBreakpoints => ({
   isTablet: width > Breakpoints.TABLET,
   isTabletLarge: width < Breakpoints.LARGE_TABLET,
   isDesktop: width >= Breakpoints.DESKTOP,
+  isMediumDesktop: width >= Breakpoints.MEDIUM_DESKTOP,
   isLargeDesktop: width >= Breakpoints.LARGE_DESKTOP,
 });
 
