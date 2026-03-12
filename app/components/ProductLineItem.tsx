@@ -92,7 +92,8 @@ function CartLineItemView({
 }) {
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
-  const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
+
+  const lineItemUrl = useVariantUrl(product?.handle ?? '', selectedOptions);
   const withLocale = useLocalizedPath();
   const variantLabel = title === "Default Title" ? '' : title ;
 
@@ -123,7 +124,7 @@ function CartLineItemView({
           }}
         >
           <h4 className="text-h4 pt-4 line-clamp-2 overflow-hidden text-ellipsis">
-            {product.title}
+            {product?.title}
           </h4>
           {variantLabel ? (
             <p className="text-small text-gray mt-2 line-clamp-1 overflow-hidden text-ellipsis">
@@ -177,6 +178,7 @@ function ProductView({
   variantId?: string;
   variantAvailableForSale?: boolean;
 }) {
+
   const productUrl = useVariantUrl(product.handle);
   const withLocale = useLocalizedPath();
   const image = 'featuredImage' in product ? product.featuredImage : null;
