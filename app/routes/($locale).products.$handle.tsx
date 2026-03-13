@@ -36,10 +36,10 @@ import { getSeoMeta, getAbsoluteUrl, getProductJsonLd } from '~/lib/seo';
 import { SubscriptionForm } from '~/components/SubscriptionForm';
 import { ProductOptions } from '~/components/ProductOptions';
 import { ReviewsSlider } from '~/components/reviews/ReviewsSlider';
-import {
-  createJudgeMeClientFromEnv,
-  type PublicJudgeMeReview,
-} from '~/lib/judgeme.server';
+// import {
+//   createJudgeMeClientFromEnv,
+//   type PublicJudgeMeReview,
+// } from '~/lib/judgeme.server';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
   const product = data?.product;
@@ -112,14 +112,14 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 }
 
 function loadDeferredData({context}: Route.LoaderArgs) {
-  const judgeMe = createJudgeMeClientFromEnv(context.env);
-  const reviews = judgeMe.getPublicReviews().catch((error) => {
-    console.error('Error fetching Judge.me reviews:', error);
-    return [];
-  });
+  // const judgeMe = createJudgeMeClientFromEnv(context.env);
+  // const reviews = judgeMe.getPublicReviews().catch((error) => {
+  //   console.error('Error fetching Judge.me reviews:', error);
+  //   return [];
+  // });
 
   return {
-    reviews
+    // reviews
   }
 }
 
@@ -218,14 +218,14 @@ function loadRelatedProducts(
 
 export default function Product() {
   const data = useLoaderData<typeof loader>();
-  const {fullProduct, relatedProducts, reviews} = data;
+  const {fullProduct, relatedProducts} = data;
 
   return (
     <div className="container-large mx-auto">
       <ProductContent
         fullProduct={fullProduct}
         relatedProducts={relatedProducts}
-        reviews={reviews}
+        // reviews={reviews}
       />
     </div>
   );
@@ -238,7 +238,7 @@ function ProductContent({
 }: {
   fullProduct: FullProductPayload;
   relatedProducts: {products: {nodes: Array<any>}} | null;
-  reviews: Promise<PublicJudgeMeReview[]>;
+  reviews?: Promise<PublicJudgeMeReview[]>;
 }) {
   const { isDesktop, isTablet, isMediumDesktop} = useBreakpoints();
 
@@ -547,9 +547,9 @@ function ProductContent({
             </div>
           </ClientSticky>
         </div>
-        <div className="col-span-1 tablet:col-span-12 desktop:col-span-7 mediumDesktop:col-span-7 largeDesktop:col-span-9 order-4">
+        {/* <div className="col-span-1 tablet:col-span-12 desktop:col-span-7 mediumDesktop:col-span-7 largeDesktop:col-span-9 order-4">
           <DeferredReviews reviewsPromise={reviews} />
-        </div>
+        </div> */}
       </div>
 
       <RelatedProducts products={relatedProducts} />
