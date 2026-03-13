@@ -16,9 +16,9 @@ import {Cart, Menu} from './icons';
 import { Heart } from 'lucide-react';
 import {
   MagnifyingGlassIcon,
-  ArrowRightIcon,
-  ChevronDownIcon,
+  ArrowRightIcon
 } from '@radix-ui/react-icons';
+import { ChevronDown } from 'lucide-react';
 import {Dropdown} from './ui/Dropdown';
 import {processUrl} from '~/helpers/processUrl';
 import {getMenuIconUrl} from '~/helpers/getMenuIconUrl';
@@ -137,7 +137,7 @@ export function HeaderMenu({
                 )}
                 {item.title}
                 {hasSubmenu ? (
-                  <ChevronDownIcon className="ml-4 h-[20px] w-[20px]" />
+                  <ChevronDown size={18} className="ml-4 h-[20px] w-[20px]" />
                 ) : null}
               </NavLink>
             </Dropdown.Button>

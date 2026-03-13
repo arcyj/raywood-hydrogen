@@ -12,7 +12,7 @@ function addBusinessDays(from: Date, days: number): Date {
 
 export const deliveryTime = () => {
   const today = new Date();
-  const start = addBusinessDays(today, 2);
+  const start = addBusinessDays(today, 1);
   const end = addBusinessDays(today, 7);
 
   return (
