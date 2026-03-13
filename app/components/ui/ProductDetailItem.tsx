@@ -17,7 +17,7 @@ export const ProductDetailItem: FC<IProductDetailItemProps> = ({
   }
 
   return (
-    <p className="text-medium-semi text-text-dark rounded mb-4 flex items-center gap-2 bg-lightGrey py-4 px-8">
+    <p className="text-regular-semi text-text-dark rounded mb-4 flex items-center gap-2 bg-lightGrey py-4 px-8">
       {label ? <span className="text-small text-gray pr-4">{label}:</span> : null }
       {icon?.url && (
         <img

@@ -111,10 +111,11 @@ export function AddToWishlistButton({
       type="button"
       onClick={handleButtonClick}
       className={`wishlist-button w-full ${className}`}
-      variant='secondary'
+      variant='tertiary'
+      size="small"
     >
       <Heart
-        size={22}
+        size={18}
         className={`mr-8 ${inWishlist ? 'text-primary fill-primary' : ''}`}
       />
       {inWishlist ? 'Remove' : 'Save'}

@@ -16,7 +16,7 @@ export function ProductGallery({
   const [mainApi, setMainApi] = useState<EmblaCarouselType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loadedMainImages, setLoadedMainImages] = useState<Record<string, boolean>>({});
-  const {isDesktop} = useBreakpoints();
+  const {isDesktop, isTablet} = useBreakpoints();
 
   const markMainImageLoaded = useCallback((id: string) => {
     setLoadedMainImages((prev) => (prev[id] ? prev : {...prev, [id]: true}));
@@ -86,7 +86,7 @@ export function ProductGallery({
       <button
         type="button"
         onClick={() => mainApi?.scrollTo(index)}
-        className={`product-gallery-thumb-slide bg-lightGrey rounded-lg ${activeIndex === index ? 'ring-2 ring-black' : ''}`}
+        className={`product-gallery-thumb-slide bg-lightGrey rounded-lg ${activeIndex === index ? 'ring-2 ring-primary' : ''}`}
         key={mediaItem.id}
         aria-label={`View image ${index + 1}`}
       >
@@ -103,29 +103,11 @@ export function ProductGallery({
     ));
 
   return (
-    <div className="tablet:rounded-lg product-gallery product-gallery-slide-in">
+    <div className="tablet:rounded-xl product-gallery product-gallery-slide-in">
       <div className="">
-        {/* {isDesktop && media.length > 1 && (
-          <div className="col-span-1 min-h-0 flex flex-col overflow-hidden product-gallery-thumbs-wrap order-1">
-            <Slider
-              className="product-gallery-thumbs-vertical rounded mix-blend-darken mr-8"
-              settings={{
-                ref: setThumbsApi,
-                direction: 'vertical',
-                slidesToShow: 5,
-                spaceBetween: 8,
-                dots: false,
-                arrows: true,
-              }}
-            >
-              {thumbSlides}
-            </Slider>
-          </div>
-        )} */}
-
         {/* Main gallery - Slider with Thumbs sync */}
         <div
-          className={`rounded-lg min-h-0 order-2 overflow-hidden ${
+          className={`rounded-lg min-h-0 order-2 shadow-small overflow-hidden ${
             media.length > 1 ? 'col-span-8 tablet:col-span-8' : 'col-span-8'
           }`}
         >
@@ -136,10 +118,10 @@ export function ProductGallery({
             settings={{
               ref: setMainApi,
               afterChange: setActiveIndex,
-              arrows: isDesktop ? true : false,
+              arrows: isTablet ? true : false,
               dots: false,
               slidesToScroll: 1,
-              slidesToShow: media.length > 1 ? 'auto' : 1,
+              slidesToShow: 1,
               spaceBetween: 8,
               loop: true,
             }}
@@ -147,6 +129,23 @@ export function ProductGallery({
             {mainSlides}
           </Slider>
         </div>
+        {isTablet && media.length > 1 && (
+          <div className="col-span-1 min-h-0 flex flex-col overflow-hidden product-gallery-thumbs-wrap order-1 mt-8">
+            <Slider
+              className="product-gallery-thumbs-vertical rounded mix-blend-darken mr-8"
+              settings={{
+                ref: setThumbsApi,
+                direction: 'horizontal',
+                slidesToShow: 6,
+                spaceBetween: 8,
+                dots: false,
+                arrows: false,
+              }}
+            >
+              {thumbSlides}
+            </Slider>
+          </div>
+        )}
       </div>
     </div>
   );

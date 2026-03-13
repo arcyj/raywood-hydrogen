@@ -21,7 +21,7 @@ const navMenuItemStyle = {
     active: twc`bg-lightGrey inset-shadow-sm`,
   },
   label: {
-    initial: twc`text-sm text-text-layout-primary mt-2 font-semibold`,
+    initial: twc`text-small text-text-layout-primary mt-2 font-semibold`,
   },
   variants: {
     navBar: '',

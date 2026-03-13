@@ -74,11 +74,11 @@ export const Button: FC<IButtonProps> = ({
       >
         {IconBefore && !loading && (
           <span className="mr-4" >
-            <IconBefore size={22}/>
+            <IconBefore size={18}/>
           </span>
         )}
         {children}
-        {IconAfter && !loading && <IconAfter size={24} className="ml-2" />}
+        {IconAfter && !loading && <IconAfter size={18} className="ml-2" />}
       </div>
       {loading ? (
         <div style={{position: 'absolute'}}>

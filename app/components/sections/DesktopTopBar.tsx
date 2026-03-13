@@ -21,7 +21,7 @@ export function DesktopTopBar({
         <CurrencySwitcher />
       </div>
       <div>
-        <p className="text-medium-semi text-white">
+        <p className="text-small text-white">
         </p>
       </div>
       <div>
@@ -29,7 +29,7 @@ export function DesktopTopBar({
           <Suspense fallback={<></>}>
             <Await resolve={isLoggedIn} errorElement="Sign in">
               {(isLoggedIn) => (
-                <span className="flex text-medium-semi">
+                <span className="flex text-small">
                   <Profile className='mr-4'/> {isLoggedIn ? 'Account' : 'Sign in'}
                 </span>
               )}

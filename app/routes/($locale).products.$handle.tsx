@@ -240,8 +240,8 @@ function ProductContent({
   relatedProducts: {products: {nodes: Array<any>}} | null;
   reviews: Promise<PublicJudgeMeReview[]>;
 }) {
-  const isDesktop = useBreakpoints().isDesktop;
-  const isTablet = useBreakpoints().isTablet;
+  const { isDesktop, isTablet, isMediumDesktop} = useBreakpoints();
+
   const fullData = fullProduct;
   const {product, breadcrumbCollection, breadcrumbParentCollection} = fullData;
   const [productCount, setProductCount] = useState(1);
@@ -308,8 +308,12 @@ function ProductContent({
   const ProductDescription = () => {
     return (
       <>
-        <p className="text-h2 mt-44 mb-12">Product Description</p>
-        <div className="flex flex-wrap gap-8">
+        <p className="text-h3 mt-24 mb-12 desktop:hidden mediumDesktop:block largeDesktop:hidden">Description</p>
+        <div className="items-center justify-between mb-8 hidden desktop:flex mediumDesktop:hidden largeDesktop:flex">
+          <span className="text-small text-gray">{vendor}</span>
+        </div>
+        <h1 className="text-h2 mt-4 mb-8 hidden desktop:flex mediumDesktop:hidden largeDesktop:flex">{title}</h1>
+        <div className="flex flex-wrap gap-8 desktop:mt-24 tablet:mt-0">
           <ProductDetailItem
             label="Expansion"
             value={
@@ -354,7 +358,7 @@ function ProductContent({
   }
 
   return (
-    <div className="largeDektop:container-large overflow-hidden max-w-full">
+    <div className="largeDektop:container-large max-w-full">
       <Breadcrumb
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
@@ -363,28 +367,34 @@ function ProductContent({
       />
       <div
         id="product-content"
-        className="grid grid-cols-1 md:grid-cols-12 gap-12 desktop:gap-64 min-w-0 tablet:pt-8"
+        className="grid grid-cols-1 tablet:grid-cols-12 desktop:gap-32 min-w-0 tablet:pt-8 items-start grid-flow-row-dense"
       >
-        <div className="min-w-0 col-span-6 mediumDesktop:col-span-8">
+        <div
+          id="product-gallery-content"
+          className="min-w-0 col-span-1 tablet:col-span-12 desktop:col-span-7 largeDesktop:col-span-4 order-1"
+        >
           <ProductGallery
             media={media.nodes}
             selectedImage={selectedVariant?.image}
           />
-          {isTablet ? <ProductDescription /> : null}
-          {isTablet ? <DeferredReviews reviewsPromise={reviews} /> : null}
         </div>
-        <div className="product-main col-span-6 mediumDesktop:col-span-4">
+        <div className="col-span-1 tablet:col-span-12 desktop:col-span-7 mediumDesktop:col-span-7 largeDesktop:col-span-5 order-3 desktop:order-3  largeDesktop:order-2">
+          <ProductDescription />
+        </div>
+        <div className="product-main col-span-1 tablet:col-span-12 desktop:col-span-5  mediumDesktop: largeDesktop:col-span-3 order-2 desktop:order-2 mediumDesktop:order-2 largeDesktop:order-3">
           <ClientSticky
             top={80}
             enabled={isDesktop ? true : false}
             bottomBoundary="#product-content"
           >
-            <div className="bg-white max-w-[500px] mx-auto">
-              <div className="flex items-center justify-between mb-8">
-                <span className="text-medium-semi text-gray">{vendor}</span>
-              </div>
-              <h1 className="text-h2 mt-4 mb-8">{title}</h1>
+            <div className="desktop:max-w-[500px] mx-auto rounded-xl desktop:border border-[#e9e9e9] desktop:px-24 py-12 desktop:shadow-small">
               <div className="flex flex-col mb-24 mt-12">
+                <div className="items-center justify-between mb-8 flex desktop:hidden mediumDesktop:flex largeDesktop:hidden">
+                  <span className="text-small text-gray">{vendor}</span>
+                </div>
+                <h1 className="text-h3 mt-4 mb-8 block desktop:hidden mediumDesktop:flex largeDesktop:hidden">
+                  {title}
+                </h1>
                 <div className="flex items-end gap-24 mb-12 justify-between">
                   <div className="flex gap-24 items-end">
                     <ProductPrice
@@ -401,10 +411,8 @@ function ProductContent({
                     className="self-end"
                   />
                 </div>
-                <ProductOptions
-                  productOptions={productOptions}
-                />
-                <div className="tablet:flex gap-8 mb-8 items-center">
+                <ProductOptions productOptions={productOptions} />
+                <div className="gap-8 mb-8 items-center">
                   {isTablet ? (
                     <>
                       <Counter
@@ -420,7 +428,7 @@ function ProductContent({
                       <ProductForm
                         selectedVariant={selectedVariant}
                         quantity={productCount}
-                        className={`flex-1`}
+                        className={`flex-1 mt-8`}
                       />
                     </>
                   ) : null}
@@ -463,7 +471,8 @@ function ProductContent({
                     IconBefore={isUrlCopied ? CopyCheck : Share}
                     onClick={copyCurrentUrlToClipboard}
                     className={`wishlist-button w-full`}
-                    variant="secondary"
+                    variant="tertiary"
+                    size="small"
                   >
                     {isUrlCopied ? 'Copied to clipboard' : 'Share'}
                   </Button>
@@ -475,10 +484,10 @@ function ProductContent({
                     <span className="flex items-center">
                       <ShippingPictogram size={44} className="mr-12" />
                       <span>
-                        <p className="text-medium-semi">
+                        <p className="text-regular-semi text-green-700">
                           Delivery {deliveryTime()}
                         </p>
-                        <p className="text-medium">
+                        <p className="text-regular">
                           Courier or parcel locker delivery
                         </p>
                       </span>
@@ -496,7 +505,7 @@ function ProductContent({
                     <span className="flex items-center">
                       <ReturnPictogram size={44} className="mr-12" />
                       <span>
-                        <p className="text-medium-semi">
+                        <p className="text-regular-semi">
                           14-Day Return & Cancellation Right
                         </p>
                       </span>
@@ -514,11 +523,11 @@ function ProductContent({
                   </Accordion.Content>
                 </Accordion.Item>
                 <Accordion.Item value="payment">
-                  <Accordion.Trigger>
+                  <Accordion.Trigger className="border-0!">
                     <span className="flex items-center">
                       <GuaranteePictogram size={44} className="mr-12" />
                       <span>
-                        <p className="text-medium-semi">
+                        <p className="text-regular-semi">
                           Secure payment powered by Shopify
                         </p>
                       </span>
@@ -535,10 +544,11 @@ function ProductContent({
                   </Accordion.Content>
                 </Accordion.Item>
               </Accordion>
-              {!isTablet ? <ProductDescription /> : null}
-              {!isTablet ? <DeferredReviews reviewsPromise={reviews} /> : null}
             </div>
           </ClientSticky>
+        </div>
+        <div className="col-span-1 tablet:col-span-12 desktop:col-span-7 mediumDesktop:col-span-7 largeDesktop:col-span-9 order-4">
+          <DeferredReviews reviewsPromise={reviews} />
         </div>
       </div>
 
@@ -598,7 +608,7 @@ function DeferredReviews({
 }) {
   return (
     <>
-      <h2 className='text-h3 mt-64 pb-8'>Reviews</h2>
+      <h2 className='text-h3 mt-24 pb-8'>Reviews</h2>
       <p className="text-[14px] font-semibold pb-24">Reviews on this page are not specific to this product. They include customer feedback from various products and general store reviews.</p>
       <Suspense
         fallback={
@@ -630,7 +640,7 @@ function RelatedProducts({
   if (!products?.products?.nodes?.length) return null;
   return (
     <div className="related-products my-48">
-      <h2 className="text-large mb-24">Related Products</h2>
+      <h2 className="text-h3 mt-24 mb-24">Related Products</h2>
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-16">
         {products.products.nodes.map((product) => (
           <ProductItem key={product.id} product={product} />
