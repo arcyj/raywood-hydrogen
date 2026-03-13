@@ -15,7 +15,7 @@ export function ProductOptions({
   const navigate = useNavigate();
   const withLocale = useLocalizedPath();
 
-  const optionClasses = (selected: boolean, available: boolean) => twClasses(["product-options-item rounded-lg text-medium-semi border-2 active:inset-shadow-sm"], {
+  const optionClasses = (selected: boolean, available: boolean) => twClasses(["product-options-item rounded-lg text-small border-2 active:inset-shadow-sm"], {
     'border-[#733B73] bg-lowPrimary': selected,
     'border-lightGrey bg-lightGrey': !selected,
     'opacity-100 cursor-pointer hover:bg-lowPrimary': available,
@@ -51,7 +51,7 @@ export function ProductOptions({
                   // as an anchor tag
                   return (
                     <Link
-                      className="product-options-item text-medium-semi"
+                      className="product-options-item text-small"
                       key={option.name + name}
                       prefetch="intent"
                       preventScrollReset

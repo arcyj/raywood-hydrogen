@@ -752,7 +752,6 @@ button.reset:hover:not(:has(> *)) {
 .product-options-item,
 .product-options-item:disabled {
   padding: 0.25rem 0.5rem;
-  font-size: 1rem;
   font-family: inherit;
 }
 
