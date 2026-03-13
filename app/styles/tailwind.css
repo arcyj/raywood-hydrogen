@@ -16,8 +16,8 @@
   --color-danger: #FA5053;
   --font-serif: 'Gilroy', sans-serif;
 
-  --breakpoint-desktop: 990px;
   --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 990px;
   --breakpoint-mediumDesktop: 1200px;
   --breakpoint-largeDesktop: 1400px;
 
@@ -47,39 +47,39 @@
 
 @layer utilities {
   .text-h1 {
-    font: 700 28px/34px 'Gilroy', sans-serif;
-  }
-
-  .text-h3 {
-    font: 600 22px/32px 'Gilroy', sans-serif;
+    font: 700 1.75rem/2.125rem 'Gilroy', sans-serif; /* 28px / 34px */
   }
 
   .text-h2 {
-    font: 700 26px/32px 'Gilroy', sans-serif;
+    font: 700 1.625rem/2rem 'Gilroy', sans-serif; /* 26px / 32px */
+  }
+
+  .text-h3 {
+    font: 600 1.375rem/2rem 'Gilroy', sans-serif; /* 22px / 32px */
   }
 
   .text-h4 {
-    font: 700 16px/18px 'Gilroy', sans-serif;
+    font: 700 1rem/1.125rem 'Gilroy', sans-serif; /* 16px / 18px */
   }
 
   .text-extra-small {
-    font: 500 12px/13px 'Gilroy', sans-serif;
+    font: 500 0.75rem/0.8125rem 'Gilroy', sans-serif; /* 12px / 13px */
   }
 
   .text-small {
-    font: 700 13px/20px 'Gilroy', sans-serif;
+    font: 700 0.813rem/1.25rem 'Gilroy', sans-serif; /* 13px / 20px */
   }
 
   .text-medium {
-    font: 500 15px/22px 'Gilroy', sans-serif;
+    font: 500 0.9375rem/1.375rem 'Gilroy', sans-serif; /* 15px / 22px */
   }
 
   .text-regular {
-    font: 500 0.9rem / 1.375rem 'Gilroy', sans-serif;
+    font: 500 0.9rem/1.375rem 'Gilroy', sans-serif;
   }
 
   .text-regular-semi {
-    font: 600 0.9rem / 1.375rem 'Gilroy', sans-serif;
+    font: 600 0.9rem/1.375rem 'Gilroy', sans-serif;
   }
 
   .text-medium-semi {
@@ -87,19 +87,19 @@
   }
 
   .text-large {
-    font: 500 20px/26px 'Gilroy', sans-serif;
+    font: 500 1.25rem/1.625rem 'Gilroy', sans-serif; /* 20px / 26px */
   }
 
   .text-large-semi {
-    font: 600 20px/26px 'Gilroy', sans-serif;
+    font: 600 1.25rem/1.625rem 'Gilroy', sans-serif; /* 20px / 26px */
   }
 
   .text-link {
-    font: 600 15px/15px 'Gilroy', sans-serif;
+    font: 600 0.875rem/0.9375rem 'Gilroy', sans-serif; /* 15px / 15px */
   }
 
   .subText-link {
-    font: 600 15px/15px 'Gilroy', sans-serif;
+    font: 600 0.875rem/0.9375rem 'Gilroy', sans-serif; /* 15px / 15px */
   }
 
   .container-narrow{
@@ -112,7 +112,7 @@
     padding: 8px;
     padding-top: 44px;
     @media (min-width: 768px) {
-      padding: 12px
+      padding: 0px 12px
     }
   }
 
@@ -144,6 +144,11 @@
     .text-h2 {
       font-size: 20px;
       line-height: 32px;
+    }
+
+    .text-h3 {
+      font-size: 20px;
+      line-height: 26px;
     }
 
     .text-h4 {

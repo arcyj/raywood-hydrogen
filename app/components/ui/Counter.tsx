@@ -54,9 +54,9 @@ export const Counter: FC<ICounterProps> = ({
     <div className={classes}>
       {label}
       <div className="flex items-center justify-between">
-        <IconButton variant='filled' Icon={Remove} className={buttonClasses} onClick={handleDecrement} disabled={isMinCountReached}/>
+        <IconButton size="small" variant='filled' Icon={Remove} className={buttonClasses} onClick={handleDecrement} disabled={isMinCountReached}/>
         <span className="text-small px-12">{count}</span>
-        <IconButton variant='filled' Icon={Add} className={buttonClasses} onClick={handleIncrement} disabled={isMaxCountReached}/>
+        <IconButton size="small" variant='filled' Icon={Add} className={buttonClasses} onClick={handleIncrement} disabled={isMaxCountReached}/>
       </div>
     </div>
   );

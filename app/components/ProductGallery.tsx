@@ -16,7 +16,7 @@ export function ProductGallery({
   const [mainApi, setMainApi] = useState<EmblaCarouselType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loadedMainImages, setLoadedMainImages] = useState<Record<string, boolean>>({});
-  const {isDesktop} = useBreakpoints();
+  const {isDesktop, isTablet} = useBreakpoints();
 
   const markMainImageLoaded = useCallback((id: string) => {
     setLoadedMainImages((prev) => (prev[id] ? prev : {...prev, [id]: true}));
@@ -118,7 +118,7 @@ export function ProductGallery({
             settings={{
               ref: setMainApi,
               afterChange: setActiveIndex,
-              arrows: isDesktop ? true : false,
+              arrows: isTablet ? true : false,
               dots: false,
               slidesToScroll: 1,
               slidesToShow: 1,
@@ -129,7 +129,7 @@ export function ProductGallery({
             {mainSlides}
           </Slider>
         </div>
-        {isDesktop && media.length > 1 && (
+        {isTablet && media.length > 1 && (
           <div className="col-span-1 min-h-0 flex flex-col overflow-hidden product-gallery-thumbs-wrap order-1 mt-8">
             <Slider
               className="product-gallery-thumbs-vertical rounded mix-blend-darken mr-8"

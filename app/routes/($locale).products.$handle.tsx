@@ -308,11 +308,12 @@ function ProductContent({
   const ProductDescription = () => {
     return (
       <>
-        <div className="items-center justify-between mb-8 hidden tablet:flex">
-          <span className="text-medium-semi text-gray">{vendor}</span>
+        <p className="text-h3 mt-24 mb-12 desktop:hidden mediumDesktop:block largeDesktop:hidden">Description</p>
+        <div className="items-center justify-between mb-8 hidden desktop:flex mediumDesktop:hidden largeDesktop:flex">
+          <span className="text-small text-gray">{vendor}</span>
         </div>
-        <h1 className="text-h2 mt-4 mb-8 hidden tablet:block">{title}</h1>
-        <div className="flex flex-wrap gap-8 mt-24 tablet:mt-0">
+        <h1 className="text-h2 mt-4 mb-8 hidden desktop:flex mediumDesktop:hidden largeDesktop:flex">{title}</h1>
+        <div className="flex flex-wrap gap-8 desktop:mt-24 tablet:mt-0">
           <ProductDetailItem
             label="Expansion"
             value={
@@ -366,38 +367,32 @@ function ProductContent({
       />
       <div
         id="product-content"
-        className="grid grid-cols-1 tablet:grid-cols-12 desktop:gap-32 min-w-0 tablet:pt-8"
+        className="grid grid-cols-1 tablet:grid-cols-12 desktop:gap-32 min-w-0 tablet:pt-8 items-start grid-flow-row-dense"
       >
         <div
           id="product-gallery-content"
-          className="min-w-0 col-span-1 tablet:col-span-12 mediumDesktop:col-span-5"
+          className="min-w-0 col-span-1 tablet:col-span-12 desktop:col-span-7 largeDesktop:col-span-4 order-1"
         >
+          <ProductGallery
+            media={media.nodes}
+            selectedImage={selectedVariant?.image}
+          />
+        </div>
+        <div className="col-span-1 tablet:col-span-12 desktop:col-span-7 mediumDesktop:col-span-7 largeDesktop:col-span-5 order-3 desktop:order-3  largeDesktop:order-2">
+          <ProductDescription />
+        </div>
+        <div className="product-main col-span-1 tablet:col-span-12 desktop:col-span-5  mediumDesktop: largeDesktop:col-span-3 order-2 desktop:order-2 mediumDesktop:order-2 largeDesktop:order-3">
           <ClientSticky
             top={80}
             enabled={isDesktop ? true : false}
-            bottomBoundary="#product-gallery-content"
-          >
-            <ProductGallery
-              media={media.nodes}
-              selectedImage={selectedVariant?.image}
-            />
-          </ClientSticky>
-        </div>
-        <div className="col-span-1 tablet:col-span-6 mediumDesktop:col-span-4">
-          {isTablet ? <ProductDescription /> : null}
-        </div>
-        <div className="product-main col-span-1 tablet:col-span-6 mediumDesktop:col-span-3">
-          <ClientSticky
-            top={80}
-            enabled={isMediumDesktop ? true : false}
             bottomBoundary="#product-content"
           >
-            <div className="tablet:max-w-[500px] mx-auto rounded-xl mediumDesktop:border mediumDesktop:border-[#e9e9e9] tablet:px-24 py-12 mediumDesktop:shadow-small">
+            <div className="desktop:max-w-[500px] mx-auto rounded-xl desktop:border border-[#e9e9e9] desktop:px-24 py-12 desktop:shadow-small">
               <div className="flex flex-col mb-24 mt-12">
-                <div className="items-center justify-between mb-8 flex tablet:hidden">
-                  <span className="text-medium-semi text-gray">{vendor}</span>
+                <div className="items-center justify-between mb-8 flex desktop:hidden mediumDesktop:flex largeDesktop:hidden">
+                  <span className="text-small text-gray">{vendor}</span>
                 </div>
-                <h1 className="text-h2 mt-4 mb-8 block tablet:hidden">
+                <h1 className="text-h3 mt-4 mb-8 block desktop:hidden mediumDesktop:flex largeDesktop:hidden">
                   {title}
                 </h1>
                 <div className="flex items-end gap-24 mb-12 justify-between">
@@ -477,6 +472,7 @@ function ProductContent({
                     onClick={copyCurrentUrlToClipboard}
                     className={`wishlist-button w-full`}
                     variant="tertiary"
+                    size="small"
                   >
                     {isUrlCopied ? 'Copied to clipboard' : 'Share'}
                   </Button>
@@ -488,7 +484,7 @@ function ProductContent({
                     <span className="flex items-center">
                       <ShippingPictogram size={44} className="mr-12" />
                       <span>
-                        <p className="text-regular-semi">
+                        <p className="text-regular-semi text-green-700">
                           Delivery {deliveryTime()}
                         </p>
                         <p className="text-regular">
@@ -527,7 +523,7 @@ function ProductContent({
                   </Accordion.Content>
                 </Accordion.Item>
                 <Accordion.Item value="payment">
-                  <Accordion.Trigger>
+                  <Accordion.Trigger className="border-0!">
                     <span className="flex items-center">
                       <GuaranteePictogram size={44} className="mr-12" />
                       <span>
@@ -548,13 +544,11 @@ function ProductContent({
                   </Accordion.Content>
                 </Accordion.Item>
               </Accordion>
-              {!isTablet ? <ProductDescription /> : null}
-              {!isTablet ? <DeferredReviews reviewsPromise={reviews} /> : null}
             </div>
           </ClientSticky>
         </div>
-        <div className="col-span-1 tablet:col-span-12 mediumDesktop:col-span-9">
-          {isTablet ? <DeferredReviews reviewsPromise={reviews} /> : null}
+        <div className="col-span-1 tablet:col-span-12 desktop:col-span-7 mediumDesktop:col-span-7 largeDesktop:col-span-9 order-4">
+          <DeferredReviews reviewsPromise={reviews} />
         </div>
       </div>
 
@@ -646,7 +640,7 @@ function RelatedProducts({
   if (!products?.products?.nodes?.length) return null;
   return (
     <div className="related-products my-48">
-      <h2 className="text-large mb-24">Related Products</h2>
+      <h2 className="text-h3 mt-24 mb-24">Related Products</h2>
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-16">
         {products.products.nodes.map((product) => (
           <ProductItem key={product.id} product={product} />
