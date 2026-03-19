@@ -27,7 +27,7 @@ export function WishlistDrawer() {
       direction='right'
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) closeCart();
+        if (!open) closeWishlist();
       }}
     >
       <VaulDrawer.Portal>

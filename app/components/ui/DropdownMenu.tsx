@@ -25,7 +25,7 @@ interface IDropDownMenuProps {
 
 const dropDownMenuItemStyle = {
   base: {
-    initial: twc`w-full rounded-md shadow-black/5`,
+    initial: twc`w-full rounded-md shadow-black/5 h-full pb-64 overflow-y-auto`,
   },
 };
 
