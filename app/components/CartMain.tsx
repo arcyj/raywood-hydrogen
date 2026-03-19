@@ -37,9 +37,10 @@ export function CartMain({layout, cart: originalCart, onClose}: CartMainProps) {
   });
 
   return (
+    <>
     <div className={className}>
       <CartEmpty hidden={linesCount} layout={layout} onClose={onClose} />
-      <div className="cart-details pb-[120px]">
+      <div className="cart-details pb-80 tablet:pb-12 tablet:px-12">
         <div aria-labelledby="cart-lines">
           <ul className='flex flex-col gap-8'>
             {(cart?.lines?.nodes ?? []).map((line) => (
@@ -47,9 +48,12 @@ export function CartMain({layout, cart: originalCart, onClose}: CartMainProps) {
             ))}
           </ul>
         </div>
-        <CartSummary cart={cart} layout={layout} isCartMutating={isCartMutating} />
       </div>
     </div>
+    <div className=''>
+      <CartSummary cart={cart} layout={layout} isCartMutating={isCartMutating} />
+    </div>
+    </>
   );
 }
 

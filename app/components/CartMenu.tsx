@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Await } from 'react-router';
 import { CartMain } from './CartMain';
-import { useDrawer } from './ui/Drawer';
+import { usePlaypeak } from '~/lib/playpeakContext';
 import type { FC } from 'react';
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
 
@@ -10,7 +10,7 @@ interface CartMenuProps {
 }
 
 export const CartMenu: FC<CartMenuProps> = ({ cart }) => {
-  const { onClose } = useDrawer();
+  const { closeDrawer } = usePlaypeak()
 
   return (
     <div className="cart-menu pt-12">
@@ -25,7 +25,7 @@ export const CartMenu: FC<CartMenuProps> = ({ cart }) => {
       >
         <Await resolve={cart}>
           {(resolvedCart) => (
-            <CartMain layout="aside" cart={resolvedCart} onClose={onClose} />
+            <CartMain layout="aside" cart={resolvedCart} onClose={closeDrawer} />
           )}
         </Await>
       </Suspense>

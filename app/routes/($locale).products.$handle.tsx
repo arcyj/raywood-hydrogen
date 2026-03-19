@@ -255,6 +255,8 @@ function ProductContent({
 
   useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
 
+  const isPreorder = selectedVariant?.currentlyNotInStock === true;
+
   const productOptions = getProductOptions({
     ...product,
     selectedOrFirstAvailableVariant: selectedVariant,
@@ -403,6 +405,7 @@ function ProductContent({
                     />
                   </div>
                   <ProductStockStatus
+                    preorder={isPreorder}
                     availableForSale={!!selectedVariant?.availableForSale}
                     quantity={
                       (selectedVariant as {quantityAvailable?: number | null})
@@ -485,7 +488,7 @@ function ProductContent({
                       <ShippingPictogram size={44} className="mr-12" />
                       <span>
                         <p className="text-regular-semi text-green-700">
-                          Delivery {deliveryTime()}
+                          Delivery {deliveryTime(isPreorder ? 14 : 1)}
                         </p>
                         <p className="text-regular">
                           Courier or parcel locker delivery
@@ -668,6 +671,7 @@ const MEDIA_FRAGMENT = `#graphql
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
     availableForSale
+    currentlyNotInStock
     compareAtPrice {
       amount
       currencyCode

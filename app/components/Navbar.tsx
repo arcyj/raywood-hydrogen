@@ -1,4 +1,5 @@
 import {Suspense} from 'react';
+import { VaulDrawer } from './ui/vaulDrawer';
 import { Drawer } from './ui/Drawer';
 import { NavMenuItem } from './ui/NavMenuItem';
 import { DropDownMenu } from './ui/DropdownMenu';
@@ -109,7 +110,25 @@ export function Navbar({
 
   return (
     <div className="bottom-0 w-full">
-      <Drawer
+      <VaulDrawer.Root
+        direction='bottom'
+        open={activeMenu !== null}
+        onOpenChange={(open) => {
+          if (!open) closeDrawer();
+        }}
+      >
+        <VaulDrawer.Portal>
+          <VaulDrawer.Overlay className="fixed inset-0 bg-black/40 z-9998" />
+          <VaulDrawer.Content className="flex flex-col pt-64 tablet:pt-0 fixed right-0 w-full tablet:w-[550px] top-0 bottom-0 h-full z-9999">
+            <div className='bg-white rounded-lg h-full relative p-12'>
+              <div className="w-full flex items-center justify-center"><span className='w-128 h-4 bg-accentGrey rounded-full block'></span></div>
+              {renderDrawerHeader()}
+              {renderMenuContent()}
+            </div>
+          </VaulDrawer.Content>
+        </VaulDrawer.Portal>
+      </VaulDrawer.Root>
+      {/* <Drawer
         onClose={onClose}
         visible={activeMenu !== null}
         position="bottom"
@@ -118,7 +137,7 @@ export function Navbar({
         header={renderDrawerHeader()}
       >
         {renderMenuContent()}
-      </Drawer>
+      </Drawer> */}
       <nav className="fixed inset-x-0 bottom-0 w-full rounded-t-md z-[9999] bg-transparent pb-0">
         <div className="grid grid-cols-4 p-4 gap-4 bg-lightGrey shadow-large">
           <NavMenuItem

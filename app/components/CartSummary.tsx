@@ -20,7 +20,7 @@ export function CartSummary({cart, layout, isCartMutating}: CartSummaryProps) {
   if (!cartHasItems) return null;
 
   const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside ring-2 border-t-2 border-lightGrey max-desktop:pb-[80px] px-12 pb-12';
+    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside bg-white rounded-b-lg ring-2 border-t-2 border-lightGrey px-12 pb-12';
 
   return (
     <div aria-labelledby="cart-summary " className={className}>

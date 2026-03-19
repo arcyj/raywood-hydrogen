@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { useDrawer } from './ui/Drawer';
+import { usePlaypeak } from '~/lib/playpeakContext';
 import { useWishlist } from '~/hooks/useWishlist';
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
@@ -27,7 +27,7 @@ interface WishlistProduct {
 }
 
 export const WishlistMenu: FC = () => {
-  const { onClose } = useDrawer();
+  const { closeDrawer } = usePlaypeak()
   const { wishlistHandles, isLoading: wishlistLoading, removeFromWishlist } = useWishlist();
   const [products, setProducts] = useState<WishlistProduct[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
@@ -95,7 +95,7 @@ export const WishlistMenu: FC = () => {
               key={product.id}
               product={product as any}
               onRemove={() => removeFromWishlist(product.handle)}
-              onClose={onClose}
+              onClose={closeDrawer}
               variantId={product.selectedOrFirstAvailableVariant?.id}
               variantAvailableForSale={product.selectedOrFirstAvailableVariant?.availableForSale}
             />
