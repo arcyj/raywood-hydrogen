@@ -13,6 +13,7 @@ import {useLocalizedPath} from '~/hooks/useLocalePath';
 import { processUrl } from '~/helpers/processUrl';
 import { ButtonLink } from './Link';
 import { Button } from './Button';
+import { usePlaypeak } from '~/lib/playpeakContext';
 
 interface IDropDownMenuProps {
   menu: HeaderQuery['menu'];
@@ -36,7 +37,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
   isLoggedIn,
 }) => {
   const { base } = dropDownMenuItemStyle;
-  const { onClose } = useDrawer();
+  const { closeDrawer } = usePlaypeak()
   const withLocale = useLocalizedPath();
 
   const classes = useMemo(
@@ -98,7 +99,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
           <NavLink
             to={withLocale('/account/orders')}
             className={navLinkStyle}
-            onClick={onClose}
+            onClick={closeDrawer}
           >
             <span>Orders</span>
             <ChevronRight size={20} />
@@ -106,7 +107,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
           <NavLink
             to={withLocale('/account/profile')}
             className={navLinkStyle}
-            onClick={onClose}
+            onClick={closeDrawer}
           >
             <span>Profile</span>
             <ChevronRight size={20} />
@@ -114,7 +115,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
           <NavLink
             to={withLocale('/account/addresses')}
             className={navLinkStyle}
-            onClick={onClose}
+            onClick={closeDrawer}
           >
             <span>Addresses</span>
             <ChevronRight size={20} />
@@ -127,7 +128,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
                     <Form
                       method="POST"
                       action={withLocale('/account/logout')}
-                      onSubmit={onClose}
+                      onSubmit={closeDrawer}
                     >
                       <Button
                         type="submit"
@@ -142,7 +143,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
                     <ButtonLink
                       href="/account/login"
                       className="w-full"
-                      onClick={onClose}
+                      onClick={closeDrawer}
                       variant="primary"
                     >
                       Sign In
@@ -173,7 +174,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
   publicStoreDomain,
   primaryDomainUrl,
 }) => {
-  const { onClose } = useDrawer();
+  const { closeDrawer } = usePlaypeak()
   const withLocale = useLocalizedPath();
 
   if (!item || !url) return null;
@@ -208,7 +209,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
               viewTransition
               onClick={(e) => {
                 e.stopPropagation();
-                onClose();
+                closeDrawer();
               }}
             >
               {iconUrl && (
@@ -240,7 +241,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
                   prefetch="intent"
                   style={activeLinkStyle}
                   className="text-medium-semi transition-colors mb-4 py-12 px-8 bg-lightGrey rounded-md flex justify-between items-center  active:bg-accentGrey active:inset-shadow-sm"
-                  onClick={onClose}
+                  onClick={closeDrawer}
                   viewTransition
                 >
                   {subItem.title}
@@ -252,7 +253,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
               IconAfter={ArrowRightIcon}
               href={withLocale(url)}
               prefetch="intent"
-              onClick={onClose}
+              onClick={closeDrawer}
               size='large'
               className="text-link rounded-md w-full block px-12 py-12 text-white bg-primary border-solid border-b-2 border-b-primary mt-4"
             >

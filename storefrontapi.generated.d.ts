@@ -1425,7 +1425,12 @@ export type MediaFragment =
 
 export type ProductVariantFragment = Pick<
   StorefrontAPI.ProductVariant,
-  'availableForSale' | 'id' | 'sku' | 'barcode' | 'title'
+  | 'availableForSale'
+  | 'currentlyNotInStock'
+  | 'id'
+  | 'sku'
+  | 'barcode'
+  | 'title'
 > & {
   compareAtPrice?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
@@ -1463,7 +1468,12 @@ export type ProductFragment = Pick<
           firstSelectableVariant?: StorefrontAPI.Maybe<
             Pick<
               StorefrontAPI.ProductVariant,
-              'availableForSale' | 'id' | 'sku' | 'barcode' | 'title'
+              | 'availableForSale'
+              | 'currentlyNotInStock'
+              | 'id'
+              | 'sku'
+              | 'barcode'
+              | 'title'
             > & {
               compareAtPrice?: StorefrontAPI.Maybe<
                 Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
@@ -1500,7 +1510,12 @@ export type ProductFragment = Pick<
   selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<
     Pick<
       StorefrontAPI.ProductVariant,
-      'availableForSale' | 'id' | 'sku' | 'barcode' | 'title'
+      | 'availableForSale'
+      | 'currentlyNotInStock'
+      | 'id'
+      | 'sku'
+      | 'barcode'
+      | 'title'
     > & {
       compareAtPrice?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
@@ -1524,7 +1539,12 @@ export type ProductFragment = Pick<
   adjacentVariants: Array<
     Pick<
       StorefrontAPI.ProductVariant,
-      'availableForSale' | 'id' | 'sku' | 'barcode' | 'title'
+      | 'availableForSale'
+      | 'currentlyNotInStock'
+      | 'id'
+      | 'sku'
+      | 'barcode'
+      | 'title'
     > & {
       compareAtPrice?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
@@ -1615,7 +1635,12 @@ export type ProductQuery = {
               firstSelectableVariant?: StorefrontAPI.Maybe<
                 Pick<
                   StorefrontAPI.ProductVariant,
-                  'availableForSale' | 'id' | 'sku' | 'barcode' | 'title'
+                  | 'availableForSale'
+                  | 'currentlyNotInStock'
+                  | 'id'
+                  | 'sku'
+                  | 'barcode'
+                  | 'title'
                 > & {
                   compareAtPrice?: StorefrontAPI.Maybe<
                     Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
@@ -1652,7 +1677,12 @@ export type ProductQuery = {
       selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<
         Pick<
           StorefrontAPI.ProductVariant,
-          'availableForSale' | 'id' | 'sku' | 'barcode' | 'title'
+          | 'availableForSale'
+          | 'currentlyNotInStock'
+          | 'id'
+          | 'sku'
+          | 'barcode'
+          | 'title'
         > & {
           compareAtPrice?: StorefrontAPI.Maybe<
             Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
@@ -1676,7 +1706,12 @@ export type ProductQuery = {
       adjacentVariants: Array<
         Pick<
           StorefrontAPI.ProductVariant,
-          'availableForSale' | 'id' | 'sku' | 'barcode' | 'title'
+          | 'availableForSale'
+          | 'currentlyNotInStock'
+          | 'id'
+          | 'sku'
+          | 'barcode'
+          | 'title'
         > & {
           compareAtPrice?: StorefrontAPI.Maybe<
             Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
@@ -2163,7 +2198,7 @@ interface GeneratedQueryTypes {
     return: PoliciesQuery;
     variables: PoliciesQueryVariables;
   };
-  '#graphql\n  query Product(\n    $country: CountryCode\n    $handle: String!\n    $language: LanguageCode\n    $selectedOptions: [SelectedOptionInput!]!\n  ) @inContext(country: $country, language: $language) {\n    product(handle: $handle) {\n      ...Product\n    }\n  }\n  #graphql\n  fragment Product on Product {\n    id\n    title\n    vendor\n    handle\n    descriptionHtml\n    description\n    encodedVariantExistence\n    encodedVariantAvailability\n    availableForSale\n    options {\n      name\n      optionValues {\n        name\n        firstSelectableVariant {\n          ...ProductVariant\n        }\n        swatch {\n          color\n          image {\n            previewImage {\n              url\n            }\n          }\n        }\n      }\n    }\n    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {\n      ...ProductVariant\n    }\n    adjacentVariants (selectedOptions: $selectedOptions) {\n      ...ProductVariant\n    }\n    seo {\n      description\n      title\n    }\n    collections(first: 5) {\n      nodes {\n        id\n        handle\n      }\n    }\n    media(first: 7) {\n      nodes {\n        ...Media\n      }\n    }\n    metafields(identifiers: [\n      {namespace: "custom", key: "expansion"}\n      {namespace: "details", key: "language"}\n      {namespace: "details", key: "age"}\n    ]) {\n      id\n      namespace\n      key\n      value\n      reference {\n        ... on Metaobject {\n          id\n          type\n          fields {\n            key\n            value\n            reference {\n              ... on Metaobject {\n                id\n                type\n                fields {\n                  key\n                  value\n                }\n              }\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    availableForSale\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    id\n    image {\n      __typename\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    selectedOptions {\n      name\n      value\n    }\n    sku\n    barcode\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n  }\n\n  #graphql\n  fragment Media on Media {\n    __typename\n    ... on MediaImage {\n      __typename\n      id\n      image {\n        id\n        url\n        altText\n      }\n    }\n  }\n\n\n': {
+  '#graphql\n  query Product(\n    $country: CountryCode\n    $handle: String!\n    $language: LanguageCode\n    $selectedOptions: [SelectedOptionInput!]!\n  ) @inContext(country: $country, language: $language) {\n    product(handle: $handle) {\n      ...Product\n    }\n  }\n  #graphql\n  fragment Product on Product {\n    id\n    title\n    vendor\n    handle\n    descriptionHtml\n    description\n    encodedVariantExistence\n    encodedVariantAvailability\n    availableForSale\n    options {\n      name\n      optionValues {\n        name\n        firstSelectableVariant {\n          ...ProductVariant\n        }\n        swatch {\n          color\n          image {\n            previewImage {\n              url\n            }\n          }\n        }\n      }\n    }\n    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {\n      ...ProductVariant\n    }\n    adjacentVariants (selectedOptions: $selectedOptions) {\n      ...ProductVariant\n    }\n    seo {\n      description\n      title\n    }\n    collections(first: 5) {\n      nodes {\n        id\n        handle\n      }\n    }\n    media(first: 7) {\n      nodes {\n        ...Media\n      }\n    }\n    metafields(identifiers: [\n      {namespace: "custom", key: "expansion"}\n      {namespace: "details", key: "language"}\n      {namespace: "details", key: "age"}\n    ]) {\n      id\n      namespace\n      key\n      value\n      reference {\n        ... on Metaobject {\n          id\n          type\n          fields {\n            key\n            value\n            reference {\n              ... on Metaobject {\n                id\n                type\n                fields {\n                  key\n                  value\n                }\n              }\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    availableForSale\n    currentlyNotInStock\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    id\n    image {\n      __typename\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    selectedOptions {\n      name\n      value\n    }\n    sku\n    barcode\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n  }\n\n  #graphql\n  fragment Media on Media {\n    __typename\n    ... on MediaImage {\n      __typename\n      id\n      image {\n        id\n        url\n        altText\n      }\n    }\n  }\n\n\n': {
     return: ProductQuery;
     variables: ProductQueryVariables;
   };

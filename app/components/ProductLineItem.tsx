@@ -102,7 +102,7 @@ function CartLineItemView({
   const close = onClose || aside?.close;
 
   return (
-    <li key={id} className="flex bg-lightGrey rounded-md px-4 py-8 w-full">
+    <li key={id} className="flex bg-lightGrey rounded-md px-4 py-8 w-full rounded-lg">
       {image && (
         <Image
           alt={title}

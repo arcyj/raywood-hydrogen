@@ -1,6 +1,6 @@
 import {Await} from 'react-router';
 import {Suspense, useEffect, useState} from 'react';
-import {Drawer} from './ui/Drawer';
+import { VaulDrawer } from './ui/vaulDrawer';
 import { IconButton } from './ui/IconButton';
 import { Cross1Icon } from "@radix-ui/react-icons";
 import {usePlaypeak} from '~/lib/playpeakContext';
@@ -13,41 +13,38 @@ export function CartDrawer({cart}: {cart: Promise<CartApiQueryFragment | null>})
   const { isDrawerOpen, closeCart } = usePlaypeak();
   const isOpen = isDrawerOpen('cart');
 
-  const Header = () => {
-    return(
-      <div className='p-12 flex justify-between items-center'>
-        <span className='text-h1'>Cart</span>
-        <IconButton
-          Icon={Cross1Icon}
-          variant="secondary"
-          size="medium"
-          onClick={closeCart}
-        />
-      </div>
-    )
-  }
-
   return (
-    <Drawer
-      onClose={closeCart}
-      visible={isOpen}
-      position="right"
-      className="overflow-hidden"
-      panelClassName="bg-white p-12"
-      header={<Header />}
+    <VaulDrawer.Root
+      direction='right'
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) closeCart();
+      }}
     >
-      <Suspense
-        fallback={
-          <CartDrawerFallback />
-        }
-      >
-        <Await resolve={cart}>
-          {(cart) => {
-            return <CartMain cart={cart} layout="aside" />;
-          }}
-        </Await>
-      </Suspense>
-    </Drawer>
+      <VaulDrawer.Portal>
+        <VaulDrawer.Overlay className="fixed inset-0 bg-black/40 z-9998" />
+        <VaulDrawer.Content className="p-12 flex flex-col fixed right-0 tablet:w-[500px] top-0 bottom-0 h-full z-9999">
+          <div className='bg-white rounded-lg h-full relative'>
+            <div className='p-12 flex justify-between items-center'>
+              <span className='text-h1'>Cart</span>
+              <IconButton
+                Icon={Cross1Icon}
+                variant="secondary"
+                size="medium"
+                onClick={closeCart}
+              />
+            </div>
+            <Suspense fallback={<CartDrawerFallback />}>
+              <Await resolve={cart}>
+                {(cart) => {
+                  return <CartMain cart={cart} layout="aside" />;
+                }}
+              </Await>
+            </Suspense>
+          </div>
+        </VaulDrawer.Content>
+      </VaulDrawer.Portal>
+    </VaulDrawer.Root>
   );
 }
 

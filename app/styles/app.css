@@ -30,7 +30,7 @@
   --font-sans: 'Gilroy', system-ui, sans-serif;
   --aside-width: 400px;
   --cart-aside-summary-height-with-discount: 300px;
-  --cart-aside-summary-height: 250px;
+  --cart-aside-summary-height: 206px;
   --grid-item-width: 210px;
   --grid-item-width-mobile: 160px;
   --products-grid-item-min: 240px;
@@ -294,7 +294,6 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .cart-summary-aside {
-  background: white;
   bottom: 0;
   left: 0;
   position: absolute;
@@ -752,6 +751,7 @@ button.reset:hover:not(:has(> *)) {
 .product-options-item,
 .product-options-item:disabled {
   padding: 0.25rem 0.5rem;
+  font-size: 1rem;
   font-family: inherit;
 }
 

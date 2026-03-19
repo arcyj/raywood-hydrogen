@@ -10,10 +10,10 @@ function addBusinessDays(from: Date, days: number): Date {
   return d;
 }
 
-export const deliveryTime = () => {
+export const deliveryTime = (startDays = 1) => {
   const today = new Date();
-  const start = addBusinessDays(today, 1);
-  const end = addBusinessDays(today, 7);
+  const start = addBusinessDays(today, startDays);
+  const end = addBusinessDays(today, startDays + 6);
 
   return (
     <>
