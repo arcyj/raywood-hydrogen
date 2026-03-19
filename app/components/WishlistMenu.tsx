@@ -81,7 +81,7 @@ export const WishlistMenu: FC = () => {
   }
 
   return (
-    <div className="wishlist-menu pt-12">
+    <div className="wishlist-menu pt-12 overflow-y-auto h-full pb-64">
       {wishlistHandles.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-32">
           <p className="text-body-regular text-text-layout-secondary mb-16">
