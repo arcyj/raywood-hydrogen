@@ -1,0 +1,21 @@
+{
+  "columns": {
+    "Handle": "Artical number",
+    "Title": "Name",
+    "Vendor": "Manufacturer",
+    "Type": "Category",
+    "Variant Barcode": "Barcode",
+    "Variant Price": "RRP (€)",
+    "Variant Weight": "Weight (kg)",
+    "Variant Weight Unit": "",
+    "Google Shopping / MPN": "Artical number",
+    "Variant Grams": ""
+  },
+  "scrape": {
+    "urlColumn": "url",
+    "fields": {
+      "Body (HTML)": { "selector": ".desc" },
+      "Image Src": { "selector": ".pop_gallery img", "attribute": "src" }
+    }
+  }
+}

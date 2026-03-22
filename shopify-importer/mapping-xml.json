@@ -1,0 +1,46 @@
+{
+  "xmlReader": {
+    "itemElement": "item",
+    "fields": {
+      "EAN":               "EAN",
+      "CODE":              "CODE",
+      "CATEGORY_NAME":     "CATEGORY_NAME",
+      "URL":               "URL",
+      "BRAND":             "BRAND",
+      "NAME":              "NAME",
+      "DESCRIPTION":       "DESCRIPTION",
+      "DESCRIPTION_SHORT": "DESCRIPTION_SHORT",
+      "IMAGE":             "IMAGES.IMAGE_URL",
+      "INSTOCK":           "INSTOCK",
+      "AVAILABILITY":      "AVAILABILITY",
+      "ORDERED":           "ORDERED",
+      "PRICE":             "PRICE",
+      "PCS":               "PCS"
+    }
+  },
+  "merge": {
+    "file": "import-stock-cqe.csv",
+    "delimiter": ";",
+    "joinOn": {
+      "primary":   "EAN",
+      "secondary": "Barcode"
+    },
+    "fields": {
+      "Weight (kg)":     "Weight (kg)",
+      "Dimensions (mm)": "Dimensions (mm)"
+    }
+  },
+  "columns": {
+    "Handle":                "CODE",
+    "Title":                 "NAME",
+    "Body (HTML)":           "DESCRIPTION",
+    "Vendor":                "BRAND",
+    "Type":                  "CATEGORY_NAME",
+    "Variant Barcode":       "EAN",
+    "Variant Price":         "PRICE",
+    "Variant Weight":        "Weight (kg)",
+    "Variant Inventory Qty": "PCS",
+    "Image Src":             "IMAGE",
+    "Google Shopping / MPN": "CODE"
+  }
+}

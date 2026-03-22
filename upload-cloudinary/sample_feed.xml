@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<products>
+    <item>
+        <SKU>SHOE-001</SKU>
+        <TITLE>Running Shoe Alpha</TITLE>
+        <IMAGES>
+            <IMAGE_URL>https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png</IMAGE_URL>
+            <IMAGE_URL>https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/320px-Camponotus_flavomarginatus_ant.jpg</IMAGE_URL>
+        </IMAGES>
+    </item>
+    <item>
+        <SKU>SHOE-002</SKU>
+        <TITLE>Trail Blazer Pro</TITLE>
+        <IMAGES>
+            <IMAGE_URL>https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Bikesgray.jpg/320px-Bikesgray.jpg</IMAGE_URL>
+        </IMAGES>
+    </item>
+</products>

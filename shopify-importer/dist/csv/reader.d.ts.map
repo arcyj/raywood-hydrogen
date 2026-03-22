@@ -1,0 +1,1 @@
+{"version":3,"file":"reader.d.ts","sourceRoot":"","sources":["../../src/csv/reader.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,WAAW,EAAE,MAAM,mBAAmB,CAAC;AAGrD,MAAM,WAAW,gBAAgB;IAC/B,SAAS,CAAC,EAAE,MAAM,CAAC;IACnB,GAAG,CAAC,EAAE,OAAO,CAAC;CACf;AAED;;;;GAIG;AACH,wBAAuB,eAAe,CACpC,QAAQ,EAAE,MAAM,EAChB,OAAO,GAAE,gBAAqB,GAC7B,aAAa,CAAC,WAAW,CAAC,CA2B5B"}

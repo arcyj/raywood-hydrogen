@@ -1,0 +1,31 @@
+{
+  "name": "shopify-importer",
+  "version": "1.0.0",
+  "description": "Convert supplier CSV files into Shopify-compatible CSV with optional product page scraping",
+  "type": "module",
+  "main": "dist/cli/index.js",
+  "bin": {
+    "shopify-importer": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli/index.ts",
+    "start": "node dist/cli/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
+    "commander": "^12.1.0",
+    "csv-parse": "^5.5.6",
+    "csv-stringify": "^6.5.1",
+    "fast-xml-parser": "^5.5.3",
+    "p-limit": "^6.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

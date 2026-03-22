@@ -1,0 +1,463 @@
+/* ==========================================================================
+   Dulas Filter — Stylesheet
+   ========================================================================== */
+
+.dulas-filter-wrap,
+.dulas-filter-wrap * {
+  box-sizing: border-box;
+}
+
+:root {
+  --df-accent:      #2563eb;
+  --df-accent-dark: #1d4ed8;
+  --df-accent-bg:   #eff6ff;
+  --df-surface:     #ffffff;
+  --df-bg:          #f8fafc;
+  --df-border:      #e2e8f0;
+  --df-text:        #0f172a;
+  --df-text-muted:  #64748b;
+  --df-radius:      6px;
+  --df-radius-lg:   10px;
+  --df-transition:  0.15s ease;
+  --df-font:        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+
+.dulas-filter-wrap {
+  font-family: var(--df-font);
+  color: var(--df-text);
+  font-size: 15px;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start;
+  gap: 28px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.dulas-filter-sidebar {
+  flex: 0 0 240px !important;
+  width: 240px !important;
+  min-width: 240px !important;
+  position: sticky;
+  top: 24px;
+  background: var(--df-surface);
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius-lg);
+  padding: 20px;
+}
+
+.dulas-filter-main {
+  flex: 1 1 0 !important;
+  min-width: 0;
+}
+
+/* ==========================================================================
+   Sidebar header
+   ========================================================================== */
+
+.dulas-filter-sidebar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--df-border);
+}
+
+.dulas-filter-sidebar__title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--df-text-muted);
+}
+
+.dulas-filter-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--df-accent);
+  cursor: pointer;
+  font-family: var(--df-font);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--df-transition);
+}
+
+.dulas-filter-clear:hover {
+  color: var(--df-accent-dark);
+}
+
+/* ==========================================================================
+   Filter form fields
+   ========================================================================== */
+
+.dulas-filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dulas-filter-field {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--df-border);
+}
+
+.dulas-filter-field:first-child {
+  padding-top: 0;
+}
+
+.dulas-filter-field:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.dulas-filter-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--df-text-muted);
+  margin-bottom: 8px;
+  user-select: none;
+}
+
+/* Select */
+.dulas-filter-select-wrap {
+  position: relative;
+}
+
+.dulas-filter-select-wrap::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--df-text-muted);
+}
+
+.dulas-filter-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--df-bg);
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 8px 32px 8px 10px;
+  font-size: 13px;
+  font-family: var(--df-font);
+  color: var(--df-text);
+  cursor: pointer;
+  line-height: 1.4;
+  transition: border-color var(--df-transition), box-shadow var(--df-transition);
+}
+
+.dulas-filter-select:focus {
+  outline: none;
+  border-color: var(--df-accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.dulas-filter-select:hover {
+  border-color: #94a3b8;
+}
+
+/* ==========================================================================
+   Checkboxes — native with accent-color
+   ========================================================================== */
+
+.dulas-filter-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dulas-filter-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--df-text);
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+  transition: color var(--df-transition);
+}
+
+.dulas-filter-checkbox-label:hover {
+  color: var(--df-accent);
+}
+
+.dulas-filter-checkbox {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  accent-color: var(--df-accent);
+  cursor: pointer;
+  margin: 0;
+}
+
+.dulas-filter-checkbox-text {
+  line-height: 1.3;
+}
+
+/* ==========================================================================
+   Results area
+   ========================================================================== */
+
+.dulas-filter-results--loading {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.dulas-filter-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 0;
+}
+
+.dulas-filter-spinner::after {
+  content: "";
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--df-border);
+  border-top-color: var(--df-accent);
+  border-radius: 50%;
+  animation: df-spin 0.6s linear infinite;
+}
+
+@keyframes df-spin {
+  to { transform: rotate(360deg); }
+}
+
+.dulas-filter-no-results {
+  text-align: center;
+  color: var(--df-text-muted);
+  padding: 60px 16px;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Cards grid
+   ========================================================================== */
+
+.dulas-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* ==========================================================================
+   Card
+   ========================================================================== */
+
+.dulas-card {
+  background: var(--df-surface);
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color var(--df-transition), box-shadow var(--df-transition), transform var(--df-transition);
+}
+
+.dulas-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07);
+  transform: translateY(-2px);
+}
+
+/* Image — taller ratio so it reads as a profile photo */
+.dulas-card__thumb-link {
+  display: block;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dulas-card__thumb {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background-size: cover;
+  background-position: center top;
+  background-color: var(--df-bg);
+  transition: transform 0.3s ease;
+}
+
+.dulas-card:hover .dulas-card__thumb {
+  transform: scale(1.03);
+}
+
+/* Placeholder when no image */
+.dulas-card__thumb--empty {
+  background: linear-gradient(160deg, #e2e8f0 0%, #f1f5f9 100%);
+}
+
+/* Body */
+.dulas-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 12px 14px 14px;
+  gap: 4px;
+}
+
+/* Status badge */
+.dulas-card__badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--df-accent);
+  margin-bottom: 2px;
+}
+
+/* Name / title */
+.dulas-card__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.dulas-card__title a {
+  color: var(--df-text);
+  text-decoration: none;
+  transition: color var(--df-transition);
+}
+
+.dulas-card__title a:hover {
+  color: var(--df-accent);
+}
+
+/* Location */
+.dulas-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--df-text-muted);
+  margin: 0;
+}
+
+.dulas-card__meta svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+/* Profile link */
+.dulas-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 8px;
+  color: var(--df-accent);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: gap var(--df-transition), color var(--df-transition);
+}
+
+.dulas-card__link:hover {
+  color: var(--df-accent-dark);
+  gap: 5px;
+}
+
+.dulas-card__link svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* ==========================================================================
+   Pagination
+   ========================================================================== */
+
+.dulas-filter-pagination {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 24px;
+}
+
+.dulas-filter-page {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  background: var(--df-surface);
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  font-size: 13px;
+  font-family: var(--df-font);
+  color: var(--df-text-muted);
+  cursor: pointer;
+  transition: background var(--df-transition), border-color var(--df-transition), color var(--df-transition);
+}
+
+.dulas-filter-page:hover {
+  background: var(--df-accent-bg);
+  border-color: var(--df-accent);
+  color: var(--df-accent);
+}
+
+.dulas-filter-page--active,
+.dulas-filter-page[aria-current="page"] {
+  background: var(--df-accent);
+  border-color: var(--df-accent-dark);
+  color: #fff;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .dulas-filter-wrap {
+    flex-direction: column !important;
+    gap: 20px;
+  }
+
+  .dulas-filter-sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+    position: static;
+  }
+
+  .dulas-filter-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .dulas-card__thumb {
+    aspect-ratio: 3 / 4;
+  }
+}
+
+@media (max-width: 420px) {
+  .dulas-filter-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
