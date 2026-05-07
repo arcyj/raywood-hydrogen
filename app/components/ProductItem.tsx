@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import {Link} from 'react-router';
 import {Image, Money} from '@shopify/hydrogen';
 import type {
@@ -7,12 +8,7 @@ import type {
   SearchProductFragment,
 } from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
-import { twClasses } from '~/helpers/twMerge';
-import { ProductStockStatus } from './ui/ProductStockStatus';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
-import { AddToCartButton } from './AddToCartButton';
-import { usePlaypeak } from '~/lib/playpeakContext';
-import { useBreakpoints } from '~/hooks/useBreakpoints';
 
 type ProductItemProduct =
   | CollectionItemFragment
@@ -20,21 +16,32 @@ type ProductItemProduct =
   | RecommendedProductFragment
   | SearchProductFragment;
 
-type VariantWithId = { id: string };
-type VariantWithImage = { image?: { altText?: string | null } | null };
-type VariantPrice = NonNullable<SearchProductFragment['selectedOrFirstAvailableVariant']>['price'];
+type VariantForCard = {
+  id: string;
+  title: string;
+  availableForSale: boolean;
+  image?: {url: string; altText?: string | null; width?: number | null; height?: number | null} | null;
+  price: {amount: string; currencyCode: string};
+  compareAtPrice?: {amount: string; currencyCode: string} | null;
+};
 
-function hasVariantId(variant: unknown): variant is VariantWithId {
-  return !!variant && typeof variant === 'object' && 'id' in variant;
-}
+function extractVariants(product: ProductItemProduct): VariantForCard[] {
+  const raw = (product as unknown as {variants?: {nodes?: unknown[]}}).variants?.nodes;
+  if (Array.isArray(raw) && raw.length > 0) return raw as VariantForCard[];
 
-function hasVariantImage(variant: unknown): variant is VariantWithImage {
-  return !!variant && typeof variant === 'object' && 'image' in variant;
-}
-
-function getVariantPrice(variant: unknown): VariantPrice | undefined {
-  if (!variant || typeof variant !== 'object' || !('price' in variant)) return undefined;
-  return (variant as { price?: VariantPrice }).price;
+  const first = 'selectedOrFirstAvailableVariant' in product
+    ? product.selectedOrFirstAvailableVariant
+    : null;
+  if (!first || !('id' in first) || !('price' in first)) return [];
+  const v = first as {id: string; title?: string; availableForSale?: boolean; image?: VariantForCard['image']; price: VariantForCard['price']; compareAtPrice?: VariantForCard['compareAtPrice']};
+  return [{
+    id: v.id,
+    title: v.title ?? '',
+    availableForSale: v.availableForSale ?? true,
+    image: v.image ?? null,
+    price: v.price,
+    compareAtPrice: v.compareAtPrice ?? null,
+  }];
 }
 
 export function ProductItem({
@@ -46,98 +53,85 @@ export function ProductItem({
   loading?: 'eager' | 'lazy';
   className?: string;
 }) {
-  const isDesktop = useBreakpoints().isDesktop;
   const variantUrl = useVariantUrl(product.handle);
   const withLocale = useLocalizedPath();
-  const { openCart } = usePlaypeak();
-  const variant = 'selectedOrFirstAvailableVariant' in product ? product.selectedOrFirstAvailableVariant : undefined;
-  const variantWithId = hasVariantId(variant) ? variant : undefined;
-  const variantWithImage = hasVariantImage(variant) ? variant : undefined;
-  const image = variantWithImage?.image ?? ('featuredImage' in product ? product.featuredImage : undefined);
-  const price =
-    getVariantPrice(variant) ??
-    ('priceRange' in product ? product.priceRange?.minVariantPrice : undefined);
-  const compareAtPrice = 'selectedOrFirstAvailableVariant' in product ? product.selectedOrFirstAvailableVariant?.compareAtPrice : undefined;
+  const variants = extractVariants(product);
+  const [activeVariant, setActiveVariant] = useState<VariantForCard | null>(variants[0] ?? null);
 
-  const availableForSale =
-    (variant as { availableForSale?: boolean } | undefined)?.availableForSale ??
-    ('availableForSale' in product ? product.availableForSale : true);
-
-  const productClasses = twClasses(["relative product-item bg-lightGrey rounded px-12 pt-12 pb-24 active:bg-accentGrey active:inset-shadow-sm hover:shadow-md transition-all duration-100 ease-in-out"], {
-    'opacity-60': !availableForSale,
-  }, className);
+  const image = activeVariant?.image ?? ('featuredImage' in product ? product.featuredImage : null);
+  const price = activeVariant?.price;
+  const compareAtPrice = activeVariant?.compareAtPrice;
+  const availableForSale = activeVariant?.availableForSale ?? ('availableForSale' in product ? product.availableForSale : true);
+  const showVariants = variants.length > 1;
 
   return (
-    <div className={productClasses} key={product.id}>
-      <div className="relative">
-        <Link
-          className="block"
-          prefetch="intent"
-          to={withLocale(variantUrl)}
-          viewTransition
-        >
-          {image && (
-            <div className="mix-blend-darken ">
-              <Image
-                alt={image.altText || product.title}
-                aspectRatio="1/1"
-                data={image}
-                loading={loading}
-                sizes="(min-width: 100px) 400px, 100vw"
-                width="auto"
-                height="auto"
-              />
-            </div>
+    <div className={`overflow-hidden ${className ?? ''}`}>
+      <Link
+        to={withLocale(variantUrl)}
+        prefetch="intent"
+        viewTransition
+        className="block"
+      >
+        <div className="aspect-[4/5] overflow-hidden">
+          {image ? (
+            <Image
+              alt={(image as {altText?: string | null}).altText || product.title}
+              data={image}
+              loading={loading}
+              sizes="(min-width: 768px) 400px, 100vw"
+              className="w-full h-full object-cover rounded-xl"
+            />
+          ) : (
+            <div className="w-full h-full bg-lightGrey" />
           )}
-          <span className="text-small text-gray pt-4">
-            {'vendor' in product ? product.vendor : ''}
-          </span>
-          <h4 className="text-h4 pt-4 line-clamp-2 overflow-hidden text-ellipsis mb-8 h-[40px]">
-            {product.title}
-          </h4>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center justify-between w-full min-h-[40px]">
-              <div className="flex flex-col">
-                {price && (
-                  <span
-                    className={`text-[18px] desktop:text-[22px] leading-[26px] font-bold ${compareAtPrice ? 'text-danger mt-4' : null}`}
-                  >
-                    <Money data={price} />
-                  </span>
-                )}
-                {compareAtPrice && (
-                  <s className="text-[13px] desktop:text-[15px] leading-[22px] font-bold text-gray">
-                    <Money data={compareAtPrice} />
-                  </s>
-                )}
-              </div>
-              {availableForSale && variantWithId ? (
-                <span className="w-[60px] shrink-0" aria-hidden />
-              ) : null}
-            </div>
-            {!availableForSale ? (
-              <ProductStockStatus availableForSale={availableForSale} />
-            ) : null}
-          </div>
+        </div>
+      </Link>
+
+      <div className="px-12 pt-12 pb-16">
+        <Link
+          to={withLocale(variantUrl)}
+          prefetch="intent"
+          viewTransition
+          className="block mb-4"
+        >
+          <h4 className="text-regular font-bold leading-tight">{product.title}</h4>
         </Link>
-        {availableForSale && variantWithId ? (
-          <div className="absolute bottom-0 right-0 z-1 h-[40px]">
-            <AddToCartButton
-              onClick={openCart}
-              lines={[
-                {
-                  merchandiseId: variantWithId.id,
-                  quantity: 1,
-                  selectedVariant: variant,
-                },
-              ]}
-              variant="tertiary"
-              size="small"
-            >
-              {isDesktop ? 'Add' : ''}
-            </AddToCartButton>
+
+        {showVariants && (
+          <div className="flex flex-wrap gap-12 mb-4">
+            {variants.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setActiveVariant(v)}
+                className={`text-regular transition-colors ${
+                  activeVariant?.id === v.id
+                    ? 'font-bold text-black'
+                    : 'text-gray font-medium'
+                }`}
+              >
+                {v.title}
+              </button>
+            ))}
           </div>
-        ) : null}
+        )}
+
+        {price && (
+          <div className="flex items-baseline gap-8">
+            <span className={`text-medium font-bold ${compareAtPrice ? 'text-danger' : ''}`}>
+              <Money data={price as Parameters<typeof Money>[0]['data']} />
+            </span>
+            {compareAtPrice && (
+              <s className="text-regular text-gray">
+                <Money data={compareAtPrice as Parameters<typeof Money>[0]['data']} />
+              </s>
+            )}
+          </div>
+        )}
+
+        {!availableForSale && (
+          <p className="text-small text-gray mt-4">Out of stock</p>
+        )}
       </div>
     </div>
   );

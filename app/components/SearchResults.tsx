@@ -144,5 +144,5 @@ function SearchResultsProducts({
 }
 
 function SearchResultsEmpty() {
-  return <p>No results, try a different search.</p>;
+  return <p className='text-regular-semi'>No results, try a different search.</p>;
 }

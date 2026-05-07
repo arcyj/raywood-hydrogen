@@ -93,7 +93,7 @@ export function TopBar() {
           <div className="inverted-radius-left bg-[#35204d] w-[40px] h-[42px] absolute -left-[20px] -top-[30px]"></div>
           <NavLink prefetch="intent" to={withLocale('/')} viewTransition end>
             <Image
-              src="./images/LogoPlaypeak.svg"
+              src="./images/RAYWOODSTORE.svg"
               alt="Logo"
               width={65}
               height={0}

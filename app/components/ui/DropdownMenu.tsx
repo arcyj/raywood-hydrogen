@@ -14,6 +14,8 @@ import { processUrl } from '~/helpers/processUrl';
 import { ButtonLink } from './Link';
 import { Button } from './Button';
 import { usePlaypeak } from '~/lib/playpeakContext';
+import { CountrySelectorTrigger } from '../CountrySelectorTrigger';
+import { useTranslation } from '~/lib/i18nContext';
 
 interface IDropDownMenuProps {
   menu: HeaderQuery['menu'];
@@ -39,6 +41,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
   const { base } = dropDownMenuItemStyle;
   const { closeDrawer } = usePlaypeak()
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
 
   const classes = useMemo(
     () => twClasses([base['initial']], {}, className),
@@ -89,7 +92,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
           <Accordion.Trigger className="flex w-full border-b-2 border-lightGrey items-center justify-between py-16 text-left text-body-regular font-semibold leading-none text-text-layout-powerful hover:bg-gray-100  active:bg-lightGrey active:inset-shadow-b-sm">
             <span>
               <Profile size={20} className="inline-block mr-8" />
-              Account
+              {t('nav.account')}
             </span>
             <ChevronDownIcon />
           </Accordion.Trigger>
@@ -101,7 +104,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
             className={navLinkStyle}
             onClick={closeDrawer}
           >
-            <span>Orders</span>
+            <span>{t('account.orders')}</span>
             <ChevronRight size={20} />
           </NavLink>
           <NavLink
@@ -109,7 +112,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
             className={navLinkStyle}
             onClick={closeDrawer}
           >
-            <span>Profile</span>
+            <span>{t('account.profile')}</span>
             <ChevronRight size={20} />
           </NavLink>
           <NavLink
@@ -117,11 +120,11 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
             className={navLinkStyle}
             onClick={closeDrawer}
           >
-            <span>Addresses</span>
+            <span>{t('account.addresses')}</span>
             <ChevronRight size={20} />
           </NavLink>
           <div className="border-t border-gray-200 mt-12 pt-12">
-            <Suspense fallback={<div className="px-16 py-12">Loading...</div>}>
+            <Suspense fallback={<div className="px-16 py-12">{t('common.loading')}</div>}>
               <Await resolve={isLoggedIn}>
                 {(loggedIn) =>
                   loggedIn ? (
@@ -136,7 +139,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
                         className="w-full"
                         size="medium"
                       >
-                        Sign Out
+                        {t('account.sign_out')}
                       </Button>
                     </Form>
                   ) : (
@@ -146,7 +149,7 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
                       onClick={closeDrawer}
                       variant="primary"
                     >
-                      Sign In
+                      {t('nav.sign_in')}
                     </ButtonLink>
                   )
                 }
@@ -155,6 +158,9 @@ export const DropDownMenu: FC<IDropDownMenuProps> = ({
           </div>
         </Accordion.Content>
       </Accordion.Item>
+      <div className="mt-8 pt-12 flex items-center">
+        <CountrySelectorTrigger className="w-full justify-start px-8 py-12 rounded-md bg-lightGrey active:bg-accentGrey transition-colors" />
+      </div>
     </Accordion.Root>
   );
 }
@@ -174,8 +180,9 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
   publicStoreDomain,
   primaryDomainUrl,
 }) => {
-  const { closeDrawer } = usePlaypeak()
+  const { closeDrawer } = usePlaypeak();
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
 
   if (!item || !url) return null;
 
@@ -257,7 +264,7 @@ const DropDownMenuItem: FC<IDropDownMenuItemProps> = ({
               size='large'
               className="text-link rounded-md w-full block px-12 py-12 text-white bg-primary border-solid border-b-2 border-b-primary mt-4"
             >
-              View all {item.title}
+              {t('nav.view_all_item', { title: item.title })}
             </ButtonLink>
           </nav>
         </Accordion.Content>

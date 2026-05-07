@@ -254,13 +254,13 @@ export const Slider: FC<ICarouselProps> = ({ children, className = '', ...props 
           {props.fadeUnderArrows && !isVertical && canScrollPrev && (
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 left-0 z-1 w-44 bg-gradient-to-r from-white to-transparent"
+              className="pointer-events-none absolute inset-y-0 left-0 z-1 w-44 bg-gradient-to-r from-lowSurface to-transparent"
             />
           )}
           {props.fadeUnderArrows && !isVertical && canScrollNext && (
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 right-0 z-1 w-44 bg-gradient-to-l from-white to-transparent"
+              className="pointer-events-none absolute inset-y-0 right-0 z-1 w-44 bg-gradient-to-l from-lowSurface to-transparent"
             />
           )}
           <PrevArrow

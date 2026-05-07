@@ -139,7 +139,7 @@ export const Drawer: FC<IDrawerProps> & { CloseButton: FC<IDrawerCloseButtonProp
                   {children}
                 </div>
                 {footer && (
-                  <div className="drawer-footer flex-shrink-0 max-desktop:pb-80">
+                  <div className="drawer-footer flex-shrink-0">
                     {footer}
                   </div>
                 )}

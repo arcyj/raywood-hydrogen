@@ -47,7 +47,7 @@ export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collections">
+    <div className="collections container-large mx-auto">
       <h1>Collections</h1>
       <PaginatedResourceSection<CollectionFragment>
         connection={collections}

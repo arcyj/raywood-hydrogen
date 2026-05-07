@@ -21,6 +21,7 @@ export const FeaturedCollection = ({
     <Suspense fallback={<FeaturedCollectionSkeleton className={className} />}>
       <Await resolve={Promise.resolve(collections)}>
         {(resolvedCollections) => {
+          console.log({resolvedCollections})
           if (!resolvedCollections?.length) return null;
 
           return (

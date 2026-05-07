@@ -1,33 +1,39 @@
 @font-face {
-  font-family: 'Gilroy';
-  src: url('../assets/fonts/Gilroy-Bold.ttf') format('truetype');
+  font-family: 'Playfair';
+  src: url('../assets/fonts/PlayfairDisplay-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Gilroy';
-  src: url('../assets/fonts/Gilroy-SemiBold.ttf') format('truetype');
+  font-family: 'Playfair';
+  src: url('../assets/fonts/PlayfairDisplay-SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Gilroy';
-  src: url('../assets/fonts/Gilroy-Medium.ttf') format('truetype');
+  font-family: 'Playfair';
+  src: url('../assets/fonts/PlayfairDisplay-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Gilroy';
-  src: url('../assets/fonts/Gilroy-Regular.ttf') format('truetype');
+  font-family: 'Montserrat';
+  src: url('../assets/fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../assets/fonts/Montserrat-SemiBold.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
 
 :root {
-  --font-sans: 'Gilroy', system-ui, sans-serif;
+  --font-sans: 'Montserrat', system-ui, sans-serif;
   --aside-width: 400px;
   --cart-aside-summary-height-with-discount: 300px;
   --cart-aside-summary-height: 206px;
@@ -35,6 +41,7 @@
   --grid-item-width-mobile: 160px;
   --products-grid-item-min: 240px;
   --header-height: 64px;
+  --mobile-header-height: 54px;
   --color-dark: #000;
   --color-light: #fff;
 }
@@ -198,12 +205,25 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 .header {
-  background: #fff;
-  height: var(--header-height);
+  height: var(--mobile-header-height);
   padding: 0 1rem;
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 0px;
   z-index: 200;
+  width: 100%;
+  background-color: white;
+}
+@media (min-width: 769px) {
+  .header {
+    width: 90%;
+    border: 1px solid rgb(207, 207, 207);
+    margin: auto;
+    top: 12px;
+    background-color: #fff;
+    height: var(--header-height);
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 .header-menu-mobile-toggle {
@@ -334,7 +354,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .predictive-search-result h5 {
-  font: 600 17px/26px 'Gilroy', sans-serif;
+  font: 600 17px/26px 'Montserrat', sans-serif;
   color: black;;
   margin-bottom: 12px;
 }
@@ -347,7 +367,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .predictive-search-result-item a {
-   font: 500 15px/22px 'Gilroy', sans-serif;
+   font: 500 15px/22px 'Montserrat', sans-serif;
   align-items: center;
   display: flex;
 }
@@ -449,7 +469,7 @@ button.reset:hover:not(:has(> *)) {
 
 .products-grid--cols-4 {
   @media (min-width: 990px) {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   }
 }
 
@@ -524,8 +544,8 @@ button.reset:hover:not(:has(> *)) {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  min-height: 300px;
-  max-height: 300px;
+  min-height: 360px;
+  max-height: 360px;
   overflow: hidden;
 }
 
@@ -533,34 +553,50 @@ button.reset:hover:not(:has(> *)) {
 .product-gallery-main .embla__container,
 .product-gallery-main .embla__slide,
 .product-gallery-main-slide {
-  min-height: 300px;
+  min-height: 360px;
 }
 
 @media (min-width: 769px) {
   .product-gallery-main {
-    min-height: 400px;
-    max-height: 400px;
+    min-height: 480px;
+    max-height: 480px;
   }
 
   .product-gallery-main .embla__viewport,
   .product-gallery-main .embla__container,
   .product-gallery-main .embla__slide,
   .product-gallery-main-slide {
-    min-height: 400px;
+    min-height: 480px;
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 990px) {
   .product-gallery-main {
-    min-height: 500px;
-    max-height: 500px;
+    min-height: 620px;
+    max-height: 620px;
   }
 
   .product-gallery-main .embla__viewport,
   .product-gallery-main .embla__container,
   .product-gallery-main .embla__slide,
   .product-gallery-main-slide {
-    min-height: 500px;
+    min-height: 620px;
+    max-height: 620px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .product-gallery-main {
+    min-height: 750px;
+    max-height: 750px;
+  }
+
+  .product-gallery-main .embla__viewport,
+  .product-gallery-main .embla__container,
+  .product-gallery-main .embla__slide,
+  .product-gallery-main-slide {
+    min-height: 750px;
+    max-height: 750px;
   }
 }
 
@@ -643,19 +679,25 @@ button.reset:hover:not(:has(> *)) {
 .product-gallery-main-slide img {
   width: 100%;
   height: auto;
-  max-height: 400px;
+  max-height: 360px;
   object-fit: contain;
 }
 
 @media (min-width: 769px) {
   .product-gallery-main-slide img {
-    max-height: 400px;
+    max-height: 480px;
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 990px) {
   .product-gallery-main-slide img {
-    max-height: 500px;
+    max-height: 620px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .product-gallery-main-slide img {
+    max-height: 750px;
   }
 }
 
@@ -685,6 +727,25 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .product-gallery-thumb-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-gallery-thumb-left {
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease, outline 0.1s ease;
+}
+
+.product-gallery-thumb-left img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -942,29 +1003,29 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 .page-content h1{
-  font: 700 25px/28px 'Gilroy', sans-serif;
+  font: 700 25px/28px 'Montserrat', sans-serif;
   padding-bottom: 12px;
   padding-top: 24px;
 }
 
 .page-content h2{
-  font: 700 23px/28px 'Gilroy', sans-serif;
+  font: 700 23px/28px 'Montserrat', sans-serif;
   padding-bottom: 12px;
   padding-top: 24px;
 }
 
 .page-content h3{
-  font: 700 21px/26px 'Gilroy', sans-serif;
+  font: 700 21px/26px 'Montserrat', sans-serif;
   padding-bottom: 12px;
   padding-top: 24px;
 }
 .page-content p{
-  font: 500 16px/26px 'Gilroy', sans-serif;
+  font: 500 16px/26px 'Montserrat', sans-serif;
 }
 
 .page-content a{
   color: #6610F2;
-  font: 600 16px/26px 'Gilroy', sans-serif;
+  font: 600 16px/26px 'Montserrat', sans-serif;
 }
 
 /*
@@ -1029,12 +1090,6 @@ button.reset:hover:not(:has(> *)) {
 }
 .error-page__link:hover {
   opacity: 0.8;
-}
-
-#shopify-pc__banner{
-  @media (max-width: 768px) {
-    margin-bottom: 70px;
-  }
 }
 
 /*

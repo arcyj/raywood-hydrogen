@@ -4,6 +4,7 @@ import {CartForm, Image, type OptimisticCartLine, Money} from '@shopify/hydrogen
 import { TrashIcon } from '@radix-ui/react-icons';
 import {useVariantUrl} from '~/lib/variants';
 import {useCartRoute} from '~/lib/cartRoute';
+import { useTranslation } from '~/lib/i18nContext';
 import {Link} from 'react-router';
 import {ProductPrice} from './ProductPrice';
 import {useContext, useState, useRef, useEffect} from 'react';
@@ -95,6 +96,7 @@ function CartLineItemView({
 
   const lineItemUrl = useVariantUrl(product?.handle ?? '', selectedOptions);
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
   const variantLabel = title === "Default Title" ? '' : title ;
 
   // Safely get close function - prefer onClose prop, fallback to Aside context
@@ -136,7 +138,7 @@ function CartLineItemView({
           <ProductPrice size="small" price={line?.cost?.amountPerQuantity} />
 
           <div className="flex gap-4 items-end">
-            <span className="text-medium-semi">total:</span>
+            <span className="text-medium-semi">{t('cart.total')}:</span>
             {isCartMutating ? (
               <div className="h-[20px] skeleton-shimmer rounded w-44 mt-4" />
             ) : (
@@ -181,6 +183,7 @@ function ProductView({
 
   const productUrl = useVariantUrl(product.handle);
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
   const image = 'featuredImage' in product ? product.featuredImage : null;
   const price = 'priceRange' in product ? product.priceRange.minVariantPrice : null;
   const aside = AsideContext ? useContext(AsideContext) : null;
@@ -254,10 +257,10 @@ function ProductView({
                 }
               }}
             >
-              {variantAvailableForSale === false ? 'Sold out' : 'Add to cart'}
+              {variantAvailableForSale === false ? t('product.sold_out') : t('product.add_to_cart')}
             </AddToCartButton>
           ) : (
-            <span className="text-sm text-gray-500">Variant not available</span>
+            <span className="text-sm text-gray-500">{t('product.variant_not_available')}</span>
           )}
           {onRemove && <WishlistRemoveButton onRemove={onRemove} />}
         </div>

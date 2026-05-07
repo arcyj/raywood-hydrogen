@@ -6,6 +6,7 @@ import {ProductLineItem} from '~/components/ProductLineItem';
 import {CartSummary} from './CartSummary';
 import {useFetchers} from 'react-router';
 import { CartForm } from '@shopify/hydrogen';
+import { useTranslation } from '~/lib/i18nContext';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -67,13 +68,13 @@ function CartEmpty({
 }) {
   // Safely get close function - prefer onClose prop, fallback to Aside context
   const aside = AsideContext ? useContext(AsideContext) : null;
+  const { t } = useTranslation();
 
   return (
     <div hidden={hidden}>
       <br />
       <p className='text-regular-semi text-center px-12 pt-24'>
-        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-        started!
+        {t('cart.empty')}
       </p>
       <br />
     </div>

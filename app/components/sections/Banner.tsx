@@ -2,6 +2,7 @@ import type { FC } from "react";
 import { Image } from '@shopify/hydrogen';
 import { Link } from "react-router";
 import {useLocalizedPath} from '~/hooks/useLocalePath';
+import { useTranslation } from '~/lib/i18nContext';
 interface IBannerProps {
   heading: string;
   text?: string;
@@ -28,6 +29,7 @@ export const Banner: FC<IBannerProps> = ({
   buttonUrl
 }) => {
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
   return(
     <div
       className="rounded-lg tablet:min-h-[475px] bg-black relative h-full overflow-hidden bg-no-repeat bg-cover h-full"
@@ -44,13 +46,13 @@ export const Banner: FC<IBannerProps> = ({
       <div className="flex flex-col flex-col-reverse pt-48 pb-48 tablet:flex tablet:flex-col items-center p-32 tablet:rounded relative tablet:min-h-[475px] justify-center ">
         <div className="flex flex-col items-center text-center">
           <span className="block mb-[42px] max-w-[300px]">
-            <Image src={logo} alt="Main Banner logo" height="auto" width="100%" />
+            <Image src={logo} alt={t('banner.logo_alt')} height="auto" width="100%" />
           </span>
           <div className="">
               <h2 className={`max-tablet:text-center text-h1 pb-8 tablet:text-center ${textColor === 'white' ? 'text-white' : 'text-black' }`}>
                 {heading}
               </h2>
-              <p className={`max-tablet:text-center text-h4 pb-24 tablet:text-center ${textColor === 'white' ? 'text-white' : 'text-black' }`}>
+              <p className={`max-tablet:text-center max-w-[550px] text-h4 pb-24 tablet:text-center ${textColor === 'white' ? 'text-white' : 'text-black' }`}>
                 {text}
               </p>
               <Link

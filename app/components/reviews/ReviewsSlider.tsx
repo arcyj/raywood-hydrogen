@@ -58,13 +58,7 @@ function ReviewCard({review}: {review: PublicReviewCard}) {
 export function ReviewsSlider({reviews}: {reviews: PublicReviewCard[]}) {
   const {isDesktop} = useBreakpoints();
 
-  if (!reviews.length) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-midnight/70">
-        No reviews yet.
-      </div>
-    );
-  }
+  if (!reviews.length) return null;
 
   return (
     <Slider

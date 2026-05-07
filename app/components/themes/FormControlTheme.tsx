@@ -8,8 +8,8 @@ export const FormControlTheme = {
   inputFilledHover: twc`hover:tablet:bg-lightGrey`,
   inputHovered: twc`hover:tablet:bg-lowPrimary`,
   inputElement: {
-    base: twc`peer text-regular-semi text-truncate relative w-full rounded border-0 bg-transparent-full p-0 pt-20 text-black caret-surface-high-brand-active outline-none transition-all duration-200 ease-out focus-within:max-h-48`,
-    active: twc`!max-h-48 text-small`,
+    base: twc`peer text-[16px] fonst-semibold text-truncate relative w-full rounded border-0 bg-transparent-full p-0 pt-20 text-black caret-surface-high-brand-active outline-none transition-all duration-200 ease-out focus-within:max-h-48`,
+    active: twc`!max-h-48 text-[16px] fonst-semibold`,
   },
   border: {
     base: twc`rounded bg-lightGrey border-2 border-accentGrey transition-all duration-100 ease-linear`,

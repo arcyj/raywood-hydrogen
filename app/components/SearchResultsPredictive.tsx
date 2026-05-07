@@ -9,6 +9,7 @@ import {
 import {useAside} from './Aside';
 import {usePlaypeak} from '~/lib/playpeakContext';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
+import {useTranslation} from '~/lib/i18nContext';
 
 type PredictiveSearchItems = PredictiveSearchReturn['result']['items'];
 
@@ -97,11 +98,12 @@ function SearchResultsPredictiveArticles({
   closeSearch,
 }: PartialPredictiveSearchResult<'articles'>) {
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
   if (!articles.length) return null;
 
   return (
     <div className="predictive-search-result overflow-y-scroll" key="articles">
-      <h5>Articles</h5>
+      <h5>{t('search.articles')}</h5>
       <ul>
         {articles.map((article) => {
           const articleUrl = urlWithTrackingParams({
@@ -139,11 +141,12 @@ function SearchResultsPredictiveCollections({
   closeSearch,
 }: PartialPredictiveSearchResult<'collections'>) {
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
   if (!collections.length) return null;
 
   return (
     <div className="predictive-search-result" key="collections">
-      <h5>Collections</h5>
+      <h5>{t('search.collections')}</h5>
       <ul>
         {collections.map((collection) => {
           const collectionUrl = urlWithTrackingParams({
@@ -181,11 +184,12 @@ function SearchResultsPredictivePages({
   closeSearch,
 }: PartialPredictiveSearchResult<'pages'>) {
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
   if (!pages.length) return null;
 
   return (
     <div className="predictive-search-result" key="pages">
-      <h5>Pages</h5>
+      <h5>{t('search.pages')}</h5>
       <ul>
         {pages.map((page) => {
           const pageUrl = urlWithTrackingParams({
@@ -215,11 +219,12 @@ function SearchResultsPredictiveProducts({
   closeSearch,
 }: PartialPredictiveSearchResult<'products'>) {
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
   if (!products.length) return null;
 
   return (
     <div className="predictive-search-result" key="products">
-      <h5>Products</h5>
+      <h5>{t('search.products')}</h5>
       <ul>
         {products.map((product) => {
           const productUrl = urlWithTrackingParams({
@@ -278,19 +283,21 @@ function SearchResultsPredictiveEmpty({
 }: {
   term: React.MutableRefObject<string>;
 }) {
+  const { t } = useTranslation();
+
   if (!term.current) {
     return (
-      <div className="flex justify-center items-center h-full">
+      <div className="flex justify-center items-center ">
         <span className="block h-full mt-[90px]">
-          Type to search...
+          {t('search.type_to_search')}
         </span>
       </div>
     );
   }
 
   return (
-    <p>
-      No results found for <q>{term.current}</q>
+    <p className="text-regular-semi pt-24 px-12 ">
+      {t('search.no_results_for')} <q>{term.current}</q>
     </p>
   );
 }

@@ -40,8 +40,9 @@ export function getCurrencyByCode(currency: string): CurrencyOption | undefined 
 }
 
 /** Symbol for display (e.g. €, £, $, kr, CHF) – first part of label before space */
-export function getCurrencySymbol(option: CurrencyOption): string {
-  return option.label.split(' ')[0] ?? option.currency;
+export function getCurrencySymbol(option: CurrencyOption | SelectedLocale): string {
+  const label = 'label' in option ? option.label : option.currencyLabel;
+  return (label ?? '').split(' ')[0] || option.currency;
 }
 
 /** Eurozone countries map to EUR */
@@ -71,4 +72,44 @@ export function getCurrencyForCountry(countryCode: string): CurrencyOption {
   };
   const found = byCountry[upper];
   return found ?? DEFAULT_CURRENCY;
+}
+
+export type AvailableCountry = {
+  isoCode: string;
+  name: string;
+  currencyCode: string;
+};
+
+/** Unified locale: user's country + currency in one object */
+export type SelectedLocale = {
+  /** User's actual country ISO code (e.g. "LV"). Null when unknown. */
+  countryCode: string | null;
+  /** Full country name for display (e.g. "Latvia"). Null when unknown. */
+  countryName: string | null;
+  /** Currency code (e.g. "EUR") */
+  currency: CurrencyCode;
+  /** Currency display label (e.g. "€ EUR") */
+  currencyLabel: string;
+  /** Representative country for Shopify cart/checkout @inContext (e.g. "DE" for EUR) */
+  cartCountryCode: CountryCode;
+};
+
+export const DEFAULT_LOCALE: SelectedLocale = {
+  countryCode: 'LV',
+  countryName: 'Latvia',
+  currency: 'EUR',
+  currencyLabel: '€ EUR',
+  cartCountryCode: 'DE',
+};
+
+/** Build a SelectedLocale from a country code + name */
+export function buildLocale(countryCode: string, countryName: string): SelectedLocale {
+  const currency = getCurrencyForCountry(countryCode);
+  return {
+    countryCode,
+    countryName,
+    currency: currency.currency,
+    currencyLabel: currency.label,
+    cartCountryCode: currency.countryCode,
+  };
 }

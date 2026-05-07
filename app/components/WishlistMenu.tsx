@@ -4,6 +4,7 @@ import { useWishlist } from '~/hooks/useWishlist';
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { ProductLineItem } from './ProductLineItem';
+import { useTranslation } from '~/lib/i18nContext';
 
 interface WishlistProduct {
   id: string;
@@ -27,8 +28,9 @@ interface WishlistProduct {
 }
 
 export const WishlistMenu: FC = () => {
-  const { closeDrawer } = usePlaypeak()
+  const { closeDrawer } = usePlaypeak();
   const { wishlistHandles, isLoading: wishlistLoading, removeFromWishlist } = useWishlist();
+  const { t } = useTranslation();
   const [products, setProducts] = useState<WishlistProduct[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
@@ -85,7 +87,7 @@ export const WishlistMenu: FC = () => {
       {wishlistHandles.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-32">
           <p className="text-body-regular text-text-layout-secondary mb-16">
-            Your wishlist is empty
+            {t('wishlist.empty')}
           </p>
         </div>
       ) : (

@@ -5,7 +5,7 @@ import { CartForm, type OptimisticCartLineInput } from '@shopify/hydrogen';
 import type { IButtonSize, IButtonVariant } from './themes/ButtonTheme';
 import { usePlaypeak } from '~/lib/playpeakContext';
 import { useCartRoute } from '~/lib/cartRoute';
-import { Cart } from './icons';
+import { ShoppingCart } from 'lucide-react';
 import { useAnalytics } from '@shopify/hydrogen';
 import { usePostHog } from '@posthog/react'
 
@@ -139,7 +139,6 @@ function AddToCartButtonInner({
         disabled={disabled ?? fetcher.state !== 'idle'}
         className='w-full'
         variant={variant}
-        IconBefore={showIcon ? Cart : undefined}
       >
         {children}
       </Button>
@@ -194,7 +193,6 @@ export function AddToCartButton({
         })}
       />
       <AddToCartButtonInner
-        showIcon={showIcon}
         size={size}
         analytics={analytics}
         disabled={disabled}

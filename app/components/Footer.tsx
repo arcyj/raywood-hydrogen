@@ -20,13 +20,7 @@ export function Footer({
     <Suspense>
       <Await resolve={footerPromise}>
         {(footer) => (
-          <footer className="footer pb-12 max-mediumDesktop:px-12 max-mediumDesktop:pt-44 max-desktop:pb-[80px] bg-midnight">
-            <Image
-              src="/images/footer.svg"
-              alt="footer peaks"
-              sizes="25px"
-              className="w-full relative -top-[40px] hidden mediumDesktop:block"
-            />
+          <footer className="footer pb-12 pt-44 bg-midnight">
             <div className="container mx-auto grid grid-cols-2 tablet:grid-cols-2 desktop:grid-cols-4 gap-24">
               {footer?.menu && header.shop.primaryDomain?.url && (
                 <FooterMenu
@@ -47,7 +41,7 @@ export function Footer({
               <div className="flex flex-col">
                 <p className="text-h4 text-white mb-12">Resources</p>
                 <a
-                  href="https://www.facebook.com/profile.php?id=61550358300608"
+                  href="https://www.facebook.com/profile.php?id=61569972213687"
                   rel="noopener noreferrer"
                   target="_blank"
                   className="text-white opacity-80 hover:opacity-100 py-8"
@@ -55,7 +49,7 @@ export function Footer({
                   Facebook
                 </a>
                 <a
-                  href="https://www.instagram.com/playpeakeu/"
+                  href="https://www.instagram.com/raywoodstore_/"
                   rel="noopener noreferrer"
                   target="_blank"
                   className="text-white opacity-80 hover:opacity-100 py-8"
@@ -72,19 +66,10 @@ export function Footer({
                   Blog
                 </NavLink>
               </div>
-              <div className='text-center flex flex-col items-center justify-center'>
-                <Image
-                  src="./images/badge_cardmarket.jpg"
-                  alt="Logo"
-                  width={110}
-                  height="100%"
-                />
-                <p className="text-white text-medium-semi pt-16 max-w-[180px]">Playpeak is a certified seller on Cardmarket</p>
-              </div>
             </div>
             <div className="w-full mt-24 border-[#3b2844] border-t pt-12">
               <p className="text-small text-accentGrey text-center">
-                © 2026, PlayPeak
+                © 2026, Raywoodstore
               </p>
             </div>
           </footer>

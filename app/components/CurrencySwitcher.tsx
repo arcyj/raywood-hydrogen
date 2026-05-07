@@ -1,6 +1,7 @@
 import { useRevalidator } from 'react-router';
 import { Combobox } from './ui/Combobox';
-import { useCurrency } from '~/lib/CurrencyContext';
+import { usePlaypeak } from '~/lib/playpeakContext';
+import { buildLocale } from '~/helpers/currencies';
 
 /**
  * Currency switcher – displays only currencies (no country names).
@@ -8,30 +9,30 @@ import { useCurrency } from '~/lib/CurrencyContext';
  * Cart syncs in background when currency changes.
  */
 export function CurrencySwitcher() {
-  const { selectedCurrency, setSelectedCurrency, availableCurrencies } = useCurrency();
+  const { locale, setLocale, availableCountries } = usePlaypeak();
   const revalidator = useRevalidator();
 
-  const handleChange = (value: typeof selectedCurrency | null) => {
-    if (!value || value.currency === selectedCurrency.currency) return;
-    setSelectedCurrency(value);
+  // Build currency options from available countries (deduplicated by currency)
+  const seen = new Set<string>();
+  const currencyItems = availableCountries
+    .filter(c => { const { currency } = buildLocale(c.isoCode, c.name); return seen.has(currency) ? false : (seen.add(currency), true); })
+    .map(c => { const l = buildLocale(c.isoCode, c.name); return { value: l.currency, label: l.currencyLabel }; });
 
-    // Sync cart to new currency in parallel
-    fetch('/api/sync-cart', { method: 'POST', credentials: 'same-origin' }).then(() =>
-      revalidator.revalidate()
-    );
+  const handleChange = (currency: string | null) => {
+    if (!currency || currency === locale.currency) return;
+    const match = availableCountries.find(c => buildLocale(c.isoCode, c.name).currency === currency);
+    if (!match) return;
+    setLocale(buildLocale(match.isoCode, match.name));
+    fetch('/api/sync-cart', { method: 'POST', credentials: 'same-origin' }).then(() => revalidator.revalidate());
   };
 
   return (
-    <Combobox<typeof selectedCurrency>
-      value={selectedCurrency}
+    <Combobox<string>
+      value={locale.currency}
       onChange={handleChange}
-      items={availableCurrencies.map((opt) => ({
-        value: opt,
-        label: opt.label,
-        mobileLabel: opt.currency,
-      }))}
-      getOptionKey={(opt) => opt.currency}
-      by={(a, b) => a.currency === b.currency}
+      items={currencyItems}
+      getOptionKey={(c) => c}
+      by={(a, b) => a === b}
       placeholder="Currency"
       aria-label="Select currency"
       filterable

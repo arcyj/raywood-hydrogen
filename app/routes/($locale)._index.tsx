@@ -6,7 +6,7 @@ import type {
 } from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import { Slider } from '~/components/Slider';
-import { Banner } from '~/components/sections/Banner';
+import { TopBanner } from '~/components/sections/TopBanner';
 import { ButtonLink } from '~/components/ui/Link';
 import { CollectionCards } from '~/components/sections/CollectionCards';
 import { CollectionSlider } from '~/components/sections/CollectionSlider';
@@ -18,7 +18,10 @@ import {
 import { getSeoMeta, getAbsoluteUrl } from '~/lib/seo';
 import { SubscriptionForm } from '~/components/SubscriptionForm';
 import { WideCollectionCards } from '~/components/sections/WideCollectionCards';
+import { FeaturedProduct, FEATURED_PRODUCT_FRAGMENT } from '~/components/sections/FeaturedProduct';
+import type { FeaturedProductData } from '~/components/sections/FeaturedProduct';
 import { useBreakpoints } from '~/hooks/useBreakpoints';
+import { useTranslation } from '~/lib/i18nContext';
 
 export const meta: Route.MetaFunction = ({matches, location}) => {
   const url = getAbsoluteUrl(matches ?? [], location);
@@ -67,9 +70,9 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
  */
 function loadDeferredData({context}: Route.LoaderArgs) {
     const wideCollectionHandles = [
-    'pantasy',
-    'pokemon-tcg-accessories',
-    'sports-cards',
+      'nintendo',
+      'sports-cards',
+      'pantasy',
   ];
 
   const wideCollections = fetchCollectionsByHandles(
@@ -85,56 +88,10 @@ function loadDeferredData({context}: Route.LoaderArgs) {
     'magic-the-gathering',
   ];
 
-  const featuredCollections = fetchFeaturedCollectionsByHandles(
-    context.storefront,
-    featuredCollectionHandles,
-  ).catch((error: Error) => {
-    console.error(error);
-    return [];
-  });
-
-  const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
-    .catch((error: Error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
-
-  const latestProducts = context.storefront
-    .query(LATEST_ADDED_PRODUCTS_QUERY, {
-      variables: {
-        handle: 'latest-added-products',
-        first: 21,
-        country: context.storefront.i18n.country,
-        language: context.storefront.i18n.language,
-      },
-    })
-    .catch((error: Error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
-
-  const constructionSetsProducts = context.storefront
-    .query(LATEST_ADDED_PRODUCTS_QUERY, {
-      variables: {
-        handle: 'construction-set',
-        first: 14,
-        country: context.storefront.i18n.country,
-        language: context.storefront.i18n.language,
-      },
-    })
-    .catch((error: Error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
-
-  const tcgAccessoriesBestSelling = context.storefront
+  const fitnessEquipment = context.storefront
     .query(BEST_SELLING_COLLECTION_PRODUCTS_QUERY, {
       variables: {
-        handle: 'tcg-accessories',
+        handle: 'fitness-equipment',
         first: 20,
         sortKey: 'BEST_SELLING',
         filters: [{available: true}],
@@ -147,13 +104,9 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       return null;
     });
 
-    const blindBoxesBestSelling = context.storefront
-    .query(BEST_SELLING_COLLECTION_PRODUCTS_QUERY, {
+  const featuredSkippingRope = context.storefront
+    .query(FEATURED_SKIPPING_ROPE_QUERY, {
       variables: {
-        handle: 'blind-boxes',
-        first: 20,
-        sortKey: 'BEST_SELLING',
-        filters: [{available: true}],
         country: context.storefront.i18n.country,
         language: context.storefront.i18n.language,
       },
@@ -162,46 +115,9 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       console.error(error);
       return null;
     });
-
-    const sportCardsBestSelling = context.storefront
-    .query(BEST_SELLING_COLLECTION_PRODUCTS_QUERY, {
+  const featuredABRoller = context.storefront
+    .query(FEATURED_AB_ROLLER_QUERY, {
       variables: {
-        handle: 'sports-cards',
-        first: 20,
-        sortKey: 'BEST_SELLING',
-        filters: [{available: true}],
-        country: context.storefront.i18n.country,
-        language: context.storefront.i18n.language,
-      },
-    })
-    .catch((error: Error) => {
-      console.error(error);
-      return null;
-    });
-
-  const figurinesBestSelling = context.storefront
-    .query(BEST_SELLING_COLLECTION_PRODUCTS_QUERY, {
-      variables: {
-        handle: 'figurines',
-        first: 20,
-        sortKey: 'BEST_SELLING',
-        filters: [{available: true}],
-        country: context.storefront.i18n.country,
-        language: context.storefront.i18n.language,
-      },
-    })
-    .catch((error: Error) => {
-      console.error(error);
-      return null;
-    });
-
-  const constructionSetBestSelling = context.storefront
-    .query(BEST_SELLING_COLLECTION_PRODUCTS_QUERY, {
-      variables: {
-        handle: 'construction-set',
-        first: 20,
-        sortKey: 'BEST_SELLING',
-        filters: [{available: true}],
         country: context.storefront.i18n.country,
         language: context.storefront.i18n.language,
       },
@@ -213,156 +129,88 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
   return {
     wideCollections,
-    featuredCollections,
-    recommendedProducts,
-    latestProducts,
-    constructionSetsProducts,
-    tcgAccessoriesBestSelling,
-    figurinesBestSelling,
-    constructionSetBestSelling,
-    blindBoxesBestSelling,
-    sportCardsBestSelling,
+    fitnessEquipment,
+    featuredSkippingRope,
+    featuredABRoller,
   };
 }
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
-  const { isDesktop } = useBreakpoints();
+
+  console.log(data.fitnessEquipment)
   return (
     <div className="home">
       <div className="container-large mx-auto">
-        <section className="mb-12 grid grid-cols-1 tablet:grid-cols-2 largeDesktop:grid-cols-4 gap-24">
-          {/* <FeaturedCollection
-            collections={data.featuredCollections}
-            className="col-span-2"
-          /> */}
-          <div className="tablet:col-span-2">
-            <Slider
-              settings={{
-                slidesToShow: 1,
-                spaceBetween: 8,
-                dots: false,
-                arrows: isDesktop ? true : false,
-                autoplay: true,
-                loop: true,
-                options: {},
+        <div className="tablet:col-span-2 mb-24">
+          <TopBanner
+            title="Handcrafted home fitness equipment"
+            text="Made with precision, crafted with care and made for life."
+            url="/collections/all"
+            images={[
+              'https://cdn.shopify.com/s/files/1/0513/0049/9632/files/DSCF4469.jpg?v=1777620200',
+              'https://cdn.shopify.com/s/files/1/0513/0049/9632/files/DSCF4481.jpg?v=1777620201',
+              'https://cdn.shopify.com/s/files/1/0513/0049/9632/files/DSCF4435.jpg?v=1777620202',
+            ]}
+          />
+        </div>
+        <section className="mb-24">
+          <Suspense>
+            <Await resolve={data.featuredSkippingRope}>
+              {(response) => {
+                const product = response?.product;
+                if (!product) return null;
+                const productData: FeaturedProductData = {
+                  handle: product.handle,
+                  variants: product.variants.nodes,
+                };
+                return (
+                  <FeaturedProduct
+                    product={productData}
+                    title="Premium Leather Skipping Rope"
+                    text="Upgrade your cardio workouts with a premium leather skipping rope designed for performance, durability, and style. Whether you're training at home or adding intensity to your routine, this rope delivers smooth, controlled movement every time."
+                    images={[
+                      'https://cdn.shopify.com/s/files/1/0513/0049/9632/files/walnut_skipping_1_white_IMG_3942-Photoroom_076c4657-1608-49ed-a267-180f1207f45b.png',
+                      'https://cdn.shopify.com/s/files/1/0513/0049/9632/files/skipping_rope_smoked_oak_8dbdb5e9-7124-478d-8d03-39420f276b03.png',
+                    ]}
+                  />
+                );
               }}
-              className="col-span-3 md:col-span-2 h-full"
-            >
-              <Banner
-                heading="Ascended Heroes now in stock!"
-                text=""
-                backgroundImage="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/measscendingheroes-large-bg_1.webp?v=1772785511"
-                logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/Ascended-Heroes.png?v=1772180539"
-                overlayFromColor="#301c54"
-                overlayToColor="#301c54"
-                buttonText="Browse products"
-                buttonUrl={`/collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F156415754551"%7D`}
-              />
-              <Banner
-                heading="Seven Legends of the Azure Sea"
-                text="One Piece TCG OP-14 Available now for purchase"
-                backgroundImage="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/mtg-azure-7-seas.jpg?v=1769068206"
-                logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/op-14-logo.webp?v=1769068482"
-                overlayFromColor="#301c54"
-                overlayToColor="#301c54"
-                buttonText="Shop now"
-                buttonUrl={`/products/one-piece-tcg-op-14-the-azure-seas-seven-booster-display-eng?Title=Default+Title`}
-              />
-              <Banner
-                heading="Phantasmal flames"
-                text="Available now for purchase"
-                backgroundImage="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/phantasmal-bg.webp?v=1763993045"
-                logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/phantasal-flames-me02-logo-2x.png?v=1763134362"
-                overlayFromColor="#170631"
-                overlayToColor="#170631"
-                buttonText="Shop now"
-                buttonUrl={`/collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139873485111"%7D`}
-              />
-              <Banner
-                heading="Forge Your Deck. Shape the Elements."
-                text="Build elemental decks, unleash powerful combos, and bend the battlefield to your will"
-                backgroundImage="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/mtg-avatar-bg.jpg?v=1763998363"
-                logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/mtg-avatar-logo.webp?v=1763998641"
-                textColor="dark"
-                buttonText="View All Products"
-                buttonUrl={`/collections/magic-the-gathering?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F141094093111"%7D`}
-              />
-              <Banner
-                heading="Unleash Legendary Power"
-                text="Mega Evolution Returns to Dominate the Battle!"
-                backgroundImage="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/MegaEvolutionBanner-pattern.jpg?v=1762860429"
-                logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/me01-logo-2x.png?v=1762859891"
-                buttonText="Explore now"
-                buttonUrl={`/collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F139488493879"%7D`}
-              />
-              <Banner
-                heading="Burst Into Battle!"
-                text="Build bold strategies with bright new Pokémon and explosive abilities designed to outshine the competition."
-                backgroundImage="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/scarlet-violet-header-bg.webp?v=1769426809"
-                logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/scarlet-violet-logo.png?v=1764003734"
-                overlayFromColor="#200531"
-                overlayToColor="#200531"
-                buttonText="Shop now"
-                buttonUrl={`/collections/pokemon-tcg?filter.productMetafield=%7B"namespace"%3A"custom"%2C"key"%3A"expansions"%2C"value"%3A"gid%3A%2F%2Fshopify%2FMetaobject%2F94150394167"%7D`}
-              />
-            </Slider>
-          </div>
-          <WideCollectionCards collections={data.wideCollections} />
-          <CollectionCards collections={data.collections} />
+            </Await>
+          </Suspense>
         </section>
-        <section>
+        <section className="mb-12 grid grid-cols-1 gap-24">
           <CollectionSlider
-            title="New in Shop"
-            collectionPath="/collections/latest-added-products"
-            products={data.latestProducts}
-            className="mb-24 py-12"
-          />
-          <CollectionSlider
-            title="Trading Card Game Accessories"
-            collectionPath="/collections/tcg-accessories"
-            products={data.tcgAccessoriesBestSelling}
-            className="mb-24 py-12"
-          />
-          <CollectionSlider
-            title="Construction Sets"
-            collectionPath="/collections/construction-set"
-            products={data.constructionSetBestSelling}
-            className="mb-24 py-12"
-          />
-          <section className="grid grid-cols-1 tablet:grid-cols-2 gap-24">
-            <Banner
-              heading="Dream Boy and Giggle Monster"
-              text="Available now for purchase"
-              logo="https://cdn.shopify.com/s/files/1/0738/0054/8663/files/dreamboyandgiggle.png?v=1768904503"
-              overlayFromColor="#334fb4"
-              overlayToColor="#d21258"
-              overlayDirection="180deg"
-              buttonText="Shop now"
-              buttonUrl={`/collections/blind-boxes`}
-            />
-            <CollectionSlider
-              title="Plushies and blind boxes"
-              collectionPath="/collections/blind-boxes"
-              products={data.blindBoxesBestSelling}
-              className="mb-24 py-12"
-            />
-          </section>
-          <CollectionSlider
-            title="Figurines"
-            collectionPath="/collections/figurines"
-            products={data.figurinesBestSelling}
-            className="mb-24 py-12"
-          />
-          <CollectionSlider
-            title="Sports Cards"
-            collectionPath="/collections/sports-cards"
-            products={data.sportCardsBestSelling}
+            title="Wooden Home Fitness Equipment"
+            collectionPath="/collections/wooden-gym-equipment"
+            products={data.fitnessEquipment}
             className="mb-24 py-12"
           />
         </section>
         <section className="mb-24">
-          <SubscriptionForm />
+          <Suspense>
+            <Await resolve={data.featuredABRoller}>
+              {(response) => {
+                const product = response?.product;
+                if (!product) return null;
+                const productData: FeaturedProductData = {
+                  handle: product.handle,
+                  variants: product.variants.nodes,
+                };
+                return (
+                  <FeaturedProduct
+                    product={productData}
+                    title="Premium Wooden AB Roller"
+                    text="Made from solid walnut wood, this roller combines natural strength with thoughtful design. The wheel features a precision-carved traction pattern, while genuine leather strips are carefully wrapped around the wheel to enhance grip and stability on the floor."
+                    images={[
+                      'https://cdn.shopify.com/s/files/1/0513/0049/9632/files/IMG-7646.png?v=1777479848',
+                      'https://cdn.shopify.com/s/files/1/0513/0049/9632/files/87029B3D-AC5C-4356-BA85-E305113F2A96.png?v=1776847161',
+                    ]}
+                  />
+                );
+              }}
+            </Await>
+          </Suspense>
         </section>
       </div>
     </div>
@@ -449,6 +297,27 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
         title
       }
     }
+    variants(first: 20) {
+      nodes {
+        id
+        title
+        availableForSale
+        image {
+          url
+          altText
+          width
+          height
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
+    }
     priceRange {
       minVariantPrice {
         amount
@@ -461,6 +330,11 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       altText
       width
       height
+    }
+    metafields(identifiers: [{namespace: "custom", key: "preorder"}]) {
+      namespace
+      key
+      value
     }
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
@@ -502,6 +376,27 @@ const LATEST_ADDED_PRODUCTS_QUERY = `#graphql
         title
       }
     }
+    variants(first: 20) {
+      nodes {
+        id
+        title
+        availableForSale
+        image {
+          url
+          altText
+          width
+          height
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
+    }
     priceRange {
       minVariantPrice {
         amount
@@ -514,6 +409,11 @@ const LATEST_ADDED_PRODUCTS_QUERY = `#graphql
       altText
       width
       height
+    }
+    metafields(identifiers: [{namespace: "custom", key: "preorder"}]) {
+      namespace
+      key
+      value
     }
   }
   query LatestAddedProducts ($country: CountryCode, $language: LanguageCode, $handle: String! $first: Int)
@@ -560,6 +460,27 @@ const BEST_SELLING_COLLECTION_PRODUCTS_QUERY = `#graphql
         title
       }
     }
+    variants(first: 20) {
+      nodes {
+        id
+        title
+        availableForSale
+        image {
+          url
+          altText
+          width
+          height
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
+    }
     priceRange {
       minVariantPrice {
         amount
@@ -593,4 +514,24 @@ const BEST_SELLING_COLLECTION_PRODUCTS_QUERY = `#graphql
       }
     }
   }
+` as const;
+
+const FEATURED_SKIPPING_ROPE_QUERY = `#graphql
+  query FeaturedSkippingRope($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
+    product(handle: "leather-skipping-rope") {
+      ...FeaturedProduct
+    }
+  }
+  ${FEATURED_PRODUCT_FRAGMENT}
+` as const;
+
+const FEATURED_AB_ROLLER_QUERY = `#graphql
+  query FeaturedSkippingRope($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
+    product(handle: "premium-wooden-ab-roller") {
+      ...FeaturedProduct
+    }
+  }
+  ${FEATURED_PRODUCT_FRAGMENT}
 ` as const;

@@ -3,14 +3,16 @@ import {usePlaypeak} from '~/lib/playpeakContext';
 import { IconButton } from './ui/IconButton';
 import { WishlistMenu } from './WishlistMenu';
 import { Cross1Icon } from "@radix-ui/react-icons";
+import { useBreakpoints } from '~/hooks/useBreakpoints';
 
 export function WishlistDrawer() {
   const { isDrawerOpen, closeWishlist } = usePlaypeak();
   const isOpen = isDrawerOpen('wishlist');
+  const { isTablet } = useBreakpoints();
 
   const Header = () => {
     return (
-      <div className="p-12 flex justify-between items-center">
+      <div className="flex justify-between items-center">
         <span className="text-h1">Wishlist</span>
         <IconButton
           Icon={Cross1Icon}
@@ -23,19 +25,22 @@ export function WishlistDrawer() {
   };
 
   return (
-     <VaulDrawer.Root
-      direction='right'
+    <VaulDrawer.Root
+      direction={isTablet ? 'right' : 'bottom'}
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) closeWishlist();
       }}
     >
       <VaulDrawer.Portal>
-        <VaulDrawer.Overlay className="fixed inset-0 bg-black/40 z-9998" />
-        <VaulDrawer.Content className="p-12 flex flex-col fixed right-0 tablet:w-[500px] top-0 bottom-0 h-full z-9999">
-          <div className='bg-white rounded-lg h-full relative'>
-              <Header />
-              <WishlistMenu />
+        <VaulDrawer.Overlay />
+        <VaulDrawer.Content className="">
+          <div className="bg-white rounded-lg h-full relative p-12">
+            <div className="w-full flex tablet:hidden items-center justify-center">
+              <span className="w-128 h-4 bg-accentGrey rounded-full block"></span>
+            </div>
+            <Header />
+            <WishlistMenu />
           </div>
         </VaulDrawer.Content>
       </VaulDrawer.Portal>

@@ -10,7 +10,7 @@ export function TopBarActions() {
       <div className="top-button tablet:hidden text-center z-[2000]">
       <NavLink prefetch="intent" to={withLocale('/')} viewTransition end>
         <Image
-          src="./images/LogoPlaypeak.svg"
+          src="./images/RAYWOODSTORE.svg"
           alt="Logo"
           width={65}
           height={0}

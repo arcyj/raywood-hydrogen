@@ -4,6 +4,7 @@ import {Input} from '~/components/ui/Input';
 import {Button} from '~/components/ui/Button';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
 import { Privacy } from './icons';
+import { useTranslation } from '~/lib/i18nContext';
 
 type ActionResponse = {
   success?: boolean;
@@ -15,7 +16,7 @@ interface SubscriptionFormProps {
   placeholder?: string;
   /** Optional button text */
   buttonText?: string;
-  /** Optional success message */
+  /** Optional success message (unused — success text comes from translations) */
   successMessage?: string;
   /** Optional class name for the form container */
   className?: string;
@@ -28,14 +29,17 @@ interface SubscriptionFormProps {
  * Uses useFetcher for non-navigating form submission.
  */
 export function SubscriptionForm({
-  placeholder = 'Your email',
-  buttonText = 'Subscribe',
-  successMessage = "Thanks for subscribing! Use SUB10 with your next order to recieve 10% off discount code.",
+  placeholder,
+  buttonText,
   className = '',
   variant = 'default',
 }: SubscriptionFormProps) {
   const fetcher = useFetcher<ActionResponse>();
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
+
+  const effectivePlaceholder = placeholder ?? t('subscription.email_placeholder');
+  const effectiveButtonText = buttonText ?? t('subscription.button');
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -65,13 +69,13 @@ export function SubscriptionForm({
     const trimmed = email.trim();
     if (!trimmed) {
       e.preventDefault();
-      setError('Email is required');
+      setError(t('subscription.error_required'));
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmed)) {
       e.preventDefault();
-      setError('Please enter a valid email address');
+      setError(t('subscription.error_invalid'));
       return;
     }
     setError('');
@@ -87,7 +91,7 @@ export function SubscriptionForm({
               type="email"
               value={email}
               handleChange={handleChange}
-              placeholder={placeholder}
+              placeholder={effectivePlaceholder}
               error={error}
               required
             />
@@ -98,7 +102,7 @@ export function SubscriptionForm({
             loading={isSubmitting}
             className="shrink-0"
           >
-            {buttonText}
+            {effectiveButtonText}
           </Button>
         </fetcher.Form>
         {error && (
@@ -120,16 +124,15 @@ export function SubscriptionForm({
       <div className="max-w-[1200px] mx-auto grid grid-cols-3 justify-center items-center z-20 relative">
         <div className="col-span-3 md:col-span-2 pr-24 text-white">
           <h2 className="text-h1 font-semibold mb-12">
-            Stay ahead of the game and recieve 10% off
+            {t('subscription.heading')}
           </h2>
           <p className="text-gray-600 mb-8 text-large-semi text-white">
-            Subscribe to our newsletter and be the first to hear about brand-new
-            TCG releases, restocks, exclusive drops, and special offers
+            {t('subscription.description')}
           </p>
           <p className="text-gray-600 text-regular-semi text-white">
-            As a welcome bonus, you’ll receive{' '}
-            <span className="font-bold text-[18px]">10% off</span> your next
-            order — just for joining our community!
+            {t('subscription.bonus_prefix')}{' '}
+            <span className="font-bold text-[18px]">{t('subscription.bonus_discount')}</span>{' '}
+            {t('subscription.bonus_suffix')}
           </p>
         </div>
         <fetcher.Form
@@ -141,9 +144,9 @@ export function SubscriptionForm({
           {actionData?.success ? (
             <div className='text-center'>
               <p className="text-h3 text-green-600 pb-12" role="alert">
-                Thanks for subscribing!
+                {t('subscription.success_heading')}
               </p>
-              <p className="text-regular-semi" >Use <span className="text-large-semi font-bold">SUB10</span> discount code with your next order to receive 10% off</p>
+              <p className="text-regular-semi">{t('subscription.success_use')} <span className="text-large-semi font-bold">SUB10</span> {t('subscription.success_code_suffix')}</p>
             </div>
           ) : (
             <div className="space-y-16">
@@ -152,7 +155,7 @@ export function SubscriptionForm({
                 type="email"
                 value={email}
                 handleChange={handleChange}
-                placeholder={placeholder}
+                placeholder={effectivePlaceholder}
                 error={error}
                 required
               />
@@ -169,21 +172,21 @@ export function SubscriptionForm({
                 variant="tertiary"
                 size="medium"
               >
-                {isSubmitting ? 'Subscribing...' : buttonText}
+                {isSubmitting ? t('subscription.submitting') : effectiveButtonText}
               </Button>
               <div className="mt-8 flex items-center">
                 <Privacy size={32} />
                 <p className="pl-12 text-small text-gray-600 border-l-2 border-solid border-black">
-                  100% safe, Read more on{' '}
+                  {t('subscription.privacy_text')}{' '}
                   <Link
                     to="/policies/privacy-policy"
                     className="underline"
                     prefetch="intent"
                   >
-                    privacy policy
+                    {t('subscription.privacy_link')}
                   </Link>
                   <br></br>
-                  Unsubscribe anytime
+                  {t('subscription.unsubscribe')}
                 </p>
               </div>
             </div>

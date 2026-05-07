@@ -6,7 +6,8 @@ import {useFetcher} from 'react-router';
 import type {FetcherWithComponents} from 'react-router';
 import { useCartRoute } from '~/lib/cartRoute';
 import { ButtonLink } from './ui/Link';
-import { usePostHog } from '@posthog/react'
+import { usePostHog } from '@posthog/react';
+import { useTranslation } from '~/lib/i18nContext';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -22,10 +23,12 @@ export function CartSummary({cart, layout, isCartMutating}: CartSummaryProps) {
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside bg-white rounded-b-lg ring-2 border-t-2 border-lightGrey px-12 pb-12';
 
+  const { t } = useTranslation();
+
   return (
     <div aria-labelledby="cart-summary " className={className}>
       <dl className="cart-subtotal flex justify-between">
-        <dt className="text-large-semi ">Total</dt>
+        <dt className="text-large-semi ">{t('cart.total')}</dt>
         <dd className="text-large-semi">
           {!isCartMutating && cart?.cost?.subtotalAmount?.amount ? (
             <Money data={cart?.cost?.subtotalAmount} />
@@ -52,7 +55,8 @@ function CartCheckoutActions({
   checkoutUrl?: string;
   isCartMutating: boolean;
 }) {
-  const posthog = usePostHog()
+  const posthog = usePostHog();
+  const { t } = useTranslation();
 
   if (!checkoutUrl) return null;
 
@@ -69,9 +73,9 @@ function CartCheckoutActions({
         // disabled={isCartMutating}
       >
         {isCartMutating ? (
-          <p>Updating cart ...</p>
+          <p>{t('cart.updating')}</p>
         ) : (
-          <p>Continue to Checkout &rarr;</p>
+          <p>{t('cart.checkout')} &rarr;</p>
         )}
       </ButtonLink>
       <br />

@@ -9,13 +9,12 @@ import {
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 
 import {usePlaypeak} from '~/lib/playpeakContext';
+import { useTranslation } from '~/lib/i18nContext';
 
 import {useAside} from '~/components/Aside';
 import {NavMenuItem} from './ui/NavMenuItem';
-import {Cart, Menu} from './icons';
-import { Heart } from 'lucide-react';
+import { Heart, Menu, ShoppingCart, Search} from 'lucide-react';
 import {
-  MagnifyingGlassIcon,
   ArrowRightIcon
 } from '@radix-ui/react-icons';
 import { ChevronDown } from 'lucide-react';
@@ -47,8 +46,8 @@ export function Header({
   const { isLargeDesktop, isMobile } = useBreakpoints();
 
   return (
-    <header className="header justify-between shadow-md rounded-b-xl hidden tablet:grid grid-cols-[auto_1fr_auto] items-center ">
-      {!isMobile && !isLargeDesktop && <MenuToggle />}
+    <header className="header justify-between shadow-md tablet:rounded-xl grid grid-cols-[auto_1fr_auto] items-center ">
+      {!isLargeDesktop && <MenuToggle />}
       <NavLink
         prefetch="intent"
         to={withLocale('/')}
@@ -58,9 +57,9 @@ export function Header({
         className="justify-self-center"
       >
         <Image
-          src="./images/LogoPlaypeak.svg"
+          src="./images/RAYWOODSTORE.svg"
           alt="Logo"
-          width={100}
+          width={isMobile ? 100 : 140}
           height={0}
         />
       </NavLink>
@@ -73,7 +72,7 @@ export function Header({
           className="hidden largeDesktop:flex justify-self-center"
         />
       )}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-end gap-4">
         <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
       </div>
     </header>
@@ -96,6 +95,7 @@ export function HeaderMenu({
   const withLocale = useLocalizedPath();
   const containerClass = `header-menu-${viewport}`;
   const {close} = useAside();
+  const { t } = useTranslation();
 
   return (
     <nav className={`${containerClass} ${className}`} role="navigation">
@@ -165,7 +165,7 @@ export function HeaderMenu({
                     prefetch="intent"
                     className="text-link w-full block px-12 py-12 text-white bg-primary border-solid border-b-2 border-b-primary"
                   >
-                    View all {item.title}
+                    {t('nav.view_all_item', { title: item.title })}
                   </ButtonLink>
                 </div>
               </Dropdown.Content>
@@ -181,6 +181,8 @@ function HeaderCtas({
   isLoggedIn,
   cart,
 }: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
+  const { isLargeDesktop } = useBreakpoints();
+
   return (
     <nav className="header-ctas" role="navigation">
       <SearchToggle />
@@ -192,11 +194,11 @@ function HeaderCtas({
 
 function SearchToggle() {
   const {openSearchDrawer} = usePlaypeak();
+  const { t } = useTranslation();
   return (
     <NavMenuItem
       onClick={openSearchDrawer}
-      Icon={() => <MagnifyingGlassIcon className="w-[20px] h-[20px]" />}
-      label={'Search'}
+      Icon={(props) => <Search {...props}  />}
       variant="menu"
     />
   );
@@ -204,6 +206,7 @@ function SearchToggle() {
 
 function MenuToggle() {
   const {openMenu, closeDrawer, isDrawerOpen} = usePlaypeak();
+  const { t } = useTranslation();
   const handleToggle = () => {
     if (isDrawerOpen('menu')) {
       closeDrawer();
@@ -214,8 +217,7 @@ function MenuToggle() {
   return (
     <NavMenuItem
       onClick={handleToggle}
-      Icon={() => <Menu className='w-[18px] h-[18px] flex' />}
-      label={'Menu'}
+      Icon={(props) => <Menu {...props}  />}
       variant='menu'
     />
   );
@@ -224,13 +226,13 @@ function MenuToggle() {
 function WishlistToggle() {
   const {openWishlist} = usePlaypeak();
   const {wishlistHandles} = useWishlist();
+  const { t } = useTranslation();
   const hasWishlistItems = wishlistHandles.length > 0;
 
   return (
     <NavMenuItem
       onClick={openWishlist}
-      Icon={() => <Heart size={20} className={hasWishlistItems ? 'text-primary fill-primary' : ''} />}
-      label={'Wishlist'}
+      Icon={(props) => <Heart {...props} className={hasWishlistItems ? 'text-primary fill-primary' : ''} />}
       variant="menu"
     />
   );
@@ -249,6 +251,7 @@ function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
 function CartBadge({count}: {count: number | null}) {
   const {publish, shop, cart, prevCart} = useAnalytics();
   const {openCart} = usePlaypeak();
+  const { t } = useTranslation();
   return (
     <NavMenuItem
       onClick={() => {
@@ -260,8 +263,7 @@ function CartBadge({count}: {count: number | null}) {
           url: window.location.href || '',
         } as CartViewPayload);
       }}
-      Icon={() => <Cart />}
-      label="Cart"
+      Icon={(props) => <ShoppingCart {...props} />}
       variant="menu"
       badge={count ? count : undefined}
     />

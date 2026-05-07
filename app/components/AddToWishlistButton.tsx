@@ -7,7 +7,7 @@ import { IconButton } from './ui/IconButton';
 type ProductInput =
   | {
       // Product structure
-      id: string;
+      id?: string;
       title: string;
       handle: string;
       vendor?: string | null;
@@ -62,6 +62,8 @@ export function AddToWishlistButton({
 }: AddToWishlistButtonProps) {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
+  if (!product) return null;
+
   // Determine if this is a variant structure (has nested product)
   const isVariant = 'product' in product && product.product !== undefined;
 
@@ -89,9 +91,9 @@ export function AddToWishlistButton({
   if (variant === 'icon') {
     return (
       <IconButton
-        Icon={Heart}
-        variant='secondary'
-        size='large'
+        Icon={(props) => <Heart {...props} className={inWishlist ? 'text-primary fill-primary' : ''} />}
+        variant='outlined'
+        size='small'
         active={inWishlist}
         type="button"
         onClick={(e) => {

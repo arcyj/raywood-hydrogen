@@ -10,6 +10,7 @@ export type IButtonVariant =
   | 'tertiaryOnDark'
   | 'link'
   | 'action'
+  | 'low'
   | 'menuLink';
 
 export type IButtonSize = 'extra-small' | 'small' | 'medium' | 'large';
@@ -38,7 +39,7 @@ export interface ILinkButtonCoreProps {
 
 const ButtonTheme = {
   base: {
-    button: twc`inline-flex text-nowrap items-center justify-center rounded-4xl text-center no-underline font-semibold transition-all duration-100 ease-in-out`,
+    button: twc`inline-flex text-nowrap items-center justify-center rounded-xl text-center no-underline font-semibold transition-all duration-100 ease-in-out`,
     link: twc`inline-flex items-center justify-between`,
     linkText: twc`text-text-layout-powerful`,
     linkTextActive: twc`border-text-layout-accent text-text-layout-accent`,
@@ -51,24 +52,27 @@ const ButtonTheme = {
     action: twc`border-0 bg-[#35204d] text-white text-text-layout-primary rounded-xl`,
     link: twc`text-label-m border-0 border-b border-solid border-layout-powerful bg-transparent-full p-0 no-underline font-semibold`,
     menuLink: twc`text-link flex items-center px-8 rounded-lg py-8 active:bg-accentGrey active:inset-shadow-sm`,
+    low: twc`text-link flex items-center px-8 rounded-lg py-8 bg-accentGrey active:inset-shadow-sm`,
   },
   active: {
-    primary: twc`border-[#943BF2] bg-linear-to-b from-primary via-primary to-[#943BF2] via-[#8f5cf5] bg-[length:100%_180%] bg-[position:50%_0%] `,
+    primary: twc`border-black bg-black`,
     secondary: twc`bg-lightGrey`,
     tertiary: twc`bg-transparent-full `,
     tertiaryOnDark: twc`bg-transparent-full`,
     action: twc`bg-[#35204d]`,
     link: twc`tbg-transparent-full`,
     menuLink: twc``,
+    low: twc``,
   },
   hover: {
-    primary: twc`hover:bg-[position:50%_40%] transition-[background-position] `,
+    primary: twc`hover:bg-[#5c5c5c] border-[#5c5c5c]`,
     secondary: twc`hover:bg-accentGrey`,
     tertiary: twc`hover:border-black hover:bg-black hover:text-white`,
     tertiaryOnDark: twc`hover:bg-transparent-low-dark hover:text-text-buttons-tertiary-focus-dark`,
     link: twc`hover:border-text-link-focus hover:text-text-link-focus`,
     menuLink: twc`hover:bg-lightGrey`,
     action: twc``,
+    low: twc`hover:inset-shadow-sm`,
   },
   mousePress: {
     primary: twc`active:bg-[position:0%_80%] active:inset-shadow-sm`,
@@ -78,9 +82,10 @@ const ButtonTheme = {
     link: twc`active:border-text-link-action active:text-text-link-action`,
     menuLink: twc`active:bg-accentGrey active:inset-shadow-sm`,
     action: twc``,
+    low: twc`active:inset-shadow-sm`,
   },
   keyPress: {
-    primary: twc`!bg-surface-high-primary-action`,
+    primary: twc`!bg-[#5c5c5c]`,
     secondary: twc`!bg-surface-high-secondary-action`,
     tertiary: twc`!border-text-buttons-tertiary-focus !bg-foreground-lowest !ring-1 !ring-text-buttons-tertiary-focus`,
     tertiaryOnDark: twc`!border-2 !bg-transparent-medium-dark`,

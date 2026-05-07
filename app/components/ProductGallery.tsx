@@ -23,9 +23,7 @@ export function ProductGallery({
   }, []);
 
   useEffect(() => {
-    if (!thumbsApi) {
-      return;
-    }
+    if (!thumbsApi) return;
     thumbsApi.scrollTo(activeIndex);
   }, [thumbsApi, activeIndex]);
 
@@ -63,74 +61,73 @@ export function ProductGallery({
   }
 
   const mainSlides = imageMediaItems.map((mediaItem) => {
-      const isLoaded = !!loadedMainImages[mediaItem.id];
-      return (
-        <div
-          className={`product-gallery-main-slide bg-lightGrey ${isLoaded ? '' : 'product-gallery-main-slide--loading'}`}
-          key={mediaItem.id}
-        >
-          {!isLoaded && <div className="product-gallery-main-slide-skeleton" aria-hidden="true" />}
-          <Image
-            alt={mediaItem.image!.altText || 'Product Image'}
-            data={mediaItem.image!}
-            sizes="600px"
-            loading="lazy"
-            onLoad={() => markMainImageLoaded(mediaItem.id)}
-            className={`product-gallery-main-image mix-blend-darken h-full w-full object-contain ${isLoaded ? 'is-loaded' : ''}`}
-          />
-        </div>
-      );
-    });
+    const isLoaded = !!loadedMainImages[mediaItem.id];
+    return (
+      <div
+        className={`product-gallery-main-slide bg-lightGrey ${isLoaded ? '' : 'product-gallery-main-slide--loading'}`}
+        key={mediaItem.id}
+      >
+        {!isLoaded && <div className="product-gallery-main-slide-skeleton" aria-hidden="true" />}
+        <Image
+          alt={mediaItem.image!.altText || 'Product Image'}
+          data={mediaItem.image!}
+          sizes="(min-width: 990px) 55vw, 100vw"
+          loading="lazy"
+          onLoad={() => markMainImageLoaded(mediaItem.id)}
+          className={`product-gallery-main-image mix-blend-darken h-full w-full object-contain ${isLoaded ? 'is-loaded' : ''}`}
+        />
+      </div>
+    );
+  });
 
   const thumbSlides = imageMediaItems.map((mediaItem, index) => (
-      <button
-        type="button"
-        onClick={() => mainApi?.scrollTo(index)}
-        className={`product-gallery-thumb-slide bg-lightGrey rounded-lg ${activeIndex === index ? 'ring-2 ring-primary' : ''}`}
-        key={mediaItem.id}
-        aria-label={`View image ${index + 1}`}
-      >
-        <Image
-          alt={mediaItem.image!.altText || 'Product Thumbnail'}
-          data={mediaItem.image!}
-          loading="lazy"
-          className="mix-blend-darken"
-          sizes="100px"
-          height="120px"
-          width="auto"
-        />
-      </button>
-    ));
+    <button
+      type="button"
+      onClick={() => mainApi?.scrollTo(index)}
+      className={`product-gallery-thumb-slide bg-lightGrey rounded-lg ${activeIndex === index ? 'ring-2 ring-primary' : ''}`}
+      key={mediaItem.id}
+      aria-label={`View image ${index + 1}`}
+    >
+      <Image
+        alt={mediaItem.image!.altText || 'Product Thumbnail'}
+        data={mediaItem.image!}
+        loading="lazy"
+        className="mix-blend-darken"
+        sizes="100px"
+        height="120px"
+        width="auto"
+      />
+    </button>
+  ));
 
   return (
-    <div className="tablet:rounded-xl product-gallery product-gallery-slide-in">
-      <div className="">
-        {/* Main gallery - Slider with Thumbs sync */}
-        <div
-          className={`rounded-lg min-h-0 order-2 shadow-small overflow-hidden ${
-            media.length > 1 ? 'col-span-8 tablet:col-span-8' : 'col-span-8'
-          }`}
-        >
-          <Slider
-            className={`product-gallery-main mix-blend-darken min-h-0 ${
-              media.length > 1 ? 'product-gallery-main--peek-mobile' : ''
-            }`}
-            settings={{
-              ref: setMainApi,
-              afterChange: setActiveIndex,
-              arrows: isTablet ? true : false,
-              dots: false,
-              slidesToScroll: 1,
-              slidesToShow: 1,
-              spaceBetween: 8,
-              loop: true,
-            }}
-          >
-            {mainSlides}
-          </Slider>
-        </div>
-        {isTablet && media.length > 1 && (
-          <div className="col-span-1 min-h-0 flex flex-col overflow-hidden product-gallery-thumbs-wrap order-1 mt-8">
+    <div className="product-gallery product-gallery-slide-in">
+      <div className="desktop:flex desktop:gap-12">
+        {/* Main image slider */}
+        <div className="flex-1 min-w-0">
+          <div className="rounded-xl overflow-hidden shadow-small">
+            <Slider
+              className={`product-gallery-main ${
+                imageMediaItems.length > 1 && !isDesktop
+                  ? 'product-gallery-main--peek-mobile'
+                  : ''
+              }`}
+              settings={{
+                ref: setMainApi,
+                afterChange: setActiveIndex,
+                arrows: isTablet && !isDesktop,
+                dots: false,
+                slidesToScroll: 1,
+                slidesToShow: 1,
+                spaceBetween: 8,
+                loop: true,
+              }}
+            >
+              {mainSlides}
+            </Slider>
+          </div>
+
+          <div className="mt-8">
             <Slider
               className="product-gallery-thumbs-vertical rounded mix-blend-darken mr-8"
               settings={{
@@ -145,7 +142,7 @@ export function ProductGallery({
               {thumbSlides}
             </Slider>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

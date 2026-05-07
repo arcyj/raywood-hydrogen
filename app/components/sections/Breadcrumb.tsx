@@ -3,6 +3,7 @@ import type { FC } from 'react';
 import { House, ChevronRight } from 'lucide-react';
 import { twClasses } from '~/helpers/twMerge';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
+import { useTranslation } from '~/lib/i18nContext';
 
 export interface BreadcrumbItem {
   title: string;
@@ -30,9 +31,10 @@ export const Breadcrumb: FC<BreadcrumbProps> = ({
   className
 }) => {
   const withLocale = useLocalizedPath();
+  const { t } = useTranslation();
   const hasProduct = Boolean(product?.title);
   const items: Array<{ title: string; href?: string }> = [
-    { title: 'Home', href: '/' },
+    { title: t('breadcrumb.home'), href: '/' },
     ...(parentCollection?.handle
       ? [{ title: parentCollection.title, href: `/collections/${parentCollection.handle}` }]
       : []),
@@ -65,7 +67,7 @@ export const Breadcrumb: FC<BreadcrumbProps> = ({
                   className="transition-colors truncate inline-block max-w-[120px] sm:max-w-[200px] md:max-w-none py-1 -my-1 px-0.5 -mx-0.5 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-accentGrey hover:text-primary"
                 >
                   {index === 0 ? (
-                    <span className="sr-only">Home</span>
+                    <span className="sr-only">{t('breadcrumb.home')}</span>
                   ) : null}
                   {index === 0 ? (
                     <House size={18} className="flex-shrink-0" aria-hidden />

@@ -7,68 +7,100 @@ import {
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {Input} from '~/components/ui/Input';
 import {MagnifyingGlassIcon, Cross1Icon} from '@radix-ui/react-icons';
-import {Drawer} from './ui/Drawer';
+import { VaulDrawer } from './ui/vaulDrawer';
 import {usePlaypeak} from '~/lib/playpeakContext';
 import { Button } from './ui/Button';
 import { IconButton } from './ui/IconButton';
+import { useBreakpoints } from '~/hooks/useBreakpoints';
+import { useTranslation } from '~/lib/i18nContext';
 
 export function SearchDrawer() {
   const queriesDatalistId = useId();
-  const { isDrawerOpen, closeSearchDrawer } = usePlaypeak();
+  const { isDrawerOpen, closeSearchDrawer, searchInputRef } = usePlaypeak();
+  const { t } = useTranslation();
   const isOpen = isDrawerOpen('search');
-  const localInputRef = useRef<HTMLInputElement | null>(null);
+  const { isTablet } = useBreakpoints();
 
-  const focusInput = useCallback(() => {
-    const input = localInputRef.current;
-    if (!input) return;
-    if (document.activeElement !== input) {
-      input.focus();
-      if (document.activeElement !== input) {
-        requestAnimationFrame(() => input.focus());
-      }
-    }
-  }, []);
+
+  const ghostInputRef = useRef<HTMLInputElement | null>(null);
+  const realInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
-    const raf = requestAnimationFrame(() => focusInput());
-    const timeout = window.setTimeout(() => focusInput(), 350);
-    const retry = window.setTimeout(() => focusInput(), 800);
+    searchInputRef.current = ghostInputRef.current;
     return () => {
-      cancelAnimationFrame(raf);
-      window.clearTimeout(timeout);
-      window.clearTimeout(retry);
+      searchInputRef.current = null;
     };
-  }, [isOpen, focusInput]);
+  }, [searchInputRef]);
 
   useEffect(() => {
-    const handleFocusRequest = () => {
-      if (!isOpen) return;
-      focusInput();
-    };
-    window.addEventListener('searchdrawer:focus', handleFocusRequest);
-    return () => window.removeEventListener('searchdrawer:focus', handleFocusRequest);
-  }, [isOpen, focusInput]);
+    if (!isOpen) {
+      searchInputRef.current = ghostInputRef.current;
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      const input = realInputRef.current;
+      if (!input) return;
+      searchInputRef.current = input;
+      input.focus();
+    }, 350);
+
+    return () => window.clearTimeout(timeout);
+  }, [isOpen, searchInputRef]);
+
+  const realInputRefCallback = useCallback(
+    (node: HTMLInputElement | null) => {
+      realInputRef.current = node;
+      if (!node) {
+        searchInputRef.current = ghostInputRef.current;
+      }
+    },
+    [searchInputRef],
+  );
 
   const handleResultsScroll = useCallback(() => {
-    const input = localInputRef.current;
+    const input = realInputRef.current;
     if (!input) return;
     if (document.activeElement === input) {
       input.blur();
     }
   }, []);
 
+  // Ghost Input for focusing on ios
   return (
-    <Drawer
-      onClose={closeSearchDrawer}
-      visible={isOpen}
-      position="top"
-      className="bg-transparent overflow-hidden m-0! max-w-[390px] tablet:max-w-[600px]"
+    <>
+      <input
+        ref={ghostInputRef}
+        aria-hidden="true"
+        tabIndex={-1}
+        type="text"
+        style={{
+          position: 'fixed',
+          top: '54px',
+          left: 0,
+          width: '100%',
+          height: '60px',
+          opacity: 0,
+          pointerEvents: 'none',
+          border: 'none',
+          outline: 'none',
+          padding: 0,
+          fontSize: '16px',
+          zIndex: -1,
+        }}
+      />
+    <VaulDrawer.Root
+      direction={isTablet ? 'top' : 'bottom'}
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) closeSearchDrawer();
+      }}
     >
+      <VaulDrawer.Portal>
+        <VaulDrawer.Overlay />
+        <VaulDrawer.Content className="max-tablet:min-h-full">
       <div
-        className="predictive-search bg-white m-12 h-full rounded-lg min-h-[300px] tablet:min-h-[400px] max-h-[calc(100vh-180px)]"
-        // onTouchStart={focusInput}
-        // onPointerDown={focusInput}
+        className="predictive-search bg-white h-full rounded-lg pb-64 "
       >
         <SearchFormPredictive>
           {({fetchResults, goToSearch, inputRef, value}) => (
@@ -81,13 +113,12 @@ export function SearchDrawer() {
                     target: {value},
                   } as React.ChangeEvent<HTMLInputElement>)
                 }
-                placeholder="Search"
+                placeholder={t('common.search_placeholder')}
                 type='text'
                 ref={(node) => {
                   inputRef.current = node;
-                  localInputRef.current = node;
+                  realInputRefCallback(node);
                 }}
-                autoFocus={isOpen}
                 // list={queriesDatalistId}
                 Icon={MagnifyingGlassIcon}
                 className="p-8 flex-1"
@@ -129,7 +160,7 @@ export function SearchDrawer() {
 
             return (
               <div
-                className="overflow-y-scroll p-12"
+                className="overflow-y-scroll min-h-[300px] p-12"
                 onScroll={handleResultsScroll}
                 onTouchMove={handleResultsScroll}
               >
@@ -163,7 +194,7 @@ export function SearchDrawer() {
                     to={`${SEARCH_ENDPOINT}?q=${term.current}`}
                   >
                     <Button className="w-full">
-                      View all results for <q>{term.current}</q>
+                      {t('search.view_all_results_for')} <q>{term.current}</q>
                       &nbsp; →
                     </Button>
                   </Link>
@@ -173,6 +204,9 @@ export function SearchDrawer() {
           }}
         </SearchResultsPredictive>
       </div>
-    </Drawer>
+      </VaulDrawer.Content>
+      </VaulDrawer.Portal>
+    </VaulDrawer.Root>
+    </>
   );
 }

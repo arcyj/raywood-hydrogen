@@ -1,7 +1,14 @@
 import { twc, twClasses } from '~/helpers/twMerge';
 import type { RadixIconProps } from './ButtonTheme';
 import type { IIconProps } from '../icons/icon.types';
-import type { FC } from 'react';
+import type { FC, ForwardRefExoticComponent, SVGProps, RefAttributes } from 'react';
+
+type SVGAttributes = Partial<SVGProps<SVGSVGElement>>;
+type ElementAttributes = RefAttributes<SVGSVGElement> & SVGAttributes;
+interface LucideProps extends ElementAttributes {
+    size?: string | number;
+    absoluteStrokeWidth?: boolean;
+}
 
 type IIconButtonVariant = 'filled' | 'outlined' | 'ghost' | 'secondary' | 'round';
 type IIconLinkTheme = 'light' | 'dark';
@@ -13,7 +20,7 @@ export interface IIconCoreProps {
   size?: IIconButtonSize;
   disabled?: boolean;
   testName?: string;
-  Icon: FC<IIconProps> | React.ForwardRefExoticComponent<RadixIconProps & React.RefAttributes<SVGSVGElement>>;
+  Icon: FC<IIconProps> | React.ForwardRefExoticComponent<RadixIconProps & React.RefAttributes<SVGSVGElement>> | ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>;
 }
 
 const IconButtonTheme = {
@@ -29,6 +36,10 @@ const IconButtonTheme = {
     secondary: {
       'DEFAULT': twc`bg-lightGrey`,
       active: twc`bg-[#FA5053] text-white`
+    },
+    outlined:{
+      'DEFAULT': twc`bg-lightGrey`,
+      active: twc`text-primary`
     },
   },
   theme: {
@@ -65,7 +76,7 @@ const IconButtonTheme = {
     disabled: twc`cursor-not-allowed`,
   },
   sizes: {
-    small: twc`h-[32px] w-[32px]`,
+    small: twc`h-[40px] w-[40px]`,
     medium: twc`h-[48px] w-[48px]`,
     large: twc`text-label-l h-56 px-16`,
   },

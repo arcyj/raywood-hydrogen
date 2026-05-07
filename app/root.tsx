@@ -17,14 +17,10 @@ import type {Route} from './+types/root';
 import {FOOTER_QUERY, HEADER_QUERY, LOCALIZATION_QUERY} from '~/lib/fragments';
 import {
   buildLocaleOptionsFromApi,
-  getDetectedCountryCode,
-  getPreferredCurrencyFromCookie,
+  detectLocaleInfo,
 } from '~/lib/i18n';
-import {
-  DEFAULT_CURRENCY,
-  getCurrencyByCode,
-  getCurrencyForCountry,
-} from '~/helpers/currencies';
+import type { SelectedLocale } from '~/helpers/currencies';
+import type { SupportedLanguage } from '~/lib/playpeakContext';
 import { createServerLogger } from '~/lib/logger.server';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
@@ -32,7 +28,8 @@ import resetStyles from '~/styles/reset.css?url';
 import {PageLayout} from './components/PageLayout';
 import {ErrorPage} from './components/ErrorPage';
 import { GoogleTagManager } from './helpers/GoogleTagManager';
-import {CurrencyProvider} from '~/lib/CurrencyContext';
+import {PlaypeakProvider} from '~/lib/playpeakContext';
+import type { AvailableCountry } from '~/helpers/currencies';
 
 declare global {
   interface Window {
@@ -92,11 +89,7 @@ export function links() {
 export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
   const {storefront, env} = args.context;
-  const detectedCountry = getDetectedCountryCode(args.request);
-  const preferredCurrency = getPreferredCurrencyFromCookie(args.request);
-  const initialCurrency = preferredCurrency
-    ? (getCurrencyByCode(preferredCurrency) ?? DEFAULT_CURRENCY)
-    : getCurrencyForCountry(detectedCountry ?? 'LV');
+  const localeInfo = detectLocaleInfo(args.request);
 
   const deferredData = loadDeferredData(args);
 
@@ -115,11 +108,27 @@ export async function loader(args: Route.LoaderArgs) {
       }
     })();
 
+  const countryName = localeInfo.country
+    ? criticalData.availableCountries.find((c) => c.isoCode === localeInfo.country)?.name ?? null
+    : null;
+  const initialLocale: SelectedLocale = {
+    countryCode: localeInfo.country,
+    countryName,
+    currency: localeInfo.currency.currency,
+    currencyLabel: localeInfo.currency.label,
+    cartCountryCode: localeInfo.currency.countryCode,
+  };
+
+  const SUPPORTED_LANGUAGES = new Set<string>(['EN', 'SV', 'LV', 'ET']);
+  const initialLanguage: SupportedLanguage = SUPPORTED_LANGUAGES.has(localeInfo.language)
+    ? (localeInfo.language as SupportedLanguage)
+    : 'EN';
+
   return {
     ...deferredData,
     ...criticalData,
-    detectedCountry,
-    initialCurrency,
+    initialLocale,
+    initialLanguage,
     posthog: !isLocalhostDev && posthogApiKey
       ? {
           apiKey: posthogApiKey,
@@ -172,6 +181,14 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
 
   const availableLocales = buildLocaleOptionsFromApi(localization);
 
+  const availableCountries: AvailableCountry[] = (
+    localization?.localization?.availableCountries ?? []
+  ).map((c) => ({
+    isoCode: c.isoCode,
+    name: c.name,
+    currencyCode: c.currency.isoCode,
+  })).sort((a, b) => a.name.localeCompare(b.name));
+
   // Fallback when header query fails so layout can still render (avoids 500)
   const header = headerRaw ?? {
     shop: {
@@ -184,7 +201,7 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
     menu: null,
   } as const;
 
-  return {header, availableLocales};
+  return {header, availableLocales, availableCountries};
 }
 
 /**
@@ -328,9 +345,10 @@ export default function App() {
 
   return (
     <AppWithPostHog posthog={posthog}>
-      <CurrencyProvider
-        initialCurrency={data.initialCurrency}
-        initialDetectedCountry={data.detectedCountry}
+      <PlaypeakProvider
+        initialLocale={data.initialLocale}
+        initialLanguage={data.initialLanguage}
+        initialAvailableCountries={data.availableCountries}
       >
         <Analytics.Provider
           cart={data.cart}
@@ -342,7 +360,7 @@ export default function App() {
             <Outlet />
           </PageLayout>
         </Analytics.Provider>
-      </CurrencyProvider>
+      </PlaypeakProvider>
     </AppWithPostHog>
   );
 }
@@ -358,9 +376,10 @@ function ErrorLayout({
 }) {
   if (withFullLayout && data) {
     return (
-      <CurrencyProvider
-        initialCurrency={data.initialCurrency}
-        initialDetectedCountry={data.detectedCountry}
+      <PlaypeakProvider
+        initialLocale={data.initialLocale}
+        initialLanguage={data.initialLanguage}
+        initialAvailableCountries={data.availableCountries ?? []}
       >
         <PageLayout
           cart={data.cart}
@@ -371,38 +390,36 @@ function ErrorLayout({
         >
           {children}
         </PageLayout>
-      </CurrencyProvider>
+      </PlaypeakProvider>
     );
   }
 
   return (
-    <>
-      <CurrencyProvider
-        initialCurrency={{currency: 'EUR', label: '€ EUR', countryCode: 'DE'}}
-        initialDetectedCountry="EE"
-      >
-        <header className="flex items-center justify-center shadow-md rounded-b-xl min-h-[var(--header-height)] px-4 py-2">
-          <div className="flex items-center justify-center w-full">
-            <Link to="/" prefetch="intent" className="inline-block">
-              <Image
-                src="./images/LogoPlaypeak.svg"
-                alt="Playpeak"
-                width={100}
-                height={40}
-              />
-            </Link>
-          </div>
-        </header>
-        <main>{children}</main>
-        <footer className="footer bg-midnight py-12">
-          <div className="container mx-auto text-center">
-            <p className="text-small text-white/80">
-              © {new Date().getFullYear()}, PlayPeak
-            </p>
-          </div>
-        </footer>
-      </CurrencyProvider>
-    </>
+    <PlaypeakProvider
+      initialLocale={{countryCode: 'EE', countryName: 'Estonia', currency: 'EUR', currencyLabel: '€ EUR', cartCountryCode: 'DE'}}
+      initialDetectedLanguage="EN"
+    >
+      <header className="flex items-center justify-center shadow-md rounded-b-xl min-h-[var(--header-height)] px-4 py-2">
+        <div className="flex items-center justify-center w-full">
+          <Link to="/" prefetch="intent" className="inline-block">
+            <Image
+              src="./images/RAYWOODSTORE.svg"
+              alt="Playpeak"
+              width={100}
+              height={40}
+            />
+          </Link>
+        </div>
+      </header>
+      <main>{children}</main>
+      <footer className="footer bg-midnight py-12">
+        <div className="container mx-auto text-center">
+          <p className="text-small text-white/80">
+            © {new Date().getFullYear()}, PlayPeak
+          </p>
+        </div>
+      </footer>
+    </PlaypeakProvider>
   );
 }
 

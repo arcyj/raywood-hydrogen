@@ -1,14 +1,11 @@
 const BASE_URL = 'https://judge.me/api/v1';
-const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const DEFAULT_FETCH_TIMEOUT_MS = 5000;
-const FAILURE_COOLDOWN_MS = 60 * 1000;
 
 type EnvLike = Record<string, string | undefined>;
 
 export type JudgeMeConfig = {
   token: string;
   shopDomain: string;
-  cacheTtlMs?: number;
 };
 
 type JudgeMeReview = {
@@ -29,11 +26,6 @@ type JudgeMeReviewsResponse = {
   reviews?: JudgeMeReview[];
 };
 
-type ReviewsCacheEntry = {
-  expiresAt: number;
-  reviews: JudgeMeReview[];
-};
-
 export type PublicJudgeMeReviewProduct = {
   title: string;
   handle: string | null;
@@ -48,28 +40,6 @@ export type PublicJudgeMeReview = {
   isVerified: boolean;
   product: PublicJudgeMeReviewProduct | null;
 };
-
-const reviewCacheByShop = new Map<string, ReviewsCacheEntry>();
-const inFlightByShop = new Map<string, Promise<JudgeMeReview[]>>();
-const failureCooldownUntilByShop = new Map<string, number>();
-
-function getJudgeMeConfig(env: EnvLike) {
-  const token = env.JUDGEME_API_TOKEN;
-  const storeDomain = env.PUBLIC_STORE_DOMAIN;
-
-  if (!token || !storeDomain) {
-    const missing: string[] = [];
-    if (!token) missing.push('JUDGEME_API_TOKEN');
-    if (!storeDomain) missing.push('PUBLIC_STORE_DOMAIN');
-    throw new Error(
-      `Judge.me credentials not configured. Missing: ${missing.join(', ')}`,
-    );
-  }
-
-  const cleanDomain = storeDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
-
-  return {token, cleanDomain};
-}
 
 function normalizeShopDomain(shopDomain: string) {
   return shopDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
@@ -159,11 +129,7 @@ async function fetchJudgeMeReviews({
   return payload.reviews ?? [];
 }
 
-export function createJudgeMeClient({
-  token,
-  shopDomain,
-  cacheTtlMs = DEFAULT_CACHE_TTL_MS,
-}: JudgeMeConfig) {
+export function createJudgeMeClient({token, shopDomain}: JudgeMeConfig) {
   if (!token) {
     throw new Error('Judge.me credentials not configured. Missing: JUDGEME_API_TOKEN');
   }
@@ -172,64 +138,13 @@ export function createJudgeMeClient({
   }
 
   const cleanDomain = normalizeShopDomain(shopDomain);
-  const cacheKey = cleanDomain;
-
-  const refreshReviews = () =>
-    fetchJudgeMeReviews({token, cleanDomain})
-      .then((reviews) => {
-        const resolvedAt = Date.now();
-        reviewCacheByShop.set(cacheKey, {
-          reviews,
-          expiresAt: resolvedAt + cacheTtlMs,
-        });
-        failureCooldownUntilByShop.delete(cacheKey);
-        return reviews;
-      })
-      .catch((error) => {
-        failureCooldownUntilByShop.set(cacheKey, Date.now() + FAILURE_COOLDOWN_MS);
-        const stale = reviewCacheByShop.get(cacheKey);
-        if (stale) {
-          console.warn(
-            `Judge.me request failed for ${cacheKey}; serving stale cache.`,
-            error,
-          );
-          return stale.reviews;
-        }
-        throw error;
-      })
-      .finally(() => {
-        inFlightByShop.delete(cacheKey);
-      });
 
   return {
-    async getAllReviews() {
-      const now = Date.now();
-      const cached = reviewCacheByShop.get(cacheKey);
-      if (cached && cached.expiresAt > now) {
-        return cached.reviews;
-      }
-
-       const cooldownUntil = failureCooldownUntilByShop.get(cacheKey) ?? 0;
-       if (now < cooldownUntil) {
-        return cached?.reviews ?? [];
-      }
-
-      const inFlight = inFlightByShop.get(cacheKey);
-      if (inFlight) {
-        return cached?.reviews ?? inFlight;
-      }
-
-      const request = refreshReviews();
-      inFlightByShop.set(cacheKey, request);
-
-      // Keep navigation fast: return stale data while refreshing in background.
-      if (cached) {
-        return cached.reviews;
-      }
-
-      return request;
+    async getAllReviews(): Promise<JudgeMeReview[]> {
+      return fetchJudgeMeReviews({token, cleanDomain});
     },
-    async getPublicReviews() {
+
+    async getPublicReviews(): Promise<PublicJudgeMeReview[]> {
       const reviews = await this.getAllReviews();
       return reviews
         .filter((review) => review.curated === 'ok')
@@ -239,9 +154,16 @@ export function createJudgeMeClient({
 }
 
 export function createJudgeMeClientFromEnv(env: EnvLike) {
-  const {token, cleanDomain} = getJudgeMeConfig(env);
-  return createJudgeMeClient({
-    token,
-    shopDomain: cleanDomain,
-  });
+  const token = env.JUDGEME_API_TOKEN;
+  const shopDomain = env.PUBLIC_STORE_DOMAIN;
+
+  if (!token || !shopDomain) {
+    const missing: string[] = [];
+    if (!token) missing.push('JUDGEME_API_TOKEN');
+    if (!shopDomain) missing.push('PUBLIC_STORE_DOMAIN');
+    console.warn(`Judge.me not configured. Missing: ${missing.join(', ')}`);
+    return null;
+  }
+
+  return createJudgeMeClient({token, shopDomain});
 }

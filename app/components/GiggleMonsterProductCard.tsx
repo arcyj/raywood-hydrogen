@@ -5,6 +5,8 @@ import {ProductPrice} from '~/components/ProductPrice';
 import {ButtonLink} from '~/components/ui/Link';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
 import {useAside} from '~/components/Aside';
+import { ShoppingCart } from 'lucide-react';
+import { useTranslation } from '~/lib/i18nContext';
 
 export type GiggleMonsterProductCardProduct = {
   id: string;
@@ -30,6 +32,7 @@ export function GiggleMonsterProductCard({
 }) {
   const withLocale = useLocalizedPath();
   const {open} = useAside();
+  const { t } = useTranslation();
 
   if (!product?.id) return null;
 
@@ -92,7 +95,7 @@ export function GiggleMonsterProductCard({
                 className="relative w-full tablet:w-1/2 mb-8"
                 disabled={buttonDisabled}
               >
-                Buy now
+                {t('product.buy_now')}
               </ButtonLink>
 
               {variantNode && (
@@ -105,7 +108,8 @@ export function GiggleMonsterProductCard({
                     variant="tertiary"
                     showIcon
                   >
-                    {!variantNode.availableForSale ? 'Sold out' : 'Add to cart'}
+                    <ShoppingCart size={18} className="mr-8"/>
+                    {!variantNode.availableForSale ? t('product.sold_out') : t('product.add_to_cart')}
                   </AddToCartButton>
                 </div>
               )}

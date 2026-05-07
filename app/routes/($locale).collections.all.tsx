@@ -34,7 +34,7 @@ export async function loader(args: Route.LoaderArgs) {
 async function loadCriticalData({context, request}: Route.LoaderArgs) {
   const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 8,
+    pageBy: 16,
   });
 
   const [{products}] = await Promise.all([
@@ -59,22 +59,26 @@ export default function Collection() {
   const {products} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collection">
-      <h1>Products</h1>
-      <PaginatedResourceSection<CollectionItemFragment>
-        connection={products}
-        resourcesClassName="products-grid"
-        skeletonComponent={ProductItemSkeleton}
-        skeletonCount={8}
-      >
-        {({node: product, index}) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
+    <div className="container-large mx-auto">
+      <h1 className="text-h1 mb-44">All Products</h1>
+      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 min-h-screen mb-64">
+        <div className="col-span-4 md:col-span-6 lg:col-span-12">
+          <PaginatedResourceSection<CollectionItemFragment>
+            connection={products}
+            resourcesClassName="products-grid products-grid--cols-4"
+            skeletonComponent={ProductItemSkeleton}
+            skeletonCount={8}
+          >
+            {({node: product, index}) => (
+              <ProductItem
+                key={product.id}
+                product={product}
+                loading={index < 8 ? 'eager' : undefined}
+              />
+            )}
+          </PaginatedResourceSection>
+        </div>
+      </div>
     </div>
   );
 }
@@ -111,6 +115,27 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
         title
       }
     }
+    variants(first: 20) {
+      nodes {
+        id
+        title
+        availableForSale
+        image {
+          url
+          altText
+          width
+          height
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
+    }
     featuredImage {
       id
       altText
@@ -125,6 +150,11 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
       maxVariantPrice {
         ...MoneyCollectionItem
       }
+    }
+    metafields(identifiers: [{namespace: "custom", key: "preorder"}]) {
+      namespace
+      key
+      value
     }
   }
 ` as const;

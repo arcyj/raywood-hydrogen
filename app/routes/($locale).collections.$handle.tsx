@@ -231,7 +231,7 @@ export default function Collection() {
   };
 
   return (
-    <div className="container-large mx-auto max-tablet:pt-44">
+    <div className="container-large mx-auto">
       <Breadcrumb
         collection={{title: collection.title, handle: collection.handle}}
         parentCollection={parentCollection ?? undefined}
@@ -241,7 +241,7 @@ export default function Collection() {
       <ChildCollectionSlider className="mb-24" />
       <div className="flex flex-col tablet:flex-row justify-between tablet:items-center">
         <div className="flex items-center gap-8 mb-12 flex-wrap justify-between w-full">
-          <div className="flex items-center gap-8 flex-wrap">
+          {/* <div className="flex items-center gap-8 flex-wrap">
             <Button
               onClick={handleFilter}
               variant="secondary"
@@ -250,11 +250,11 @@ export default function Collection() {
             >
               All filters
             </Button>
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-8 flex-wrap">
-            <SortByFilter />
-            {isTablet ? (
+            {/* <SortByFilter /> */}
+            {/* {isTablet ? (
               <ToggleGroup
                 value={String(collectionGrid)}
                 onValueChange={(v) => {
@@ -270,7 +270,7 @@ export default function Collection() {
                   <LargeGrid size={20} />
                 </ToggleGroup.Item>
               </ToggleGroup>
-            ) : null}
+            ) : null} */}
           </div>
         </div>
       </div>
@@ -319,10 +319,10 @@ export default function Collection() {
         )}
       </div>
       <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 min-h-screen mb-64">
-        <div className="col-span-4 md:col-span-6 lg:col-span-12 bg-white">
+        <div className="col-span-4 md:col-span-6 lg:col-span-12">
           <PaginatedResourceSection<ProductItemFragment>
             connection={collection.products}
-            resourcesClassName={`products-grid ${collectionGrid === 4 ? 'products-grid--cols-4' : 'products-grid--cols-6'}`}
+            resourcesClassName={`products-grid products-grid--cols-4`}
             skeletonComponent={ProductItemSkeleton}
             skeletonCount={1}
             nextPageUrl={nextPageUrl}
@@ -337,8 +337,6 @@ export default function Collection() {
           </PaginatedResourceSection>
         </div>
       </div>
-
-      <SubscriptionForm className='mb-64'/>
 
       <Analytics.CollectionView
         data={{
@@ -385,6 +383,27 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         title
       }
     }
+    variants(first: 20) {
+      nodes {
+        id
+        title
+        availableForSale
+        image {
+          url
+          altText
+          width
+          height
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
+    }
     featuredImage {
       id
       altText
@@ -399,6 +418,11 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
       maxVariantPrice {
         ...MoneyProductItem
       }
+    }
+    metafields(identifiers: [{namespace: "custom", key: "preorder"}]) {
+      namespace
+      key
+      value
     }
   }
 ` as const;

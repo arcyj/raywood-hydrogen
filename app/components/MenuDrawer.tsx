@@ -1,10 +1,11 @@
 
-import {Drawer} from './ui/Drawer';
+import { VaulDrawer } from './ui/vaulDrawer';
 import { IconButton } from './ui/IconButton';
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { DropDownMenu } from './ui/DropdownMenu';
 import {usePlaypeak} from '~/lib/playpeakContext';
 import type {HeaderQuery} from 'storefrontapi.generated';
+import { useBreakpoints } from '~/hooks/useBreakpoints';
 
 interface IMenuDrawerProps {
   header: HeaderQuery;
@@ -23,8 +24,8 @@ export function MenuDrawer({
 
   const Header = () => {
     return (
-      <div className='p-12 flex justify-between items-center'>
-        <span className='text-h1'>Menu</span>
+      <div className='flex justify-between items-center'>
+        <span className='text-h1'>Shop</span>
         <IconButton
           Icon={Cross1Icon}
           variant="secondary"
@@ -35,25 +36,33 @@ export function MenuDrawer({
     );
   };
 
-  const FooterContent = () => {
-    return <></>;
-  };
-
+  const { isTablet } = useBreakpoints();
   return (
-    <Drawer
-      onClose={closeDrawer}
-      visible={isOpen}
-      position="left"
-      className="overflow-hidden h-full"
-      panelClassName="p-12 bg-white "
-      header={<Header />}
+    <VaulDrawer.Root
+      direction={isTablet ? 'right' : 'bottom'}
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) closeDrawer();
+      }}
     >
-      <DropDownMenu
-        menu={menu}
-        isLoggedIn={isLoggedIn}
-        publicStoreDomain={publicStoreDomain}
-        primaryDomainUrl={publicStoreDomain}
-      />
-    </Drawer>
+      <VaulDrawer.Portal>
+        <VaulDrawer.Overlay />
+        <VaulDrawer.Content>
+          <div className="bg-white rounded-t-lg tablet:rounded-lg h-full relative p-12">
+            <div className="w-full flex tablet:hidden items-center justify-center">
+              <span className="w-128 h-4 bg-accentGrey rounded-full block"></span>
+            </div>
+            <Header />
+
+            <DropDownMenu
+              menu={menu}
+              isLoggedIn={isLoggedIn}
+              publicStoreDomain={publicStoreDomain}
+              primaryDomainUrl={publicStoreDomain}
+            />
+          </div>
+        </VaulDrawer.Content>
+      </VaulDrawer.Portal>
+    </VaulDrawer.Root>
   );
 }

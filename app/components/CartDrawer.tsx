@@ -4,34 +4,39 @@ import { VaulDrawer } from './ui/vaulDrawer';
 import { IconButton } from './ui/IconButton';
 import { Cross1Icon } from "@radix-ui/react-icons";
 import {usePlaypeak} from '~/lib/playpeakContext';
+import { useBreakpoints } from '~/hooks/useBreakpoints';
+import { useTranslation } from '~/lib/i18nContext';
 import type {
   CartApiQueryFragment,
 } from 'storefrontapi.generated';
 import { CartMain } from './CartMain';
 
 export function CartDrawer({cart}: {cart: Promise<CartApiQueryFragment | null>}) {
-  const { isDrawerOpen, closeCart } = usePlaypeak();
+  const { isDrawerOpen, closeDrawer } = usePlaypeak();
+  const { isTablet } = useBreakpoints();
+  const { t } = useTranslation();
   const isOpen = isDrawerOpen('cart');
 
   return (
     <VaulDrawer.Root
-      direction='right'
+      direction={isTablet ? 'right' : 'bottom'}
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) closeCart();
+        if (!open) closeDrawer();
       }}
     >
       <VaulDrawer.Portal>
-        <VaulDrawer.Overlay className="fixed inset-0 bg-black/40 z-9998" />
-        <VaulDrawer.Content className="p-12 flex flex-col fixed right-0 tablet:w-[500px] top-0 bottom-0 h-full z-9999">
-          <div className='bg-white rounded-lg h-full relative'>
-            <div className='p-12 flex justify-between items-center'>
-              <span className='text-h1'>Cart</span>
+        <VaulDrawer.Overlay />
+        <VaulDrawer.Content>
+          <div className='bg-white rounded-t-lg tablet:rounded-lg h-full relative'>
+            <div className="w-full flex tablet:hidden items-center justify-center pt-12"><span className='w-128 h-4 bg-accentGrey rounded-full block'></span></div>
+            <div className='px-12 pb-12 tablet:pt-12 flex justify-between items-center'>
+              <span className='text-h1'>{t('cart.heading')}</span>
               <IconButton
                 Icon={Cross1Icon}
                 variant="secondary"
                 size="medium"
-                onClick={closeCart}
+                onClick={closeDrawer}
               />
             </div>
             <Suspense fallback={<CartDrawerFallback />}>
@@ -50,6 +55,7 @@ export function CartDrawer({cart}: {cart: Promise<CartApiQueryFragment | null>})
 
 function CartDrawerFallback() {
   const [showRefreshHint, setShowRefreshHint] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -75,7 +81,7 @@ function CartDrawerFallback() {
       </ul>
       {showRefreshHint ? (
         <p className="text-small text-center">
-          If loading persists, please refresh the page
+          {t('cart.loading_hint')}
         </p>
       ) : null}
     </div>

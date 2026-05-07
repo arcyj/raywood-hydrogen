@@ -6,6 +6,7 @@ import { Filters } from './filters/Filters';
 import { IconButton } from './ui/IconButton';
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { FILTER_URL_PREFIX } from '~/helpers/const';
+import { useTranslation } from '~/lib/i18nContext';
 
 const LEGACY_IN_STOCK_PARAM = 'inStock';
 
@@ -31,11 +32,12 @@ export function FilterDrawer() {
     closeFilter();
   };
   const isOpen = isDrawerOpen('filter');
+  const { t } = useTranslation();
 
   const Header = () => {
     return(
       <div className='p-12 flex justify-between items-center'>
-        <span className='text-h1'>Filters</span>
+        <span className='text-h1'>{t('filter.heading')}</span>
         <IconButton
           Icon={Cross1Icon}
           variant="secondary"
@@ -50,10 +52,10 @@ export function FilterDrawer() {
     return(
       <div className='p-12 flex justify-between items-center gap-4'>
         <Button variant='secondary' size="medium" onClick={clearAllFilters} className='w-full'>
-          Clear all
+          {t('filter.clear_all')}
         </Button>
         <Button variant='primary' size="medium" onClick={closeFilter} className='w-full'>
-          Apply filters
+          {t('filter.apply')}
         </Button>
       </div>
     )

@@ -9,6 +9,7 @@ import {AsideContext} from './Aside';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useLocalizedPath} from '~/hooks/useLocalePath';
 import {useCartRoute} from '~/lib/cartRoute';
+import { useTranslation } from '~/lib/i18nContext';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 type CartLineLike = {
@@ -101,13 +102,14 @@ function CartLineQuantity({line}: {line: CartLine}) {
   const {id: lineId, quantity, isOptimistic} = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
+  const { t } = useTranslation();
 
   return (
     <div className="cart-line-quantity">
-      <small>Quantity: {quantity} &nbsp;&nbsp;</small>
+      <small>{t('cart.quantity', { count: quantity })} &nbsp;&nbsp;</small>
       <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
         <button
-          aria-label="Decrease quantity"
+          aria-label={t('cart.decrease_quantity')}
           disabled={quantity <= 1 || !!isOptimistic}
           name="decrease-quantity"
           value={prevQuantity}
@@ -118,7 +120,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
       &nbsp;
       <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
         <button
-          aria-label="Increase quantity"
+          aria-label={t('cart.increase_quantity')}
           name="increase-quantity"
           value={nextQuantity}
           disabled={!!isOptimistic}
@@ -210,9 +212,10 @@ function CartLineRemoveButtonInner({
     previousStateRef.current = fetcher.state;
   }, [fetcher.state, fetcher.data, lineIds, publish, shop, cart, prevCart]);
 
+  const { t } = useTranslation();
   return (
     <button disabled={disabled || fetcher.state !== 'idle'} type="submit">
-      Remove
+      {t('cart.remove')}
     </button>
   );
 }

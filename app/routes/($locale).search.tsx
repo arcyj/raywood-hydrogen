@@ -150,6 +150,32 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
         title
       }
     }
+    variants(first: 20) {
+      nodes {
+        id
+        title
+        availableForSale
+        image {
+          url
+          altText
+          width
+          height
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
+    }
+    metafields(identifiers: [{namespace: "custom", key: "preorder"}]) {
+      namespace
+      key
+      value
+    }
   }
 ` as const;
 

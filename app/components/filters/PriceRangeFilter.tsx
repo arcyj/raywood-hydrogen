@@ -8,7 +8,8 @@ import type { CollectionQuery } from "storefrontapi.generated";
 import { FILTER_URL_PREFIX } from "~/helpers/const";
 import { filterInputToParams } from "~/helpers/filterInputToParams";
 import { getCurrencySymbol } from "~/helpers/currencies";
-import { useCurrency } from "~/lib/CurrencyContext";
+import { usePlaypeak } from "~/lib/playpeakContext";
+import { useTranslation } from "~/lib/i18nContext";
 
 export function PriceRangeFilter({
   collection,
@@ -21,8 +22,9 @@ export function PriceRangeFilter({
   const location = useLocation();
   const navigate = useNavigate();
   const thumbRef = useRef<"from" | "to" | null>(null);
-  const { selectedCurrency } = useCurrency();
-  const currencySymbol = getCurrencySymbol(selectedCurrency);
+  const { locale } = usePlaypeak();
+  const currencySymbol = getCurrencySymbol(locale);
+  const { t } = useTranslation();
 
   const { minVariantPrice, maxVariantPrice } = getPricesRange(collection);
   const { min, max } = getPricesFromFilter(params);
@@ -50,12 +52,12 @@ export function PriceRangeFilter({
 
   return (
     <div className={`space-y-4 rounded-lg p-24 mt-24 bg-lightGrey ${className}`}>
-      <h3 className="text-h3 font-semibold text-gray-900 mb-24">Price Range</h3>
+      <h3 className="text-h3 font-semibold text-gray-900 mb-24">{t('filter.price_range')}</h3>
         <div className="flex items-center gap-4 mb-24">
         <div className="flex flex-1 shrink items-center gap-1 rounded-lg bg-white px-4">
           <VisuallyHidden.Root asChild>
-            <label htmlFor="minPrice" aria-label="Min price">
-              Min price
+            <label htmlFor="minPrice" aria-label={t('filter.min_price')}>
+              {t('filter.min_price')}
             </label>
           </VisuallyHidden.Root>
           <span className="text-medium-semi pl-4">{currencySymbol}</span>
@@ -76,11 +78,11 @@ export function PriceRangeFilter({
             className="w-full border-none text-regular-semi bg-transparent py-3 px-8 text-right focus:outline-hidden focus:ring-0 focus-visible:outline-hidden"
           />
         </div>
-        <span className="px-8 text-medium-semi">To</span>
+        <span className="px-8 text-medium-semi">{t('filter.price_to')}</span>
         <div className="flex flex-1 items-center gap-1 rounded-lg bg-white px-8">
           <VisuallyHidden.Root asChild>
-            <label htmlFor="maxPrice" aria-label="Max price">
-              Max price
+            <label htmlFor="maxPrice" aria-label={t('filter.max_price')}>
+              {t('filter.max_price')}
             </label>
           </VisuallyHidden.Root>
           <span className="text-medium-semi pl-4">{currencySymbol}</span>

@@ -1,10 +1,45 @@
-import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useRef, useState, useCallback, useMemo, useEffect, type ReactNode, type MutableRefObject } from 'react';
+import {
+  DEFAULT_LOCALE,
+  type SelectedLocale,
+  type AvailableCountry,
+} from '~/helpers/currencies';
+import { PREFERRED_CURRENCY_COOKIE, PREFERRED_COUNTRY_COOKIE, PREFERRED_LANGUAGE_COOKIE } from '~/lib/i18n';
+
+export type SupportedLanguage = 'EN' | 'SV' | 'LV' | 'ET' | 'LT';
+const SUPPORTED_LANGUAGES: SupportedLanguage[] = ['EN', 'SV', 'LV', 'ET', 'LT'];
+const LANGUAGE_STORAGE_KEY = 'preferred_language';
 
 const STORAGE_PREFIX = 'playpeak-';
+const LOCALE_STORAGE_KEY = 'selected_locale';
+const COOKIE_MAX_AGE = 365 * 24 * 60 * 60;
+
+function setCookie(name: string, value: string) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+}
+
+function persistLocale(locale: SelectedLocale) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(LOCALE_STORAGE_KEY, JSON.stringify(locale));
+}
+
+function getStoredLocale(): SelectedLocale | null {
+  if (typeof window === 'undefined') return null;
+  const raw = localStorage.getItem(LOCALE_STORAGE_KEY);
+  if (!raw) return null;
+  try { return JSON.parse(raw) as SelectedLocale; } catch { return null; }
+}
 
 export type DrawerType = 'search' | 'menu' | 'profile' | 'wishlist' | 'cart' | 'filter' | null;
 
 interface PlaypeakContextValue {
+  // Unified locale – country + currency in one object
+  locale: SelectedLocale;
+  setLocale: (locale: SelectedLocale) => void;
+  language: SupportedLanguage;
+  setLanguage: (lang: SupportedLanguage) => void;
+
   // Settings (persisted in localStorage)
   getSetting: <T>(key: string) => T | null;
   setSetting: <T>(key: string, value: T) => void;
@@ -22,6 +57,11 @@ interface PlaypeakContextValue {
   closeDrawer: () => void;
   isDrawerOpen: (drawer: DrawerType) => boolean;
 
+  // Ref to the search input — set by SearchDrawer so openSearchDrawer can
+  // focus it synchronously inside the user-gesture call stack (required by iOS
+  // to show the keyboard).
+  searchInputRef: MutableRefObject<HTMLInputElement | null>;
+
   // Convenience methods for specific drawers
   openSearchDrawer: () => void;
   closeSearchDrawer: () => void;
@@ -33,6 +73,12 @@ interface PlaypeakContextValue {
   closeWishlist: () => void;
   openFilter: () => void;
   closeFilter: () => void;
+
+  // Country selector
+  availableCountries: AvailableCountry[];
+  isCountrySelectorOpen: boolean;
+  openCountrySelector: () => void;
+  closeCountrySelector: () => void;
 }
 
 const PlaypeakContext = createContext<PlaypeakContextValue | null>(null);
@@ -42,10 +88,73 @@ PlaypeakContext.displayName = 'PlaypeakContext';
 
 interface PlaypeakProviderProps {
   children: ReactNode;
+  initialLocale?: SelectedLocale;
+  initialLanguage?: SupportedLanguage;
   initialDarkMode?: boolean;
+  initialAvailableCountries?: AvailableCountry[];
 }
 
-export function PlaypeakProvider({ children, initialDarkMode = false }: PlaypeakProviderProps) {
+export function PlaypeakProvider({
+  children,
+  initialLocale,
+  initialLanguage,
+  initialDarkMode = false,
+  initialAvailableCountries,
+}: PlaypeakProviderProps) {
+  // --- Locale state (country + currency unified) ---
+  const [locale, setLocaleState] = useState<SelectedLocale>(
+    () => initialLocale ?? getStoredLocale() ?? DEFAULT_LOCALE,
+  );
+  const [language, setLanguageState] = useState<SupportedLanguage>(() => {
+    const stored = getStoredLanguage();
+    if (stored) return stored;
+    if (initialLanguage && SUPPORTED_LANGUAGES.includes(initialLanguage)) return initialLanguage;
+    return 'EN';
+  });
+
+  const setLocale = useCallback((newLocale: SelectedLocale) => {
+    setLocaleState(newLocale);
+    if (typeof window !== 'undefined') {
+      persistLocale(newLocale);
+      setCookie(PREFERRED_CURRENCY_COOKIE, newLocale.currency);
+      setCookie(PREFERRED_COUNTRY_COOKIE, newLocale.countryCode ?? '');
+    }
+  }, []);
+
+  // Sync from server when locale changes (driven by updated cookies on the server)
+  useEffect(() => {
+    if (initialLocale?.countryCode) {
+      setLocaleState(initialLocale);
+      persistLocale(initialLocale);
+    }
+  }, [initialLocale?.countryCode, initialLocale?.currency]);
+
+  const setLanguage = useCallback((lang: SupportedLanguage) => {
+    setLanguageState(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+      setCookie(PREFERRED_LANGUAGE_COOKIE, lang);
+    }
+  }, []);
+
+  // --- Country selector ---
+  const [availableCountries] = useState<AvailableCountry[]>(initialAvailableCountries ?? []);
+  const [isCountrySelectorOpen, setIsCountrySelectorOpen] = useState(false);
+
+  const openCountrySelector = useCallback(() => setIsCountrySelectorOpen(true), []);
+  const closeCountrySelector = useCallback(() => setIsCountrySelectorOpen(false), []);
+
+  // Auto-open country selector when country couldn't be detected and user has no stored preference
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hasStored = Boolean(localStorage.getItem(LOCALE_STORAGE_KEY));
+    const dismissed = Boolean(sessionStorage.getItem('country-selector-dismissed'));
+    if (!hasStored && !dismissed && !initialLocale?.countryCode) {
+      setIsCountrySelectorOpen(true);
+    }
+  }, []);
+
+  // --- Settings ---
   const getSetting = useCallback(<T,>(key: string): T | null => {
     if (typeof window === 'undefined') return null;
     const raw = localStorage.getItem(STORAGE_PREFIX + key);
@@ -89,6 +198,7 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
   });
 
   const [activeDrawer, setActiveDrawer] = useState<DrawerType>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   // Sync dark mode with localStorage and document class
   useEffect(() => {
@@ -127,6 +237,10 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
 
   // Convenience methods
   const openSearchDrawer = useCallback(() => {
+    // Focus synchronously here, inside the user-gesture call stack.
+    // iOS Safari only shows the keyboard when focus() is called directly
+    // from a user interaction — setTimeout/useEffect breaks that chain.
+    searchInputRef.current?.focus();
     openDrawer('search');
   }, [openDrawer]);
 
@@ -176,6 +290,10 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
 
   const value = useMemo(
     () => ({
+      locale,
+      setLocale,
+      language,
+      setLanguage,
       getSetting,
       setSetting,
       collectionGrid,
@@ -187,6 +305,7 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
       openDrawer,
       closeDrawer,
       isDrawerOpen,
+      searchInputRef,
       openSearchDrawer,
       closeSearchDrawer,
       openCart,
@@ -197,8 +316,16 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
       closeWishlist,
       openFilter,
       closeFilter,
+      availableCountries,
+      isCountrySelectorOpen,
+      openCountrySelector,
+      closeCountrySelector,
     }),
     [
+      locale,
+      setLocale,
+      language,
+      setLanguage,
       getSetting,
       setSetting,
       collectionGrid,
@@ -210,6 +337,7 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
       openDrawer,
       closeDrawer,
       isDrawerOpen,
+      searchInputRef,
       openSearchDrawer,
       closeSearchDrawer,
       openCart,
@@ -220,18 +348,12 @@ export function PlaypeakProvider({ children, initialDarkMode = false }: Playpeak
       closeWishlist,
       openFilter,
       closeFilter,
+      availableCountries,
+      isCountrySelectorOpen,
+      openCountrySelector,
+      closeCountrySelector,
     ],
   );
-
-  // Debug: Log context value in development
-  useEffect(() => {
-    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-      console.log('[PlaypeakContext] Provider mounted with value:', {
-        darkMode,
-        activeDrawer,
-      });
-    }
-  }, [darkMode, activeDrawer]);
 
   return <PlaypeakContext.Provider value={value}>{children}</PlaypeakContext.Provider>;
 }
@@ -245,4 +367,12 @@ export function usePlaypeak() {
     throw new Error('usePlaypeak must be used within a PlaypeakProvider');
   }
   return context;
+}
+
+function getStoredLanguage(): SupportedLanguage | null {
+  if (typeof window === 'undefined') return null;
+  const raw = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  if (!raw) return null;
+  const upper = raw.toUpperCase() as SupportedLanguage;
+  return SUPPORTED_LANGUAGES.includes(upper) ? upper : null;
 }

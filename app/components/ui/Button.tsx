@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Spinner } from '../icons/Spinner';
-import { buttonClasses } from '../themes/ButtonTheme';
-import type { ILinkButtonCoreProps } from '../themes/ButtonTheme';
-import type { MouseEvent, KeyboardEvent, FC } from 'react';
+import {useState} from 'react';
+import {Spinner} from '../icons/Spinner';
+import {buttonClasses} from '../themes/ButtonTheme';
+import type {ILinkButtonCoreProps} from '../themes/ButtonTheme';
+import type {MouseEvent, KeyboardEvent, FC} from 'react';
 
 interface IButtonProps extends ILinkButtonCoreProps {
   type?: 'button' | 'submit';
@@ -36,7 +36,9 @@ export const Button: FC<IButtonProps> = ({
     }
   };
 
-  const handleClicked = (event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => {
+  const handleClicked = (
+    event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>,
+  ) => {
     onClick && onClick(event);
   };
 
@@ -73,8 +75,8 @@ export const Button: FC<IButtonProps> = ({
         style={{visibility: loading ? 'hidden' : 'visible'}}
       >
         {IconBefore && !loading && (
-          <span className="mr-4" >
-            <IconBefore size={18}/>
+          <span className="mr-4">
+            <IconBefore size={18} />
           </span>
         )}
         {children}

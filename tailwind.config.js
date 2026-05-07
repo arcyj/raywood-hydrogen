@@ -16,84 +16,84 @@ const colorConfig = {
 
 const typographyConfig = {
   '.text-h1': {
-    font: "700 28px/34px 'Gilroy', sans-serif",
+    font: "700 28px/34px 'Playfair', sans-serif",
     '@media (max-width: 768px)': {
       fontSize: '22px',
       lineHeight: '32px',
     },
   },
   '.text-h2': {
-    font: "600 22px/32px 'Gilroy', sans-serif",
+    font: "600 22px/32px 'Playfair', sans-serif",
     '@media (max-width: 768px)': {
       fontSize: '20px',
       lineHeight: '32px',
     },
   },
   '.text-h3': {
-    font: "700 26px/24px 'Gilroy', sans-serif !important",
+    font: "700 26px/24px 'Playfair', sans-serif !important",
     '@media (max-width: 768px)': {
       fontSize: '15px !important',
       lineHeight: '27px !important',
     },
   },
   '.text-h4': {
-    font: "700 16px/18px 'Gilroy', sans-serif !important",
+    font: "700 16px/18px 'Montserrat', sans-serif !important",
     '@media (max-width: 768px)': {
       fontSize: '15px !important',
       lineHeight: '18px !important',
     },
   },
   '.text-small': {
-    font: "700 12px/20px 'Gilroy', sans-serif !important",
+    font: "700 12px/20px 'Montserrat', sans-serif !important",
     '@media (max-width: 768px)': {
       fontSize: '15px !important',
       lineHeight: '27px !important',
     },
   },
   '.text-medium': {
-    font: "500 13px/22px 'Gilroy', sans-serif !important",
+    font: "500 13px/22px 'Montserrat', sans-serif !important",
     '@media (max-width: 768px)': {
       fontSize: '15px !important',
       lineHeight: '27px !important',
     },
   },
   '.text-regular': {
-    font: "400 15px/20px 'Gilroy', sans-serif !important",
+    font: "400 15px/20px 'Montserrat', sans-serif !important",
     '@media (max-width: 768px)': {
       fontSize: '15px !important',
       lineHeight: '27px !important',
     },
   },
   '.text-regular-semi': {
-    font: "500 15px/20px 'Gilroy', sans-serif !important",
+    font: "500 15px/20px 'Montserrat', sans-serif !important",
     '@media (max-width: 768px)': {
       fontSize: '15px !important',
       lineHeight: '27px !important',
     },
   },
   '.text-medium-semi': {
-    font: "600 15px/22px 'Gilroy', sans-serif !important",
+    font: "600 15px/22px 'Montserrat', sans-serif !important",
     '@media (max-width: 768px)': {
       fontSize: '15px !important',
       lineHeight: '27px !important',
     },
   },
   '.text-large': {
-    font: "500 18px/24px 'Gilroy', sans-serif !important",
+    font: "500 18px/24px 'Montserrat', sans-serif !important",
     '@media (max-width: 768px)': {
       fontSize: '15px !important',
       lineHeight: '27px !important',
     },
   },
   '.text-large-semi': {
-    font: "600 18px/24px 'Gilroy', sans-serif !important",
+    font: "600 18px/24px 'Montserrat', sans-serif !important",
     '@media (max-width: 768px)': {
       fontSize: '15px !important',
       lineHeight: '27px !important',
     },
   },
   '.text-button-large': {
-    font: "600 16px/24px 'Gilroy', sans-serif !important",
+    font: "600 16px/24px 'Montserrat', sans-serif !important",
   },
 };
 
@@ -115,7 +115,8 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        gilroy: ['Gilroy', 'sans-serif'],
+        montserrat: ['Montserrat', 'sans-serif'],
+        playfair: ['Playfair', 'sans-serif'],
       },
       borderRadius: {
         none: '0',

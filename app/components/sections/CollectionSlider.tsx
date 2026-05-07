@@ -8,32 +8,36 @@ import { ArrowRight } from 'lucide-react';
 import type {
   LatestAddedProductsQuery,
 } from 'storefrontapi.generated';
+import { useTranslation } from '~/lib/i18nContext';
 
 export function CollectionSlider({
   title,
   collectionPath,
   products,
   className,
+  url
 }: {
   title: string;
   collectionPath: string;
+  url?:string;
   products: Promise<LatestAddedProductsQuery | null>;
   className?: string;
 }) {
   const { isDesktop } = useBreakpoints();
+  const { t } = useTranslation();
   return (
     <div className={className}>
       <div className="mb-8 flex items-center pb-12 ">
         <h2 className="text-large-semi mr-12">{title}</h2>
         <ButtonLink
-          href={collectionPath}
+          href={url ? url : collectionPath}
           className="transition-colors"
           prefetch="intent"
           IconAfter={ArrowRight}
           variant="secondary"
           size="small"
         >
-          View all
+          {t('common.view_all')}
         </ButtonLink>
       </div>
       <Suspense fallback={<div className="h-[320px] bg-lightGrey rounded animate-pulse" />}>
@@ -57,7 +61,7 @@ export function CollectionSlider({
                 }}
               >
                 {productNodes.map((product) => (
-                  <ProductItem key={product.id} product={product} className="w-[170px] tablet:w-[257px]"/>
+                  <ProductItem key={product.id} product={product} className="w-[170px] tablet:w-[350px]"/>
                 ))}
               </Slider>
             );

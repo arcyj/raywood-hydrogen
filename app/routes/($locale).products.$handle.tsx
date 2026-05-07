@@ -1,4 +1,4 @@
-import {Await, useLoaderData, Link} from 'react-router';
+import {Await, useLoaderData} from 'react-router';
 import {Suspense, useEffect, useRef, useState} from 'react';
 import type {Route} from './+types/products.$handle';
 import type {ProductFragment} from 'storefrontapi.generated';
@@ -10,8 +10,6 @@ import {
   getProductOptions,
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
-  Image,
-  Money,
 } from '@shopify/hydrogen';
 import { AddToWishlistButton } from '~/components/AddToWishlistButton';
 import {ProductPrice} from '~/components/ProductPrice';
@@ -36,10 +34,15 @@ import { getSeoMeta, getAbsoluteUrl, getProductJsonLd } from '~/lib/seo';
 import { SubscriptionForm } from '~/components/SubscriptionForm';
 import { ProductOptions } from '~/components/ProductOptions';
 import { ReviewsSlider } from '~/components/reviews/ReviewsSlider';
-// import {
-//   createJudgeMeClientFromEnv,
-//   type PublicJudgeMeReview,
-// } from '~/lib/judgeme.server';
+import { ImageTextSection, type ImageTextItem } from '~/components/sections/ImageTextSection';
+import { useIsNotVisible } from '~/hooks/useIsNotVisible';
+import { PaymentIcons } from '~/components/PaymentIcons';
+import {
+  createJudgeMeClientFromEnv,
+  type PublicJudgeMeReview,
+} from '~/lib/judgeme.server';
+import { useFreeDelivery } from '~/hooks/useFreeDelivery';
+import { useTranslation } from '~/lib/i18nContext';
 
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
   const product = data?.product;
@@ -112,15 +115,16 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 }
 
 function loadDeferredData({context}: Route.LoaderArgs) {
-  // const judgeMe = createJudgeMeClientFromEnv(context.env);
-  // const reviews = judgeMe.getPublicReviews().catch((error) => {
-  //   console.error('Error fetching Judge.me reviews:', error);
-  //   return [];
-  // });
+  const judgeMe = createJudgeMeClientFromEnv(context.env);
 
-  return {
-    // reviews
-  }
+  const reviews = judgeMe
+    ? judgeMe.getPublicReviews().catch((error) => {
+        console.error('Error fetching Judge.me reviews:', error);
+        return [] as PublicJudgeMeReview[];
+      })
+    : Promise.resolve([] as PublicJudgeMeReview[]);
+
+  return {reviews};
 }
 
 type FullProductPayload = {
@@ -205,7 +209,7 @@ function loadRelatedProducts(
       );
       return {
         products: {
-          nodes: filtered.slice(0, 6), // Limit to 4 products
+          nodes: filtered.slice(0, 4), // Limit to 4 products
         },
       };
     })
@@ -218,14 +222,14 @@ function loadRelatedProducts(
 
 export default function Product() {
   const data = useLoaderData<typeof loader>();
-  const {fullProduct, relatedProducts} = data;
+  const {fullProduct, relatedProducts, reviews} = data;
 
   return (
     <div className="container-large mx-auto">
       <ProductContent
         fullProduct={fullProduct}
         relatedProducts={relatedProducts}
-        // reviews={reviews}
+        reviews={reviews}
       />
     </div>
   );
@@ -238,15 +242,17 @@ function ProductContent({
 }: {
   fullProduct: FullProductPayload;
   relatedProducts: {products: {nodes: Array<any>}} | null;
-  reviews?: Promise<PublicJudgeMeReview[]>;
+  reviews?: Promise<PublicJudgeMeReview[]> | PublicJudgeMeReview[];
 }) {
-  const { isDesktop, isTablet, isMediumDesktop} = useBreakpoints();
-
+  const { isDesktop, isTablet} = useBreakpoints();
+  const isFreeDelivery = useFreeDelivery();
+  const { t } = useTranslation();
   const fullData = fullProduct;
   const {product, breadcrumbCollection, breadcrumbParentCollection} = fullData;
   const [productCount, setProductCount] = useState(1);
   const [isUrlCopied, setIsUrlCopied] = useState(false);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isMainFormVisible, mainFormRef] = useIsNotVisible();
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
@@ -254,8 +260,6 @@ function ProductContent({
   );
 
   useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
-
-  const isPreorder = selectedVariant?.currentlyNotInStock === true;
 
   const productOptions = getProductOptions({
     ...product,
@@ -271,6 +275,8 @@ function ProductContent({
       key,
       {matchNullNamespace: true},
     );
+
+  const isPreorder = getMeta('custom', 'preorder')?.value === 'true';
 
   const expansionData = parseMetaobjectFromMetafield(getMeta('custom', 'expansion'));
   const languageData = parseMetaobjectFromMetafield(getMeta('details', 'language'));
@@ -307,105 +313,60 @@ function ProductContent({
     };
   }, []);
 
-  const ProductDescription = () => {
-    return (
-      <>
-        <p className="text-h3 mt-24 mb-12 desktop:hidden mediumDesktop:block largeDesktop:hidden">Description</p>
-        <div className="items-center justify-between mb-8 hidden desktop:flex mediumDesktop:hidden largeDesktop:flex">
-          <span className="text-small text-gray">{vendor}</span>
-        </div>
-        <h1 className="text-h2 mt-4 mb-8 hidden desktop:flex mediumDesktop:hidden largeDesktop:flex">{title}</h1>
-        <div className="flex flex-wrap gap-8 desktop:mt-24 tablet:mt-0">
-          <ProductDetailItem
-            label="Expansion"
-            value={
-              typeof expansionData?.title === 'string'
-                ? expansionData.title
-                : ''
-            }
-          />
-          <ProductDetailItem
-            value={
-              (typeof languageData?.value === 'string'
-                ? languageData.value
-                : undefined) ??
-              (typeof languageData?.name === 'string'
-                ? languageData.name
-                : '') ??
-              ''
-            }
-            icon={
-              typeof languageData?.icon === 'object' && languageData?.icon?.url
-                ? languageData.icon
-                : undefined
-            }
-          />
-          <ProductDetailItem
-            label="EAN"
-            value={selectedVariant?.barcode ?? ''}
-          />
-          <ProductDetailItem
-            label="Suitable Age"
-            value={(ageMetafield?.value as string) ?? ''}
-          />
-        </div>
-        {descriptionHtml.length > 0 ? (
-          <div
-            className="mt-24 text-regular product__description max-w-[900px] text-justify"
-            dangerouslySetInnerHTML={{__html: descriptionHtml}}
-          />
-        ) : null}
-      </>
-    );
-  }
-
   return (
-    <div className="largeDektop:container-large max-w-full">
+    <div className="largeDesktop:container-large max-w-full">
       <Breadcrumb
         collection={breadcrumbCollection ?? undefined}
         parentCollection={breadcrumbParentCollection ?? undefined}
         product={{title: product.title}}
         className="max-tablet:mt-44 max-tablet:mb-4 hidden tablet:block"
       />
+
+      {/* 2-column layout: gallery left, product info right */}
       <div
         id="product-content"
-        className="grid grid-cols-1 tablet:grid-cols-12 desktop:gap-32 min-w-0 tablet:pt-8 items-start grid-flow-row-dense"
+        className="grid grid-cols-1 desktop:grid-cols-12 desktop:gap-48 min-w-0 tablet:pt-8 items-start"
       >
+        {/* Left: Gallery */}
         <div
           id="product-gallery-content"
-          className="min-w-0 col-span-1 tablet:col-span-12 desktop:col-span-7 largeDesktop:col-span-4 order-1"
+          className="min-w-0 col-span-1 desktop:col-span-7"
         >
-          <ProductGallery
-            media={media.nodes}
-            selectedImage={selectedVariant?.image}
-          />
-        </div>
-        <div className="col-span-1 tablet:col-span-12 desktop:col-span-7 mediumDesktop:col-span-7 largeDesktop:col-span-5 order-3 desktop:order-3  largeDesktop:order-2">
-          <ProductDescription />
-        </div>
-        <div className="product-main col-span-1 tablet:col-span-12 desktop:col-span-5  mediumDesktop: largeDesktop:col-span-3 order-2 desktop:order-2 mediumDesktop:order-2 largeDesktop:order-3">
           <ClientSticky
             top={80}
-            enabled={isDesktop ? true : false}
+            enabled={isDesktop}
             bottomBoundary="#product-content"
           >
-            <div className="desktop:max-w-[500px] mx-auto rounded-xl desktop:border border-[#e9e9e9] desktop:px-24 py-12 desktop:shadow-small">
-              <div className="flex flex-col mb-24 mt-12">
-                <div className="items-center justify-between mb-8 flex desktop:hidden mediumDesktop:flex largeDesktop:hidden">
-                  <span className="text-small text-gray">{vendor}</span>
-                </div>
-                <h1 className="text-h3 mt-4 mb-8 block desktop:hidden mediumDesktop:flex largeDesktop:hidden">
-                  {title}
-                </h1>
-                <div className="flex items-end gap-24 mb-12 justify-between">
-                  <div className="flex gap-24 items-end">
-                    <ProductPrice
-                      price={selectedVariant?.price}
-                      compareAtPrice={selectedVariant?.compareAtPrice}
-                    />
-                  </div>
+            <ProductGallery
+              media={media.nodes}
+              selectedImage={selectedVariant?.image}
+            />
+          </ClientSticky>
+        </div>
+
+        {/* Right: All product info */}
+        <div className="col-span-1 desktop:col-span-4">
+          <div className="py-16 desktop:py-4 desktop:pl-8">
+            {/* Vendor + preorder badge */}
+            <div className="flex items-center justify-between mb-12">
+              {isPreorder && (
+                <span className="bg-yellow-500 text-white text-[11px] font-semibold px-8 py-2 rounded pointer-events-none">
+                  {t('product.coming_soon')}
+                </span>
+              )}
+            </div>
+
+            {/* Title */}
+            <h1 className="text-h1 mb-20">{title}</h1>
+
+            {/* Price + stock status */}
+            <div className="flex items-end gap-24 mb-20 justify-between">
+              <ProductPrice
+                price={selectedVariant?.price}
+                compareAtPrice={selectedVariant?.compareAtPrice}
+              />
+              {/* {!isPreorder ? (
                   <ProductStockStatus
-                    preorder={isPreorder}
                     availableForSale={!!selectedVariant?.availableForSale}
                     quantity={
                       (selectedVariant as {quantityAvailable?: number | null})
@@ -413,178 +374,128 @@ function ProductContent({
                     }
                     className="self-end"
                   />
-                </div>
-                <ProductOptions productOptions={productOptions} />
-                <div className="gap-8 mb-8 items-center">
-                  {isTablet ? (
-                    <>
-                      <Counter
-                        // label={
-                        //   <span className="text-small mb-4">Quantity</span>
-                        // }
-                        count={productCount}
-                        countChange={(val) => handleCountChange(val)}
-                        maxCount={30}
-                        minCount={1}
-                        className="flex flex-col items-start justify-center"
-                      />
-                      <ProductForm
-                        selectedVariant={selectedVariant}
-                        quantity={productCount}
-                        className={`flex-1 mt-8`}
-                      />
-                    </>
-                  ) : null}
-                  {!isTablet ? (
-                    <>
-                      <ProductForm
-                        selectedVariant={selectedVariant}
-                        quantity={productCount}
-                        className={`flex-1 mb-8`}
-                      />
-                    </>
-                  ) : null}
-                </div>
-                <div className="flex gap-8 mt-4">
-                  <AddToWishlistButton
-                    variant="button"
-                    className={`${!isTablet ? 'w-full' : null}`}
-                    product={selectedVariant}
-                    productData={{
-                      id: product.id,
-                      vendor: product.vendor,
-                      featuredImage: (() => {
-                        const firstMedia = media.nodes?.[0];
-                        if (
-                          firstMedia &&
-                          'image' in firstMedia &&
-                          firstMedia.image
-                        ) {
-                          return {
-                            url: firstMedia.image.url,
-                            altText: firstMedia.image.altText,
-                          };
-                        }
-                        return null;
-                      })(),
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    IconBefore={isUrlCopied ? CopyCheck : Share}
-                    onClick={copyCurrentUrlToClipboard}
-                    className={`wishlist-button w-full`}
-                    variant="tertiary"
-                    size="small"
-                  >
-                    {isUrlCopied ? 'Copied to clipboard' : 'Share'}
-                  </Button>
-                </div>
-              </div>
-              <Accordion className="mt-32" defaultOpenAll={false}>
-                <Accordion.Item value="delivery">
-                  <Accordion.Trigger>
-                    <span className="flex items-center">
-                      <ShippingPictogram size={44} className="mr-12" />
-                      <span>
-                        <p className="text-regular-semi text-green-700">
-                          Delivery {deliveryTime(isPreorder ? 14 : 1)}
-                        </p>
-                        <p className="text-regular">
-                          Courier or parcel locker delivery
-                        </p>
-                      </span>
-                    </span>
-                  </Accordion.Trigger>
-                  <Accordion.Content
-                    data-state="open"
-                    className="pb-24 px-12 pt-12"
-                  >
-                    <ShippingOptions />
-                  </Accordion.Content>
-                </Accordion.Item>
-                <Accordion.Item value="returns">
-                  <Accordion.Trigger>
-                    <span className="flex items-center">
-                      <ReturnPictogram size={44} className="mr-12" />
-                      <span>
-                        <p className="text-regular-semi">
-                          14-Day Return & Cancellation Right
-                        </p>
-                      </span>
-                    </span>
-                  </Accordion.Trigger>
-                  <Accordion.Content
-                    data-state="open"
-                    className="pb-24 px-12 pt-12"
-                  >
-                    <p className="text-regular">
-                      If you are a consumer in the European Union, you have the
-                      right to cancel your order within 14 days of receiving
-                      your goods, without giving any reason.
-                    </p>
-                  </Accordion.Content>
-                </Accordion.Item>
-                <Accordion.Item value="payment">
-                  <Accordion.Trigger className="border-0!">
-                    <span className="flex items-center">
-                      <GuaranteePictogram size={44} className="mr-12" />
-                      <span>
-                        <p className="text-regular-semi">
-                          Secure payment powered by Shopify
-                        </p>
-                      </span>
-                    </span>
-                  </Accordion.Trigger>
-                  <Accordion.Content
-                    data-state="open"
-                    className="pb-24 px-12 pt-12"
-                  >
-                    <p className="text-regular">
-                      Fast, safe checkout backed by Shopify’s world-class
-                      security.
-                    </p>
-                  </Accordion.Content>
-                </Accordion.Item>
-              </Accordion>
+                ) : (
+                  <span className="bg-yellow-500 text-white text-[11px] font-semibold px-8 py-2 rounded pointer-events-none">
+                    {t('product.coming_soon')}
+                  </span>
+                )} */}
             </div>
-          </ClientSticky>
+
+            {/* Variant options */}
+            <ProductOptions productOptions={productOptions} />
+
+            {/* Counter + Add to Cart */}
+            <div ref={mainFormRef} className="mt-16 flex flex-col gap-8">
+              {isTablet && (
+                <Counter
+                  count={productCount}
+                  countChange={(val) => handleCountChange(val)}
+                  maxCount={30}
+                  minCount={1}
+                  className="flex flex-col items-start justify-center"
+                />
+              )}
+              <ProductForm
+                selectedVariant={selectedVariant}
+                quantity={productCount}
+                className="flex-1"
+              />
+            </div>
+
+            {/* Wishlist + Share */}
+            <div className="flex gap-8 mt-12">
+              <AddToWishlistButton
+                variant="button"
+                className={`${!isTablet ? 'w-full' : null}`}
+                product={selectedVariant}
+                productData={{
+                  id: product.id,
+                  vendor: product.vendor,
+                  featuredImage: (() => {
+                    const firstMedia = media.nodes?.[0];
+                    if (
+                      firstMedia &&
+                      'image' in firstMedia &&
+                      firstMedia.image
+                    ) {
+                      return {
+                        url: firstMedia.image.url,
+                        altText: firstMedia.image.altText,
+                      };
+                    }
+                    return null;
+                  })(),
+                }}
+              />
+              <Button
+                type="button"
+                IconBefore={isUrlCopied ? CopyCheck : Share}
+                onClick={copyCurrentUrlToClipboard}
+                className="wishlist-button w-full"
+                variant="tertiary"
+                size="small"
+              >
+                {isUrlCopied
+                  ? t('product.copied_to_clipboard')
+                  : t('product.share')}
+              </Button>
+            </div>
+
+            {descriptionHtml.length > 0 && (
+              <div className="mt-48 desktop:mt-24">
+                <p className="text-h3 mb-16">{t('product.description')}</p>
+                <div
+                  className="text-regular product__description text-justify"
+                  dangerouslySetInnerHTML={{__html: descriptionHtml}}
+                />
+              </div>
+            )}
+          </div>
         </div>
-        {/* <div className="col-span-1 tablet:col-span-12 desktop:col-span-7 mediumDesktop:col-span-7 largeDesktop:col-span-9 order-4">
-          <DeferredReviews reviewsPromise={reviews} />
-        </div> */}
+      </div>
+      {/* Image + text feature section */}
+      <ImageTextSection
+        className="mt-48 desktop:mt-64 -mx-16 tablet:-mx-32 largeDesktop:-mx-64"
+        items={[
+          {
+            image:
+              'https://cdn.shopify.com/s/files/1/0513/0049/9632/files/raimonds-color-2.heic?v=1777620133',
+            title: 'Meet Raymond, start to finish',
+            text: 'Handcrafted from raw materials with an eye to every smallest detail.\nOnly highest quality wood used which is carefully sourced',
+          },
+          {
+            image:
+              'https://cdn.shopify.com/s/files/1/0513/0049/9632/files/IMG_3662.heic?v=1777620086',
+            title: 'Best quality materials',
+            text: 'Handcrafted from raw materials with an eye to every smallest detail.\nOnly highest quality wood used which is carefully sourced',
+          },
+        ]}
+      />
+
+      {/* Reviews */}
+      <div className="mt-24 desktop:mt-48">
+        <DeferredReviews reviewsPromise={reviews} />
       </div>
 
       <RelatedProducts products={relatedProducts} />
-      <section className="my-48">
-        <SubscriptionForm />
-      </section>
-      {/* {!isTablet && selectedVariant?.availableForSale ? (
-        <div className="sticky bottom-[66px]">
-          <AddToCartButton
-            showIcon={false}
-            disabled={!selectedVariant || !selectedVariant.availableForSale}
-            onClick={() => {
-              open('cart');
-            }}
-            lines={
-              selectedVariant
-                ? [
-                    {
-                      merchandiseId: selectedVariant.id,
-                      quantity: 1,
-                      selectedVariant,
-                    },
-                  ]
-                : []
-            }
-          >
-            <span className='w-full flex justify-between items-center'>
-              <span className="flex"><Cart size={20} className='mr-4' /> Add to cart</span> <Money data={selectedVariant.price} />
-            </span>
-          </AddToCartButton>
+
+      {/* Sticky Add to Cart — appears when the main form scrolls out of view on mobile */}
+      {!isDesktop && (
+        <div
+          className={`fixed bg-transparent bottom-12 left-0 right-0 z-50 transition-transform duration-300 ${
+            isMainFormVisible ? 'translate-x-full' : 'translate-x-0'
+          }`}
+        >
+          <div className="px-12">
+            <ProductForm
+              selectedVariant={selectedVariant}
+              quantity={productCount}
+              className="flex-shrink-0 w-auto"
+              showPrice
+            />
+          </div>
         </div>
-      ) : null} */}
+      )}
       <Analytics.ProductView
         data={{
           products: [
@@ -604,34 +515,68 @@ function ProductContent({
   );
 }
 
+function ReviewsSkeleton() {
+  const { t } = useTranslation();
+  return (
+    <div className="animate-pulse">
+     <h2 className="text-h3 mt-24 pb-8">{t('product.reviews_heading')}</h2>
+      <p className="text-[14px] font-semibold pb-24">
+        {t('product.reviews_disclaimer')}
+      </p>
+      <div className="flex gap-12 overflow-hidden">
+        {Array.from({length: 4}).map((_, i) => (
+          <div
+            key={i}
+            className="min-w-[280px] h-[210px] tablet:min-w-[360px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="h-4 w-20 bg-gray-200 rounded" />
+              <div className="h-4 w-24 bg-gray-200 rounded" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 w-full bg-gray-100 rounded" />
+              <div className="h-3 w-5/6 bg-gray-100 rounded" />
+              <div className="h-3 w-2/3 bg-gray-100 rounded" />
+            </div>
+            <div className="mt-6 h-3 w-28 bg-gray-100 rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReviewsBlock({reviews}: {reviews: PublicJudgeMeReview[]}) {
+  const { t } = useTranslation();
+  if (!reviews?.length) return null;
+  return (
+    <>
+      <h2 className="text-h3 mt-24 pb-8">{t('product.reviews_heading')}</h2>
+      <p className="text-[14px] font-semibold pb-24">
+        {t('product.reviews_disclaimer')}
+      </p>
+      <ReviewsSlider reviews={reviews} />
+    </>
+  );
+}
+
 function DeferredReviews({
   reviewsPromise,
 }: {
-  reviewsPromise: Promise<PublicJudgeMeReview[]>;
+  reviewsPromise?: Promise<PublicJudgeMeReview[]> | PublicJudgeMeReview[];
 }) {
+  if (!reviewsPromise) return null;
+
+  if (Array.isArray(reviewsPromise)) {
+    return <ReviewsBlock reviews={reviewsPromise} />;
+  }
+
   return (
-    <>
-      <h2 className='text-h3 mt-24 pb-8'>Reviews</h2>
-      <p className="text-[14px] font-semibold pb-24">Reviews on this page are not specific to this product. They include customer feedback from various products and general store reviews.</p>
-      <Suspense
-        fallback={
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-midnight/70">
-            Loading reviews...
-          </div>
-        }
-      >
-        <Await
-          resolve={reviewsPromise}
-          errorElement={
-            <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-midnight/70">
-              Reviews are temporarily unavailable.
-            </div>
-          }
-        >
-          {(resolvedReviews) => <ReviewsSlider reviews={resolvedReviews} />}
-        </Await>
-      </Suspense>
-    </>
+    <Suspense fallback={<ReviewsSkeleton />}>
+      <Await resolve={reviewsPromise} errorElement={null}>
+        {(resolvedReviews) => <ReviewsBlock reviews={resolvedReviews} />}
+      </Await>
+    </Suspense>
   );
 }
 
@@ -640,11 +585,12 @@ function RelatedProducts({
 }: {
   products: {products: {nodes: Array<any>}} | null;
 }) {
+  const { t } = useTranslation();
   if (!products?.products?.nodes?.length) return null;
   return (
     <div className="related-products my-48">
-      <h2 className="text-h3 mt-24 mb-24">Related Products</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-16">
+      <h2 className="text-h3 mt-24 mb-24">{t('product.related_products')}</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-16">
         {products.products.nodes.map((product) => (
           <ProductItem key={product.id} product={product} />
         ))}
@@ -758,6 +704,7 @@ const PRODUCT_FRAGMENT = `#graphql
     }
     metafields(identifiers: [
       {namespace: "custom", key: "expansion"}
+      {namespace: "custom", key: "preorder"}
       {namespace: "details", key: "language"}
       {namespace: "details", key: "age"}
     ]) {
@@ -892,6 +839,11 @@ const RELATED_PRODUCTS_QUERY = `#graphql
       altText
       width
       height
+    }
+    metafields(identifiers: [{namespace: "custom", key: "preorder"}]) {
+      namespace
+      key
+      value
     }
   }
   query RelatedProducts(

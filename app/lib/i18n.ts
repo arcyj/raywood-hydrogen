@@ -6,7 +6,7 @@ import type {
   ProductFilter,
 } from "@shopify/hydrogen/storefront-api-types";
 import type {LocalizationQuery} from 'storefrontapi.generated';
-import { CURRENCIES, DEFAULT_CURRENCY, getCurrencyByCode, getCurrencyForCountry } from "../helpers/currencies";
+import { CURRENCIES, DEFAULT_CURRENCY, getCurrencyByCode, getCurrencyForCountry, type CurrencyOption } from "../helpers/currencies";
 
 export type I18nLocale = I18nBase & {
   currency: CurrencyCode;
@@ -33,6 +33,22 @@ export function buildLocaleOptionsFromApi(
 
 /** Cookie name for persisting selected currency across reloads */
 export const PREFERRED_CURRENCY_COOKIE = 'PREFERRED_CURRENCY';
+/** Cookie name for persisting selected country across reloads */
+export const PREFERRED_COUNTRY_COOKIE = 'PREFERRED_COUNTRY';
+/** Cookie name for persisting selected language across reloads */
+export const PREFERRED_LANGUAGE_COOKIE = 'PREFERRED_LANGUAGE';
+
+const SUPPORTED_LANGUAGES = new Set(['EN', 'SV', 'LV', 'ET']);
+
+export function getPreferredLanguageFromCookie(request: Request): string | null {
+  const cookieHeader = request.headers.get('Cookie');
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(new RegExp(`${PREFERRED_LANGUAGE_COOKIE}=([^;]*)`));
+  const raw = match?.[1];
+  if (!raw) return null;
+  const value = decodeURIComponent(raw.trim()).toUpperCase();
+  return SUPPORTED_LANGUAGES.has(value) ? value : null;
+}
 
 /** Valid currency codes – derived from CURRENCIES so we don't maintain two lists */
 const VALID_CURRENCIES = new Set(CURRENCIES.map((c) => c.currency));
@@ -56,7 +72,7 @@ const SKIP_GEO_COUNTRIES = new Set(['XX', 'T1']);
  * Returns ISO 3166-1 Alpha-2 country code (e.g. "CA") or null.
  */
 export function getDetectedCountryCode(request: Request): string | null {
-  const cf = (request as Request & { cf?: { country?: string } }).cf;
+  const cf = (request as Request & {cf?: {country?: string}}).cf;
   const fromCf = cf?.country?.toUpperCase();
   if (fromCf && !SKIP_GEO_COUNTRIES.has(fromCf)) return fromCf;
 
@@ -79,43 +95,48 @@ export function getLocaleOptionForCountry(
   return options.find((opt) => opt.country.toUpperCase() === code) ?? null;
 }
 
+export type DetectedLocaleInfo = {
+  country: string | null;
+  currency: CurrencyOption;
+  language: string;
+};
+
+/**
+ * Single entry point for detecting country, currency, and language from a request.
+ * Combines geo-IP detection, cookie preference, and Accept-Language parsing.
+ */
+function getPreferredCountryFromCookie(request: Request): string | null {
+  const cookieHeader = request.headers.get('Cookie');
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(new RegExp(`${PREFERRED_COUNTRY_COOKIE}=([^;]*)`));
+  const raw = match?.[1];
+  if (!raw) return null;
+  return decodeURIComponent(raw.trim()).toUpperCase() || null;
+}
+
+export function detectLocaleInfo(request: Request): DetectedLocaleInfo {
+  const geoCountry = getDetectedCountryCode(request);
+  // Cookie-stored country takes precedence over geo-IP (user's explicit selection)
+  const country = getPreferredCountryFromCookie(request) ?? geoCountry;
+  const preferredCurrency = getPreferredCurrencyFromCookie(request);
+  const currency = preferredCurrency
+    ? (getCurrencyByCode(preferredCurrency) ?? getCurrencyForCountry(country ?? 'LV'))
+    : getCurrencyForCountry(country ?? 'LV');
+  const language = getPreferredLanguageFromCookie(request) ?? 'EN';
+  return { country, currency, language };
+}
+
 /**
  * Gets locale from currency cookie + geo. No URL locale – currency in context/localStorage.
  * Uses preferred currency from cookie; country from currency for cart. Geo used for detected country.
  */
 export function getLocaleFromRequest(request: Request): I18nLocale {
-  const preferredCurrency = getPreferredCurrencyFromCookie(request);
-  const detectedCountry = getDetectedCountryCode(request);
-
-  if (preferredCurrency) {
-    const currencyOption = getCurrencyByCode(preferredCurrency);
-    if (currencyOption) {
-      return {
-        language: 'EN' as LanguageCode,
-        country: currencyOption.countryCode as CountryCode,
-        currency: currencyOption.currency,
-        label: currencyOption.label,
-        pathPrefix: '',
-      };
-    }
-  }
-
-  if (detectedCountry) {
-    const currencyOption = getCurrencyForCountry(detectedCountry);
-    return {
-      language: 'EN' as LanguageCode,
-      country: currencyOption.countryCode as CountryCode,
-      currency: currencyOption.currency,
-      label: currencyOption.label,
-      pathPrefix: '',
-    };
-  }
-
+  const { currency, country, language } = detectLocaleInfo(request);
   return {
-    language: 'EN' as LanguageCode,
-    country: DEFAULT_CURRENCY.countryCode as CountryCode,
-    currency: DEFAULT_CURRENCY.currency,
-    label: DEFAULT_CURRENCY.label,
+    language: language as LanguageCode,
+    country: currency.countryCode as CountryCode,
+    currency: currency.currency,
+    label: currency.label,
     pathPrefix: '',
   };
 }

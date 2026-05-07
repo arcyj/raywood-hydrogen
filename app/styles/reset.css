@@ -30,7 +30,8 @@ body {
 
 body > main {
   padding: 8px 8px;
-  background-color: #fff;
+  padding-top: 92px;
+  background-color: rgb(248 248 248);
 }
 
 @supports (height: 100dvh) {
@@ -67,7 +68,6 @@ body > main {
 }
 
 section {
-  padding: 1rem 0;
   @media (min-width: 768px) {
     padding: 2rem 0;
   }

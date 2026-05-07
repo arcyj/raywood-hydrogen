@@ -62,7 +62,7 @@ function WideCollectionCard({collection}: {collection: CollectionCardData}) {
       }}
     >
       <>
-        <div className="bg-[#250f48] opacity-80 w-full h-full absolute left-0 top-0 z-10"></div>
+        <div className="bg-[#2a2336] opacity-80 w-full h-full absolute left-0 top-0 z-10"></div>
         {collection.image?.url && (
           <div className="relative p-24 flex items-center h-full gap-24 z-20">
             <Image

@@ -11,10 +11,11 @@
   --color-secondary-text: #A1A1AA;
   --color-lightGrey: #F5F7FA;
   --color-accentGrey: #EEEEEE;
-  --color-primary: #6610F2;
+  --color-primary: #13071A;
   --color-lowPrimary: #f8f3ff;
   --color-danger: #FA5053;
-  --font-serif: 'Gilroy', sans-serif;
+  --color-lowSurface: rgb(248 248 248);
+  --font-serif: 'PlayFair', sans-serif;
 
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 990px;
@@ -47,59 +48,59 @@
 
 @layer utilities {
   .text-h1 {
-    font: 700 1.75rem/2.125rem 'Gilroy', sans-serif; /* 28px / 34px */
+    font: 700 1.75rem/2.125rem 'Playfair', sans-serif; /* 28px / 34px */
   }
 
   .text-h2 {
-    font: 700 1.625rem/2rem 'Gilroy', sans-serif; /* 26px / 32px */
+    font: 700 1.625rem/2rem 'Playfair', sans-serif; /* 26px / 32px */
   }
 
   .text-h3 {
-    font: 600 1.375rem/2rem 'Gilroy', sans-serif; /* 22px / 32px */
+    font: 600 1.375rem/2rem 'Playfair', sans-serif; /* 22px / 32px */
   }
 
   .text-h4 {
-    font: 700 1rem/1.125rem 'Gilroy', sans-serif; /* 16px / 18px */
+    font: 700 1rem/1.125rem 'Playfair', sans-serif; /* 16px / 18px */
   }
 
   .text-extra-small {
-    font: 500 0.75rem/0.8125rem 'Gilroy', sans-serif; /* 12px / 13px */
+    font: 500 0.75rem/0.8125rem 'Montserrat', sans-serif; /* 12px / 13px */
   }
 
   .text-small {
-    font: 700 0.813rem/1.25rem 'Gilroy', sans-serif; /* 13px / 20px */
+    font: 700 0.813rem/1.25rem 'Montserrat', sans-serif; /* 13px / 20px */
   }
 
   .text-medium {
-    font: 500 0.9375rem/1.375rem 'Gilroy', sans-serif; /* 15px / 22px */
+    font: 500 0.9375rem/1.375rem 'Montserrat', sans-serif; /* 15px / 22px */
   }
 
   .text-regular {
-    font: 500 0.9rem/1.375rem 'Gilroy', sans-serif;
+    font: 500 0.9rem/1.375rem 'Montserrat', sans-serif;
   }
 
   .text-regular-semi {
-    font: 600 0.9rem/1.375rem 'Gilroy', sans-serif;
+    font: 600 0.9rem/1.375rem 'Montserrat', sans-serif;
   }
 
   .text-medium-semi {
-    font: 600 1rem/1.375rem 'Gilroy', sans-serif;
+    font: 600 1rem/1.375rem 'Montserrat', sans-serif;
   }
 
   .text-large {
-    font: 500 1.25rem/1.625rem 'Gilroy', sans-serif; /* 20px / 26px */
+    font: 500 1.25rem/1.625rem 'Montserrat', sans-serif; /* 20px / 26px */
   }
 
   .text-large-semi {
-    font: 600 1.25rem/1.625rem 'Gilroy', sans-serif; /* 20px / 26px */
+    font: 600 1.25rem/1.625rem 'Montserrat', sans-serif; /* 20px / 26px */
   }
 
   .text-link {
-    font: 600 0.875rem/0.9375rem 'Gilroy', sans-serif; /* 15px / 15px */
+    font: 600 0.875rem/0.9375rem 'Montserrat', sans-serif; /* 15px / 15px */
   }
 
   .subText-link {
-    font: 600 0.875rem/0.9375rem 'Gilroy', sans-serif; /* 15px / 15px */
+    font: 600 0.875rem/0.9375rem 'Montserrat', sans-serif; /* 15px / 15px */
   }
 
   .container-narrow{
@@ -107,15 +108,19 @@
     margin: auto;
   }
   .container-large{
-    max-width: 1900px;
+    max-width: 1600px;
     margin: auto;
-    padding: 8px;
-    padding-top: 44px;
     @media (min-width: 768px) {
       padding: 0px 12px
     }
   }
-
+  .container-full{
+    width: 100%;
+    margin: auto;
+    @media (min-width: 768px) {
+      padding: 0px 12px
+    }
+  }
   .scrollbar{
     overflow-y: auto;
     scrollbar-width: thick;

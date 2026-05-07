@@ -16,16 +16,16 @@ interface IButtonProps {
 
 const navMenuItemStyle = {
   base: {
-    initial: twc`relative rounded-md p-8 flex flex-col items-center justify-center cursor-pointer`,
-    inActive: twc`bg-white`,
-    active: twc`bg-lightGrey inset-shadow-sm`,
+    initial: twc`relative rounded-md p-8 flex flex-col items-center justify-center cursor-pointer bg-white`,
+    inActive: twc`bg-[#1e1027] text-black`,
+    active: twc`bg-[#1e1027] inset-shadow-sm`,
   },
   label: {
-    initial: twc`text-small text-text-layout-primary mt-2 font-semibold`,
+    initial: twc`text-small mt-2 font-semibold hidden tablet:block`,
   },
   variants: {
     navBar: '',
-    menu: "hover:bg-lightGrey rounded-lg py-8 active:bg-accentGrey active:inset-shadow-sm"
+    menu: "hover:bg-lightGrey rounded-lg py-8 max-tablet:active:bg-[#3e1956] active:inset-shadow-sm"
   }
 };
 
@@ -60,7 +60,7 @@ export const NavMenuItem: FC<IButtonProps> = ({
           {badge}
         </span>
       )}
-      {Icon && <Icon size={32} />}
+      {Icon && <Icon size={22} />}
       {label && <span className={labelClasses}>{label}</span>}
     </button>
   )

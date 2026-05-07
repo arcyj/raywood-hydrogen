@@ -23,6 +23,7 @@ import { useControllableState } from './use-controllable-state';
 import { useScaleBackground } from './use-scale-background';
 import { usePositionFixed } from './use-position-fixed';
 import { isIOS, isMobileFirefox } from './browser';
+import { twClasses } from '~/helpers/twMerge';
 
 export interface WithFadeFromProps {
   /**
@@ -801,7 +802,7 @@ export function Root({
 }
 
 export const Overlay = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>>(
-  function ({ ...rest }, ref) {
+  function ({ className, ...rest }, ref) {
     const { overlayRef, snapPoints, onRelease, shouldFade, isOpen, modal, shouldAnimate } = useDrawerContext();
     const composedRef = useComposedRefs(ref, overlayRef);
     const hasSnapPoints = snapPoints && snapPoints.length > 0;
@@ -821,6 +822,7 @@ export const Overlay = React.forwardRef<HTMLDivElement, React.ComponentPropsWith
         data-vaul-snap-points-overlay={isOpen && shouldFade ? 'true' : 'false'}
         data-vaul-animate={shouldAnimate?.current ? 'true' : 'false'}
         {...rest}
+        className={twClasses("fixed inset-0 bg-black/40 z-9996", {}, className)}
       />
     );
   },
@@ -831,7 +833,7 @@ Overlay.displayName = 'Drawer.Overlay';
 export type ContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>;
 
 export const Content = React.forwardRef<HTMLDivElement, ContentProps>(function (
-  { onPointerDownOutside, style, onOpenAutoFocus, ...rest },
+  { onPointerDownOutside, style, onOpenAutoFocus, className, ...rest },
   ref,
 ) {
   const {
@@ -919,7 +921,7 @@ export const Content = React.forwardRef<HTMLDivElement, ContentProps>(function (
       onPointerDown={(event) => {
         if (handleOnly) return;
         rest.onPointerDown?.(event);
-        pointerStartRef.current = { x: event.pageX, y: event.pageY };
+        pointerStartRef.current = {x: event.pageX, y: event.pageY};
         onPress(event);
       }}
       onOpenAutoFocus={(e) => {
@@ -956,11 +958,18 @@ export const Content = React.forwardRef<HTMLDivElement, ContentProps>(function (
         const xPosition = event.pageX - pointerStartRef.current.x;
 
         const swipeStartThreshold = event.pointerType === 'touch' ? 10 : 2;
-        const delta = { x: xPosition, y: yPosition };
+        const delta = {x: xPosition, y: yPosition};
 
-        const isAllowedToSwipe = isDeltaInDirection(delta, direction, swipeStartThreshold);
+        const isAllowedToSwipe = isDeltaInDirection(
+          delta,
+          direction,
+          swipeStartThreshold,
+        );
         if (isAllowedToSwipe) onDrag(event);
-        else if (Math.abs(xPosition) > swipeStartThreshold || Math.abs(yPosition) > swipeStartThreshold) {
+        else if (
+          Math.abs(xPosition) > swipeStartThreshold ||
+          Math.abs(yPosition) > swipeStartThreshold
+        ) {
           pointerStartRef.current = null;
         }
       }}
@@ -980,6 +989,15 @@ export const Content = React.forwardRef<HTMLDivElement, ContentProps>(function (
           handleOnPointerUp(lastKnownPointerEventRef.current);
         }
       }}
+      className={twClasses(
+        'tablet:p-12  flex flex-col fixed  w-full z-9997',
+        {
+          'right-0 top-[54px] tablet:top-0 tablet:w-[500px] bottom-0 h-[calc(100%_-_54px)] tablet:h-full': direction === 'right' ||  direction === 'bottom',
+          'left-0 top-[54px] tablet:top-0 tablet:w-[500px] bottom-0 h-[calc(100%_-_54px)] tablet:h-full': direction === 'left',
+          'top-[44px] left-[50%] h-[500px] max-w-[700px] mx-auto -translate-x-[50%]': direction === 'top',
+        },
+        className,
+      )}
     />
   );
 });
