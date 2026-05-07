@@ -26,8 +26,8 @@ import { useTranslation } from '~/lib/i18nContext';
 export const meta: Route.MetaFunction = ({matches, location}) => {
   const url = getAbsoluteUrl(matches ?? [], location);
   return getSeoMeta({
-    title: 'Playpeak | TCG & Collectibles',
-    description: 'Shop trading card games and collectibles. Pokemon TCG, Magic: The Gathering, Lorcana and more.',
+    title: 'RaywoodStore',
+    description: 'Premium wooden home fitness equipment',
     url,
     type: 'website',
   });
